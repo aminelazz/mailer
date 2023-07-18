@@ -1,0 +1,18 @@
+.navigation:hover {
+  background-color: #566769;
+}
+.send {
+  background-color: #39b24b;
+  border: 0;
+}
+.send:hover {
+  background-color: #288035;
+}
+ul {
+  list-style-type: "-  ";
+}
+
+ol li span.header{
+  text-decoration: underline;
+  font-weight: 600;
+}

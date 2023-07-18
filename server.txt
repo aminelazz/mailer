@@ -1,0 +1,9 @@
+193.187.173.89:22:root:StCom2@19
+
+https://chat.openai.com/share/599d1aec-f6e3-4fd9-9ed0-89870eed5895
+
+http://193.187.173.178/
+
+https://chat.openai.com/share/829fff8c-5227-40f6-b1a7-9aa17b43393b
+
+https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/

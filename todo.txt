@@ -1,0 +1,8 @@
+auto calculate rotation time
+
+add button to blacklist and export them as txt
+
+pause send when smtp corrupt
+continue after click on button without reloadin the page
+
+add drive link to history
