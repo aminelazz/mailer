@@ -66,7 +66,7 @@
                   <img src="./public/assets/status.svg" alt="">
                </div>
             </a>
-            <button type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="submitForm()">Start</button>
+            <button type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
             <div class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
                <button class="col-3 btn btn-primary border-0" style="background-color: #3598DC;">
                   <img src="./public/assets/play.svg" alt="Play" class=" pb-1">

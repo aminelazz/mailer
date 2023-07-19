@@ -188,7 +188,7 @@ function sendEmailsUsingPHPMailer($formData)
             // Configure SMTP
             $mail->isSMTP();                                                                                            // Send using SMTP
             $mail->SMTPDebug        = 0;                                                                                // Enable verbose debug output
-            $mail->SMTPDebug        = SMTP::DEBUG_SERVER;                                                            // Enable verbose debug output
+            // $mail->SMTPDebug        = SMTP::DEBUG_SERVER;                                                               // Enable verbose debug output
             $mail->SMTPKeepAlive    = true;                                                                             // Keep the SMTP connection open after each message
             $mail->SMTPAuth         = true;                                                                             // Enable SMTP authentication
             $mail->Host             = $host;                                                                            // Set the SMTP server to send through
@@ -239,20 +239,18 @@ function sendEmailsUsingPHPMailer($formData)
 
                 $mail->clearAllRecipients();
                 // Send the response back to the client-side code using AJAX
-                echo "<pre>";
                 echo json_encode([
-                    'recipient' => $recipient,
-                    'response' => $response
-                ]);
-                echo "</pre>";
+                    $recipient => $response
+                ]) . "||";
 
                 // Flush the output buffer to send the response immediately
                 ob_flush();
                 flush();
 
                 if (!isset($recipient)) {
-                    break;
+                    break 3;
                 }
+                // sleep(5);
             }
 
 
@@ -263,7 +261,9 @@ function sendEmailsUsingPHPMailer($formData)
     }
 }
 
-// Call the function with the form data sent from AJAX
+// Call the function with the form data sent from WebSocket
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Call the function to send emails using PHPMailer and get the email responses
     sendEmailsUsingPHPMailer($_POST);
 }
