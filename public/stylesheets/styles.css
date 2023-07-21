@@ -16,3 +16,12 @@ ol li span.header{
   text-decoration: underline;
   font-weight: 600;
 }
+
+.response
+{
+  width: 60%;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}

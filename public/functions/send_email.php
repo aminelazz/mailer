@@ -86,10 +86,7 @@ function sendEmailsUsingPHPMailer($formData)
 {
     $mail = new PHPMailer;
 
-    $servers            = explode("\n", $formData['servers']);
-    $pauseAfterSend     = $formData['pauseAfterSend'];
-    $rotationAfter      = $formData['rotationAfter'];
-    $BCCnumber          = $formData['BCCnumber'];
+    $server             = $formData['server'];
     $headers            = explode("\n", $formData['headers']);
     $contentType        = $formData['contentType'];
     $charset            = $formData['charset'];
@@ -99,23 +96,30 @@ function sendEmailsUsingPHPMailer($formData)
     $fromName           = $formData['fromName'];
     $subjectEncoding    = $formData['subjectEncoding'];
     $subject            = $formData['subject'];
-    $fromEmailCheck     = isset($formData['fromEmailCheck']) ? $formData['fromEmailCheck'] : false;
+    $fromEmailCheck     = $formData['fromEmailCheck'];
     $fromEmail          = (!empty($formData['fromEmail'])) ? true : false;
-    $replyToCheck       = isset($formData['replyToCheck']) ? $formData['replyToCheck'] : false;
+    $replyToCheck       = $formData['replyToCheck'];
     $replyTo            = (!empty($formData['replyTo'])) ? true : false;
-    $returnPathCheck    = isset($formData['returnPathCheck']) ? $formData['returnPathCheck'] : false;
+    $returnPathCheck    = $formData['returnPathCheck'];
     $returnPath         = (!empty($formData['returnPath'])) ? true : false;
     $link               = $formData['link'];
-    $attachements       = isset($formData['attachements']) ? $formData['attachements'] : '';
     $creative           = $formData['creative'];
-    $recipients         = explode("\n", $formData['recipients']);
-    $blacklist          = explode("\n", $formData['blacklist']);
-
-    $emailResponses = [];
+    $recipient          = $formData['recipient'];
 
     $headerProperties = [];
 
+    // Split the header properties by ": "
+    for ($i = 0; $i < sizeof($headers); $i++) {
+        $h = explode(": ", $headers[$i]);
+        array_push($headerProperties, $h[1]);
+    }
+
+    list($messageID, $XMailer, $autoSubmit, $XAutoResponse, $XAbuse) = $headerProperties;
+
+    list($host, $port, $smtpSecure, $username, $password) = explode(":", $server);
+
     // Configure From Name
+    $fromName = replaceTags($fromName, $username, $recipient, $link);
     switch ($fromNameEncoding) {
         case '7bit':
             $fromName = iconv(mb_detect_encoding($fromName, 'auto'), 'UTF-8', $fromName);
@@ -134,7 +138,7 @@ function sendEmailsUsingPHPMailer($formData)
     }
 
     // Configure Subject
-    $subject = replaceTags($subject, '', '', $link);
+    $subject = replaceTags($subject, $username, $recipient, $link);
     switch ($subjectEncoding) {
         case '7bit':
             $subject = iconv(mb_detect_encoding($subject, 'auto'), 'UTF-8', $subject);
@@ -152,10 +156,24 @@ function sendEmailsUsingPHPMailer($formData)
             break;
     }
 
+    // Configure From Email
+    if ($fromEmailCheck) {
+        $fromEmail = $username;
+    }
+
+    // Configure ReplyTo
+    if ($replyToCheck) {
+        $replyTo = $username;
+    }
+
+    // Configure Return Path (Confirm Reading) and add it
+    if ($returnPathCheck) {
+        $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
+    }
+
     // Add mail config
-    $mail->setFrom(replaceTags($fromEmail, '', '', $link), replaceTags($fromName, '', '', $link));
-    $mail->AddReplyTo(replaceTags($replyTo, '', '', $link), replaceTags($fromName, '', '', $link));
-    $mail->Sender       = replaceTags($returnPath, '', '', $link);
+    $mail->setFrom(replaceTags($fromEmail, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
+    $mail->AddReplyTo(replaceTags($replyTo, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     $mail->Subject      = $subject;
     $mail->MessageDate  = PHPMailer::rfcDate();
     $mail->Encoding     = $encoding;
@@ -163,102 +181,70 @@ function sendEmailsUsingPHPMailer($formData)
     $mail->CharSet      = $charset;
     $mail->Priority     = $priority;
 
-    // Split the header properties by ": "
-    for ($i = 0; $i < sizeof($headers); $i++) {
-        $h = explode(": ", $headers[$i]);
-        // $h = explode(": ", htmlentities($headers[$i]));
-        array_push($headerProperties, $h[1]);
-    }
 
-    list($messageID, $XMailer, $autoSubmit, $XAutoResponse, $XAbuse) = $headerProperties;
+    // Configure SMTP
+    $mail->isSMTP();                                                                                            // Send using SMTP
+    $mail->SMTPDebug        = 0;                                                                                // Enable verbose debug output
+    // $mail->SMTPDebug        = SMTP::DEBUG_SERVER;                                                               // Enable verbose debug output
+    $mail->SMTPKeepAlive    = true;                                                                             // Keep the SMTP connection open after each message
+    $mail->SMTPAuth         = true;                                                                             // Enable SMTP authentication
+    $mail->Host             = $host;                                                                            // Set the SMTP server to send through
+    $mail->Port             = $port;                                                                            // TCP port to connect to
+    $mail->SMTPSecure       = strtolower($smtpSecure);                                                          // Enable implicit TLS/SSL encryption
+    $mail->Username         = $username;                                                                        // SMTP username
+    $mail->Password         = $password;                                                                        // SMTP password
+    $mail->Priority         = $priority;                                                                        // Email priority
+    $mail->MessageID        = replaceTags($messageID, $username, $recipient, $link);                                    // An ID to be used in the Message-ID header
+    $mail->XMailer          = replaceTags($XMailer, $username, $recipient, $link);                                      // X-Mailer header
+    $mail->addCustomHeader("Auto-Submitted", replaceTags($autoSubmit, $username, $recipient, $link));
+    $mail->addCustomHeader("X-Auto-Response-Suppress", replaceTags($XAutoResponse, $username, $recipient, $link));
+    $mail->addCustomHeader("X-Abuse", replaceTags($XAbuse, $username, $recipient, $link));
 
-    $sendPerRotation = $BCCnumber * count($servers);
-    $result = count($recipients) / $sendPerRotation;
-    $nbrRotations = ($result != floor($result)) ? ceil($result) : $result;
-    // $nbrRotations = count($servers) > 1 ? (($result != floor($result)) ? ceil($result) : $result) : 1;
+    //Recipients
+    $mail->addBCC($recipient);                                      //Name is optional
 
-    $start_index = 0;
-
-    // Perform the rotation
-    for ($i = 0; $i < $nbrRotations; $i++) {
-        // Loop through the servers
-        foreach ($servers as $server) {
-            list($host, $port, $smtpSecure, $username, $password) = explode(":", $server);
-
-            // Configure SMTP
-            $mail->isSMTP();                                                                                            // Send using SMTP
-            $mail->SMTPDebug        = 0;                                                                                // Enable verbose debug output
-            // $mail->SMTPDebug        = SMTP::DEBUG_SERVER;                                                               // Enable verbose debug output
-            $mail->SMTPKeepAlive    = true;                                                                             // Keep the SMTP connection open after each message
-            $mail->SMTPAuth         = true;                                                                             // Enable SMTP authentication
-            $mail->Host             = $host;                                                                            // Set the SMTP server to send through
-            $mail->Port             = $port;                                                                            // TCP port to connect to
-            $mail->SMTPSecure       = strtolower($smtpSecure);                                                          // Enable implicit TLS/SSL encryption
-            $mail->Username         = $username;                                                                        // SMTP username
-            $mail->Password         = $password;                                                                        // SMTP password
-            $mail->Priority         = $priority;                                                                        // Email priority
-            $mail->MessageID        = replaceTags($messageID, $username, '', $link);                                    // An ID to be used in the Message-ID header
-            $mail->XMailer          = replaceTags($XMailer, $username, '', $link);                                      // X-Mailer header
-            $mail->addCustomHeader("Auto-Submitted", replaceTags($autoSubmit, $username, '', $link));
-            $mail->addCustomHeader("X-Auto-Response-Suppress", replaceTags($XAutoResponse, $username, '', $link));
-            $mail->addCustomHeader("X-Abuse", replaceTags($XAbuse, $username, '', $link));
-
-            // Remove empty lines
-            $recipients = \array_filter($recipients, static function ($element) {
-                return $element !== "";
-                //                   ↑
-                // Array value which you want to delete
-            });
-
-            // Loop through the recipients and send emails
-            for ($j = $start_index; $j < ($start_index + $BCCnumber); $j++) {
-                if (isset($_POST['cancelled']) && $_POST['cancelled'] === 'true') {
-                    // If the "Cancel" button has been clicked, stop the loop
-                    break;
-                }
-
-                $recipient = $recipients[$j];
-
-                //Recipients
-                $mail->addBCC($recipient);                                      //Name is optional
-
-                //Attachments
-                // $mail->addAttachment('/var/tmp/file.tar.gz');                //Add attachments
-
-                //Content
-                $mail->msgHTML(replaceTags($creative, $username, $recipient, $link));       // Create a message body from an HTML string
-
-
-
-                // Send the email using PHPMailer
-                if ($mail->Send()) {
-                    $response = 'Mail Sent successfully';
-                } else {
-                    $response = 'Error: ' . $mail->ErrorInfo;
-                }
-
-                $mail->clearAllRecipients();
-                // Send the response back to the client-side code using AJAX
-                echo json_encode([
-                    $recipient => $response
-                ]) . "||";
-
-                // Flush the output buffer to send the response immediately
-                ob_flush();
-                flush();
-
-                if (!isset($recipient)) {
-                    break 3;
-                }
-                // sleep(5);
+    // Attachments
+    // Attach files from the form
+    if (!empty($_FILES['attachments']['tmp_name'])) {
+        // Check if multiple files were uploaded
+        if (is_array($_FILES['attachments']['tmp_name'])) {
+            // Loop through each uploaded file
+            foreach ($_FILES['attachments']['tmp_name'] as $index => $tmp_name) {
+                // Get the filename
+                $filename = $_FILES['attachments']['name'][$index];
+                // Add the attachment to the email
+                $mail->addAttachment($tmp_name, $filename);
             }
-
-
-            // Increase the $start_index by $BCCnumber
-            $start_index += $BCCnumber;
-            // }
+        } else {
+            // Single file uploaded
+            $tmp_name = $_FILES['attachments']['tmp_name'];
+            $filename = $_FILES['attachments']['name'];
+            // Add the attachment to the email
+            $mail->addAttachment($tmp_name, $filename);
         }
     }
+
+    //Content
+    $mail->msgHTML(replaceTags($creative, $username, $recipient, $link));       // Create a message body from an HTML string
+
+
+
+    // Send the email using PHPMailer
+    if ($mail->Send()) {
+        $response = 'Mail Sent successfully';
+    } else {
+        $response = 'Error: ' . $mail->ErrorInfo;
+    }
+
+    $mail->clearAllRecipients();
+    // Send the response back to the client-side code using AJAX
+    echo json_encode([
+        $recipient => $response
+    ]) . "||";
+
+    // Flush the output buffer to send the response immediately
+    ob_flush();
+    flush();
 }
 
 // Call the function with the form data sent from WebSocket

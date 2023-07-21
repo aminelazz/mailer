@@ -12,7 +12,7 @@
 </head>
 
 <body class="row w-100">
-   <form action="public/functions/send_email.php" method="post" class="p-0" id="sendForm">
+   <form action="public/functions/send_email.php" method="post" class="p-0" id="sendForm" enctype="multipart/form-data">
       <!-- Start Side panel -->
       <div class="col p-0 position-fixed start-0 h-100" style="max-width: 220px; background-color: #8fa1a3;">
          <div class="m-2 ">
@@ -101,7 +101,7 @@
                         <label for="servers" class="form-label fw-semibold">
                            Servers
                         </label>
-                        <textarea name="servers" id="servers" class="form-control" style="height: 134px; resize: none;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
+                        <textarea name="servers" id="servers" class="form-control" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
                      </div>
                      <!-- End Server Field -->
                      <div class="col">
@@ -110,13 +110,13 @@
                               <label for="pauseAfterSend" class="form-label fw-semibold">
                                  Pause After Send <span class="fst-italic">(Seconds)</span>
                               </label>
-                              <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="5" min="1" onchange="changeTimeValues()">
+                              <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="5" min="0" onchange="changeTimeValues()">
                            </div>
                            <div class=" col">
                               <label for="rotationAfter" class="form-label fw-semibold">
-                                 Rotation After <span class="fst-italic">(Minutes)</span>
+                                 Rotation After <span class="fst-italic">(Seconds)</span>
                               </label>
-                              <input type="number" name="rotationAfter" id="rotationAfter" class="form-control" style="height: 43px;" value="1" min="1">
+                              <input type="number" name="rotationAfter" id="rotationAfter" class="form-control" style="height: 43px;" value="1" min="0">
                            </div>
                         </div>
                         <div class=" row">
@@ -434,7 +434,7 @@
                               </select>
                            </div>
                            <div class="col-8 p-0">
-                              <input type="text" class="form-control rounded-start-0" id="subject" name="subject" placeholder="From Name" value="[au_10]" style="height: 43px;">
+                              <input type="text" class="form-control rounded-start-0" id="subject" name="subject" placeholder="Subject" value="[au_10]" style="height: 43px;">
                            </div>
                         </div>
                      </div>
@@ -511,9 +511,18 @@
                         <label for="attachements" class="form-label fw-semibold">Attachements</label>
                         <div class="row mx-0">
                            <div class="col-8 p-0">
-                              <input type="text" name="attachementsName" id="attachementsName" class="form-control rounded-end-0" style="height: 43px; font-size: 0.85rem;" placeholder="Your files names" disabled>
+                              <!-- Attachements name & Clear files button -->
+                              <div class="row mx-0" style="position: relative;">
+                                 <input type="text" name="attachementsName" id="attachementsName" class="form-control rounded-end-0 col" style="height: 43px; font-size: 0.85rem; position: absolute;" placeholder="Your files names" disabled>
+                                 <!-- Clear files button -->
+                                 <button type="button" id="clearAttachements" class="btn btn-outline-dark rounded-0 p-auto invisible" style="z-index: 1; height: 43px; width: 43px; position: absolute; right: 0; border-color: transparent; padding-top: 2px;" onclick="clearFiles()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                                       <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z"></path>
+                                    </svg>
+                                 </button>
+                              </div>
                            </div>
-                           <input type="file" name="attachements" id="attachements" hidden multiple oninput="fileUpload()">
+                           <input type="file" name="attachements[]" id="attachements" hidden multiple onchange="fileUpload()" oninput="fileUpload()">
                            <label class="send btn btn-success col-4 rounded-start-0 d-flex justify-content-center align-items-center" for="attachements" style="height: 43px;">Upload</label>
                         </div>
 
@@ -573,7 +582,7 @@
                <h5 class="card-header fw-semibold">
                   Status Section
                </h5>
-               <div class="card-body border-3 border-top border-success" style="height: 377px;">
+               <div class="card-body border-3 border-top border-success" style="height: 377px; overflow: auto;">
                   <table class="table table-striped">
                      <tbody id="responseArea">
 
@@ -582,19 +591,6 @@
                </div>
             </div>
             <!-- End Status -->
-
-            <hr class="my-4">
-
-            <!-- Start Result -->
-            <div id="Result" class="card">
-               <h5 class="card-header fw-semibold">
-                  Result Section
-               </h5>
-               <div class="card-body border-3 border-top border-success" id="responseArea" style="height: 377px;">
-
-               </div>
-            </div>
-            <!-- End Result -->
          </div>
       </div>
       <!-- End Main Menu -->
