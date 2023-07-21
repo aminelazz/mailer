@@ -1,7 +1,6 @@
 add a button to blacklist and export them as txt
 
 pause send when smtp corrupt
-continue after clicking on the button without reloading the page
 
 add a drive link to the history
 

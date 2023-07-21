@@ -19,9 +19,16 @@ ol li span.header{
 
 .response
 {
-  width: 60%;
-  max-width: 60%;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
+}
+
+table{
+  width: 100%;
+  table-layout: fixed;
+}
+
+.response-cell {
+  width: 50%; /* You can adjust the value as needed */
 }

@@ -1,6 +1,23 @@
+var sendStatus = ""
+var progressBar = document.getElementById("progressBar")
+var progressBarContainer = document.getElementById("progressBarContainer")
+var sendCount = document.getElementById("sendCount")
+
+// Start index of recipients
+let reachedRecipientIndex = sessionStorage.getItem("reachedRecipientIndex")
+var start_index = reachedRecipientIndex ? reachedRecipientIndex : 0
+
+var statusLabel = document.getElementById("status")
+
 window.addEventListener("load", () => {
     var attachementsName = document.getElementById("attachementsName")
     var clearButton = document.getElementById("clearAttachements")
+    var failed = document.getElementById("failed")
+
+    statusLabel.innerText = "Status: Pending"
+
+    // Clear the failed area
+    failed.value = ""
 
     if (attachementsName.value != "") {
         clearButton.classList.toggle("invisible")
@@ -8,7 +25,12 @@ window.addEventListener("load", () => {
 
     previewCreative()
     fileUpload()
+    clearFiles()
 })
+
+function preventUnload() {
+    return true
+}
 
 function changeTimeValues() {
     var servers = document.getElementById("servers").value.split("\n")
@@ -131,8 +153,9 @@ function clearFiles() {
 }
 
 function checkFields() {
-    var recipients = document.getElementById("recipients").value.toString()
-    var recipientsCount = recipients.split("\n").length
+    var servers = document.getElementById("servers")
+    var recipients = document.getElementById("recipients")
+    var recipientsCount = recipients.value.toString().split("\n").length
 
     BCCnumber.setCustomValidity("")
 
@@ -140,6 +163,116 @@ function checkFields() {
         BCCnumber.setCustomValidity(
             "The 'Number of Emails In Bcc' number must be smaller than number of recipients"
         )
+    }
+
+    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm
+
+    servers.setCustomValidity("")
+
+    if (!serverpattern.test(servers.value.toString())) {
+        servers.setCustomValidity(
+            "Please enter at least one valid smtp server or multi-line smtp servers"
+        )
+    }
+
+    let recipientspattern = /^[\w.-]+@[\w.-]+$/gm
+
+    recipients.setCustomValidity("")
+
+    if (!recipientspattern.test(recipients.value.toString())) {
+        recipients.setCustomValidity(
+            "Please enter at least one valid email address or multi-line email address"
+        )
+    }
+}
+
+function startSend() {
+    sendStatus = "sending"
+    statusLabel.innerText = `Status: Sending`
+    sendEmails()
+    controlButtons()
+}
+
+function pauseSend() {
+    sendStatus = "paused"
+    statusLabel.innerText = `Status: Paused`
+    controlButtons()
+}
+function stopSend() {
+    sendStatus = "stopped"
+    statusLabel.innerText = `Status: Stopped`
+    controlButtons()
+}
+
+function controlButtons() {
+    var start       = document.getElementById("start") // prettier-ignore
+    var controlArea = document.getElementById("controlArea") // prettier-ignore
+    let play        = document.getElementById("play") // prettier-ignore
+    let pause       = document.getElementById("pause") // prettier-ignore
+    let stop        = document.getElementById("stop") // prettier-ignore
+
+    switch (sendStatus) {
+        case "sending":
+            controlArea.classList.remove("invisible")
+            start.disabled = true
+            play.disabled = true
+            pause.disabled = false
+            progressBar.classList.remove(
+                "bg-play",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+            )
+            progressBar.classList.add("bg-play")
+            break
+
+        case "paused":
+            controlArea.classList.remove("invisible")
+            start.disabled = true
+            play.disabled = false
+            pause.disabled = true
+            progressBar.classList.remove(
+                "bg-play",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+            )
+            progressBar.classList.add("bg-warning")
+            break
+
+        case "stopped":
+            controlArea.classList.add("invisible")
+            start.disabled = false
+            play.disabled = false
+            pause.disabled = false
+            stop.disabled = false
+            progressBar.classList.remove(
+                "bg-play",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+            )
+            progressBar.classList.add("bg-danger")
+            break
+
+        case "completed":
+            controlArea.classList.add("invisible")
+            start.disabled = false
+            play.disabled = false
+            pause.disabled = false
+            stop.disabled = false
+            progressBar.classList.remove(
+                "bg-play",
+                "bg-success",
+                "bg-warning",
+                "bg-danger"
+            )
+            progressBar.classList.add("success")
+            statusLabel.innerText = `Status: Completed`
+            break
+
+        default:
+            break
     }
 }
 
@@ -149,45 +282,64 @@ $(document).ready(function () {
     $("#sendForm").submit(function (event) {
         event.preventDefault()
 
-        sendEmails()
-    })
+        // Scroll to the Result Section
+        const resultSection = document.getElementById("Result")
+        resultSection.scrollIntoView({ behavior: "smooth" })
 
-    // Handle Cancel button click
-    $("#cancelBtn").click(function () {
-        // Set a flag to indicate that the Cancel button has been clicked
-        window.cancelled = true
+        // Clear the failed area
+        var failed = document.getElementById("failed")
+        failed.value = ""
+
+        // Set sendStatus to "sending" and clear sessionStorage
+        sendStatus = "sending"
+        statusLabel.innerText = `Status: Sending`
+        sessionStorage.clear()
+
+        // Clear the response area
+        $("#responseArea").html("")
+
+        progressBar.innerText = "0"
+        progressBar.style.width = "0"
+        sendCount.innerText = "0 / 0"
+        progressBarContainer.classList.remove("invisible")
+
+        // Control buttons
+        controlButtons()
+
+        start_index = 0
+
+        // Send email
+        sendEmails()
     })
 })
 
 async function sendEmails() {
-    // Clear the response area
-    $("#responseArea").html("")
-
     var fields = {
-        servers            : document.getElementById("servers"), // prettier-ignore
-        pauseAfterSend     : document.getElementById("pauseAfterSend"), // prettier-ignore
-        rotationAfter      : document.getElementById("rotationAfter"), // prettier-ignore
-        BCCnumber          : document.getElementById("BCCnumber"), // prettier-ignore
-        headers            : document.getElementById("headers"), // prettier-ignore
-        contentType        : document.getElementById("contentType"), // prettier-ignore
-        charset            : document.getElementById("charset"), // prettier-ignore
-        encoding           : document.getElementById("encoding"), // prettier-ignore
-        priority           : document.getElementById("priority"), // prettier-ignore
-        fromNameEncoding   : document.getElementById("fromNameEncoding"), // prettier-ignore
-        fromName           : document.getElementById("fromName"), // prettier-ignore
-        subjectEncoding    : document.getElementById("subjectEncoding"), // prettier-ignore
-        subject            : document.getElementById("subject"), // prettier-ignore
-        fromEmailCheck     : document.getElementById("fromEmailCheck"), // prettier-ignore
-        fromEmail          : document.getElementById("fromEmail"), // prettier-ignore
-        replyToCheck       : document.getElementById("replyToCheck"), // prettier-ignore
-        replyTo            : document.getElementById("replyTo"), // prettier-ignore
-        returnPathCheck    : document.getElementById("returnPathCheck"), // prettier-ignore
-        returnPath         : document.getElementById("returnPath"), // prettier-ignore
-        link               : document.getElementById("link"), // prettier-ignore
-        attachements       : document.getElementById("attachements"), // prettier-ignore
-        creative           : document.getElementById("creative"), // prettier-ignore
-        recipients         : document.getElementById("recipients"), // prettier-ignore
-        blacklist          : document.getElementById("blacklist"), // prettier-ignore
+        servers             : document.getElementById("servers"), // prettier-ignore
+        pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
+        rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
+        BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
+        headers             : document.getElementById("headers"), // prettier-ignore
+        contentType         : document.getElementById("contentType"), // prettier-ignore
+        charset             : document.getElementById("charset"), // prettier-ignore
+        encoding            : document.getElementById("encoding"), // prettier-ignore
+        priority            : document.getElementById("priority"), // prettier-ignore
+        fromNameEncoding    : document.getElementById("fromNameEncoding"), // prettier-ignore
+        fromName            : document.getElementById("fromName"), // prettier-ignore
+        subjectEncoding     : document.getElementById("subjectEncoding"), // prettier-ignore
+        subject             : document.getElementById("subject"), // prettier-ignore
+        fromEmailCheck      : document.getElementById("fromEmailCheck"), // prettier-ignore
+        fromEmail           : document.getElementById("fromEmail"), // prettier-ignore
+        replyToCheck        : document.getElementById("replyToCheck"), // prettier-ignore
+        replyTo             : document.getElementById("replyTo"), // prettier-ignore
+        returnPathCheck     : document.getElementById("returnPathCheck"), // prettier-ignore
+        returnPath          : document.getElementById("returnPath"), // prettier-ignore
+        link                : document.getElementById("link"), // prettier-ignore
+        attachements        : document.getElementById("attachements"), // prettier-ignore
+        creative            : document.getElementById("creative"), // prettier-ignore
+        recipients          : document.getElementById("recipients"), // prettier-ignore
+        blacklist           : document.getElementById("blacklist"), // prettier-ignore
+        failed              : document.getElementById("failed"), // prettier-ignore
     }
 
     var servers     = fields.servers.value.split("\n") // prettier-ignore
@@ -217,17 +369,9 @@ async function sendEmails() {
     const creative          = fields.creative.value // prettier-ignore
 
     // Remove empty lines
-    servers = servers.filter((element) => element !== "")
-    //                                                      ↑
-    //                                         Array value to delete
-
-    recipients = recipients.filter((element) => element !== "")
-    //                                                            ↑
-    //                                               Array value to delete
-
-    blacklist = blacklist.filter((element) => element !== "")
-    //                                                          ↑
-    //                                             Array value to delete
+    servers     = servers.filter((element) => element !== "") // prettier-ignore
+    recipients  = recipients.filter((element) => element !== "") // prettier-ignore
+    blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
 
     // Remove recipients who are in the blacklist
     const filteredRecipients = recipients.filter(
@@ -235,9 +379,6 @@ async function sendEmails() {
     )
 
     console.log(filteredRecipients)
-
-    // Start index of recipients
-    var start_index = 0
 
     // Calculate rotations number
     const sendPerRotation = BCCnumber * servers.length
@@ -247,17 +388,43 @@ async function sendEmails() {
 
     // Perform the rotation
     rotation: for (let i = 0; i < nbrRotations; i++) {
+        var serverCount
+        if (servers.length >= filteredRecipients.length) {
+            if (BCCnumber == filteredRecipients.length) {
+                serverCount = 1
+            } else {
+                serverCount = filteredRecipients.length - BCCnumber + 1
+            }
+        } else {
+            serverCount = servers.length
+        }
+
         // Loop through the servers
-        per_server: for (let j = 0; j < servers.length; j++) {
+        for (let j = 0; j < serverCount; j++) {
             let server = servers[j]
 
             // prettier-ignore
             // Loop through the filteredRecipients and send emails
-            per_recipient: for (let k = start_index; k < start_index + parseInt(BCCnumber); k++) {
+            for (let k = start_index; k < start_index + parseInt(BCCnumber); k++) {
 
-                if (k > recipients.length) {
-                    break
+                // Stop the loops after finishing all recipients
+                if (k > (filteredRecipients.length - 1)) {
+                    break rotation
                 }
+
+                switch (sendStatus) {
+                    case "paused":
+                        sessionStorage.setItem("reachedRecipientIndex", k)
+                        break rotation
+                        break;
+
+                    case "stopped":
+                        break rotation
+                        break;
+                
+                    default:
+                        break;
+                }              
 
                 let recipient = filteredRecipients[k]
                 console.log(`Recipient: ${recipient}`)
@@ -305,7 +472,7 @@ async function sendEmails() {
 
                 // Send AJAX request to send_email.php
                 try {
-                    $.ajax({
+                    /*await */$.ajax({
                         type: "POST",
                         url: "public/functions/send_email.php",
                         data: formData,
@@ -317,49 +484,76 @@ async function sendEmails() {
                             responses = responses.slice(0, -2)
                             // Split responses to an array containing json objects
                             var responsesArray = responses.split("||")
-                            console.log(responsesArray)
-                            // Iterate over the array to get the kay and the value
-                            $.each(
-                                responsesArray,
-                                function (key, value) {
-                                    // Convert the json object to a js object
-                                    // Convert it again to an array which gives 2 nested arrays
-                                    // Get the nested array
-                                    var emailResponse = Object.entries(
-                                        JSON.parse(value)
-                                    )[0]
-                                    // prettier-ignore
-                                    // Display the response message next to each recipient's email address
-                                    $("#responseArea").append(
-                                        `<tr>
-                                            <th scope="row" style="width: 2%;">
-                                                ${k + 1}
-                                            </th>
-                                            <td class="text-center">
-                                                ${emailResponse[0]}
-                                            </td>
-                                            <td class="text-center" style="width: 10%;">
-                                                ${formattedHours}:${formattedMinutes}:${formattedSeconds}
-                                            </td>
-                                            <td class="response">
-                                                    ${
-                                                        emailResponse[1]
-                                                    } jjjjjjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
-                                            </td>
-                                        </tr>`
-                                    )
+                            // Iterate over the array to get the key and the value
+                            $.each(responsesArray, function (key, value) {
+                                // Convert the json object to a js object
+                                // Convert it again to an array which gives 2 nested arrays
+                                // Get the first nested array which contains the email and its response
+                                var emailResponse = Object.entries(
+                                    JSON.parse(value)
+                                )[0]
+
+                                // Get the second value of the second nested array which contains the status (color of text in response using the bootstrap class)
+                                var status = Object.entries(
+                                    JSON.parse(value)
+                                )[1][1]
+
+                                // prettier-ignore
+                                // Display the response message next to each recipient's email address
+                                $("#responseArea").append(
+                                    `<tr>
+                                        <th scope="row" style="width: 10%;">
+                                            ${k + 1} / ${filteredRecipients.length}
+                                        </th>
+                                        <td class="text-center" style="width: 40%;">
+                                            ${emailResponse[0]}
+                                        </td>
+                                        <td class="text-${status}">
+                                            <div class="text-center response">
+                                                ${emailResponse[1]}
+                                            <div>
+                                        </td>
+                                        <td class="text-center" style="width: 10%;">
+                                            ${formattedHours}:${formattedMinutes}:${formattedSeconds}
+                                        </td>
+                                    </tr>`
+                                )
+
+                                // Fill the Bounced area with failed sends
+                                if (status == "danger") {
+                                    fields.failed.value += `${emailResponse[0]}\n`
                                 }
-                            )
+
+                                // Configure the progress bar
+                                var percentage = ((k + 1) / filteredRecipients.length) * 100
+
+                                progressBar.innerText = `${percentage.toFixed(0)}%`
+                                progressBar.style.width = `${percentage.toFixed(0)}%`
+
+                                sendCount.innerText = `${k + 1} / ${filteredRecipients.length}`
+                            })
                         },
                     })
                 } catch (error) {
                     console.log(error)
                 }
+
+                // Set the sendStatus value to completed when reaching last recipient and set buttons properties
+                if (k == (filteredRecipients.length - 1)) {
+                    setTimeout(() => {
+                        sendStatus = "completed"
+                        controlButtons()
+                    },1000)
+                }
+
+                await delay(100)
             }
             start_index += parseInt(BCCnumber)
             await delay(pauseAfterSend)
         }
-        await delay(rotationAfter)
+        if (servers.length > 1) {
+            await delay(rotationAfter)
+        }
     }
 }
 

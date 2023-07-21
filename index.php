@@ -11,7 +11,7 @@
    <title>St-Com</title>
 </head>
 
-<body class="row w-100">
+<body class="row w-100" onbeforeunload="return preventUnload()">
    <form action="public/functions/send_email.php" method="post" class="p-0" id="sendForm" enctype="multipart/form-data">
       <!-- Start Side panel -->
       <div class="col p-0 position-fixed start-0 h-100" style="max-width: 220px; background-color: #8fa1a3;">
@@ -60,23 +60,34 @@
                   <img src="./public/assets/recepients.svg" alt="">
                </div>
             </a>
-            <a href="#Status" class="btn py-3 px-0 fw-semibold text-white rounded-0 navigation">
+            <a href="#Result" class="btn py-3 px-0 fw-semibold text-white rounded-0 navigation">
                <div class="d-flex flex-row justify-content-between px-4">
-                  <div>Status</div>
+                  <div>Result</div>
                   <img src="./public/assets/status.svg" alt="">
                </div>
             </a>
-            <button type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
-            <div class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
-               <button class="col-3 btn btn-primary border-0" style="background-color: #3598DC;">
+            <!-- Start Button -->
+            <button id="start" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
+            <!-- Play & Pause & Stop Buttons -->
+            <div id="controlArea" class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
+               <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="startSend()">
                   <img src="./public/assets/play.svg" alt="Play" class=" pb-1">
                </button>
-               <button class="col-3 btn btn-warning border-0">
+               <button id="pause" type="button" class="col-3 btn btn-warning border-2" onclick="pauseSend()">
                   <img src="./public/assets/pause.svg" alt="Pause" class=" pb-1">
                </button>
-               <button class="col-3 btn btn-danger border-0">
+               <button id="stop" type="button" class="col-3 btn btn-danger border-2" onclick="stopSend()">
                   <img src="./public/assets/stop.svg" alt="Cancel" class=" pb-1">
                </button>
+            </div>
+            <!-- Status Label -->
+            <div class="text-white text-center fw-semibold my-3" id="status"></div>
+            <!-- Progress bar & Send count -->
+            <div>
+               <div class="progress p-0 mx-auto invisible" id="progressBarContainer" role="progressbar" style="width: 85%;" aria-label="Sent emails" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-play" id="progressBar" style="width: 0%">0%</div>
+               </div>
+               <div id="sendCount" class="text-white text-center fw-semibold my-1" style="font-size: 0.85rem;"></div>
             </div>
          </div>
       </div>
@@ -101,7 +112,7 @@
                         <label for="servers" class="form-label fw-semibold">
                            Servers
                         </label>
-                        <textarea name="servers" id="servers" class="form-control" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
+                        <textarea name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
                      </div>
                      <!-- End Server Field -->
                      <div class="col">
@@ -553,7 +564,7 @@
                   Recipients Section
                </h5>
                <div class="card-body border-3 border-top border-success">
-                  <!-- Recipients & Blacklist & Failures -->
+                  <!-- Recipients & Blacklist & Failed -->
                   <div class="row">
                      <!-- Recipients -->
                      <div class="col-4">
@@ -565,10 +576,10 @@
                         <label for="blacklist" class="form-label fw-semibold">Blacklist</label>
                         <textarea name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea>
                      </div>
-                     <!-- Failures -->
+                     <!-- Failed -->
                      <div class="col-4">
-                        <label for="failures" class="form-label fw-semibold">Failures</label>
-                        <textarea name="failures" id="failures" rows="15" class="form-control w-100 bg-white" style="resize: none;" disabled></textarea>
+                        <label for="failed" class="form-label fw-semibold">Failed</label>
+                        <textarea name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="resize: none;" disabled></textarea>
                      </div>
                   </div>
                </div>
@@ -577,10 +588,10 @@
 
             <hr class="my-4">
 
-            <!-- Start Status -->
-            <div id="Status" class="card">
+            <!-- Start Result -->
+            <div id="Result" class="card">
                <h5 class="card-header fw-semibold">
-                  Status Section
+                  Result Section
                </h5>
                <div class="card-body border-3 border-top border-success" style="height: 377px; overflow: auto;">
                   <table class="table table-striped">
@@ -590,12 +601,32 @@
                   </table>
                </div>
             </div>
-            <!-- End Status -->
+            <!-- End Result -->
+
+            <div class="embedded-app"></div>
          </div>
       </div>
       <!-- End Main Menu -->
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="https://unpkg.com/dropbox@10.34.0/dist/Dropbox-sdk.min.js"></script>
+   <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="cfnbzr0xosl3luc"></script>
+   <script>
+      var options = {
+         // Shared link to Dropbox file
+         link: "https://www.dropbox.com/scl/fo/lwdhkucgys1eau8c7n8bi/h?rlkey=1g3qiehijklkld276t2be1p97&dl=0",
+         file: {
+            // Sets the zoom mode for embedded files. Defaults to 'best'.
+            zoom: "best" // or "fit"
+         },
+         folder: {
+            // Sets the view mode for embedded folders. Defaults to 'list'.
+            view: "list", // or "grid"
+            headerSize: "normal" // or "small"
+         }
+      }
+      Dropbox.embed(options, "embedded-app");
+   </script>
    <script src="./public/js/script.js"></script>
 </body>
 

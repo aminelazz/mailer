@@ -231,15 +231,18 @@ function sendEmailsUsingPHPMailer($formData)
 
     // Send the email using PHPMailer
     if ($mail->Send()) {
-        $response = 'Mail Sent successfully';
+        $response   = 'Mail Sent successfully';
+        $status     = 'success';
     } else {
-        $response = 'Error: ' . $mail->ErrorInfo;
+        $response   = 'Error: ' . $mail->ErrorInfo;
+        $status     = 'danger';
     }
 
     $mail->clearAllRecipients();
     // Send the response back to the client-side code using AJAX
     echo json_encode([
-        $recipient => $response
+        $recipient => $response,
+        'status'   => $status
     ]) . "||";
 
     // Flush the output buffer to send the response immediately
