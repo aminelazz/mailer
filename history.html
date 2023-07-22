@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="./public/stylesheets/bootstrap.css">
+    <title>Dropbox History Folder</title>
+</head>
+<body class="w-100 h-100" style="position: fixed;">
+    <div class="h-100" id="embed-folder"></div>
+    
+    <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="cfnbzr0xosl3luc"></script>
+    <script>
+      var options = {
+         // Shared link to Dropbox file
+         link: "https://www.dropbox.com/scl/fo/lwdhkucgys1eau8c7n8bi/h?rlkey=1g3qiehijklkld276t2be1p97&dl=0",
+         file: {
+            // Sets the zoom mode for embedded files. Defaults to 'best'.
+            zoom: "best" // or "fit"
+         },
+         folder: {
+            // Sets the view mode for embedded folders. Defaults to 'list'.
+            view: "list", // or "grid"
+            headerSize: "normal" // or "small"
+         }
+      }
+      Dropbox.embed(options, document.getElementById("embed-folder"));
+   </script>
+</body>
+</html>

