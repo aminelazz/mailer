@@ -2,6 +2,7 @@ var sendStatus = ""
 var progressBar = document.getElementById("progressBar")
 var progressBarContainer = document.getElementById("progressBarContainer")
 var sendCount = document.getElementById("sendCount")
+var refreshDiv = document.getElementById("refreshDiv")
 
 // Start index of recipients
 let reachedRecipientIndex = sessionStorage.getItem("reachedRecipientIndex")
@@ -165,7 +166,7 @@ function checkFields() {
         )
     }
 
-    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm
+    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gim
 
     servers.setCustomValidity("")
 
@@ -175,7 +176,7 @@ function checkFields() {
         )
     }
 
-    let recipientspattern = /^[\w.-]+@[\w.-]+$/gm
+    let recipientspattern = /^[\w.-]+@[\w.-]+$/gim
 
     recipients.setCustomValidity("")
 
@@ -276,11 +277,26 @@ function controlButtons() {
     }
 }
 
+function showRefresh() {
+    refreshDiv.classList.remove("invisible")
+}
+
+function hideRefresh() {
+    refreshDiv.classList.add("invisible")
+}
+
+function refreshIframe() {
+    let dropboxIframe = document.getElementById("dropboxFolder")
+    dropboxIframe.src = dropboxIframe.src
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
     $("#sendForm").submit(function (event) {
         event.preventDefault()
+
+        // uploadToDropbox()
 
         // Scroll to the Result Section
         const resultSection = document.getElementById("Result")
@@ -501,7 +517,7 @@ async function sendEmails() {
                                 // prettier-ignore
                                 // Display the response message next to each recipient's email address
                                 $("#responseArea").append(
-                                    `<tr>
+                                    `<tr id="responseN${k + 1}">
                                         <th scope="row" style="width: 10%;">
                                             ${k + 1} / ${filteredRecipients.length}
                                         </th>
@@ -531,6 +547,10 @@ async function sendEmails() {
                                 progressBar.style.width = `${percentage.toFixed(0)}%`
 
                                 sendCount.innerText = `${k + 1} / ${filteredRecipients.length}`
+
+                                // Scroll to the last added response
+                                let responseTable = document.getElementById("responseTable")
+                                responseTable.scroll(0, responseTable.scrollHeight)
                             })
                         },
                     })
@@ -546,7 +566,7 @@ async function sendEmails() {
                     },1000)
                 }
 
-                await delay(100)
+                await delay(400)
             }
             start_index += parseInt(BCCnumber)
             await delay(pauseAfterSend)

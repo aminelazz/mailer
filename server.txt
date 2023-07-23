@@ -1,4 +1,5 @@
 193.187.173.89:22:root:StCom2@19
+45.145.6.18:22:root:Maruil589
 
 https://chat.openai.com/share/599d1aec-f6e3-4fd9-9ed0-89870eed5895
 

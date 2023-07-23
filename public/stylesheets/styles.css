@@ -32,3 +32,23 @@ table{
 .response-cell {
   width: 50%; /* You can adjust the value as needed */
 }
+
+button, [aria-selected=false]
+{
+  color: #4587EE;
+}
+
+button, [aria-selected=true]
+{
+  color: black;
+  font-weight: 600;
+}
+
+.nav-link{
+  padding-inline: 2rem;
+}
+
+.refresh-dropbox
+{
+  background-color: #0062FF;
+}
