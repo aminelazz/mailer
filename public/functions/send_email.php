@@ -242,7 +242,7 @@ function sendEmailsUsingPHPMailer($formData)
     // Send the response back to the client-side code using AJAX
     echo json_encode([
         $recipient => $response,
-        'status'   => $status
+        'status'   => $status,
     ]) . "||";
 
     // Flush the output buffer to send the response immediately

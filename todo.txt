@@ -1,6 +1,6 @@
 add a button to blacklist and export them as txt
 
-pause send when smtp corrupts and write its name
+pause send when smtp corrupt and write its name
 
 add a drive link to the history
 
@@ -9,3 +9,7 @@ show the number of successes and fails
 Add authentication
 
 add multiple from names, subjects and creatives
+
+add test email after 100 send
+
+start index

@@ -68,6 +68,7 @@
             </a>
             <!-- Start Button -->
             <button id="start" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
+            <button id="history" type="button" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="savehistory()">Save to history</button>
             <!-- Play & Pause & Stop Buttons -->
             <div id="controlArea" class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
                <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="startSend()">
@@ -96,8 +97,21 @@
       <div class="d-flex h-100">
          <div style="width: 250px"></div>
          <div class="col mb-4 container-xxl" style="padding-top: 10px;">
-            <div>
+            <div class="d-flex align-items-center justify-content-between">
                <h4>St-Com Mailing</h4>
+               <!-- Welcome & Logout -->
+               <div class="btn-group">
+                  <button type="button" class="btn">Welcome, <span id="mailerName" class="fw-semibold"></span></button>
+                  <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                     <span class="visually-hidden">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu  dropdown-menu-end">
+                     <li>
+                        <button type="button" class="btn btn-outline-danger dropdown-item" onclick="logout()">Log out</button>
+                     </li>
+                  </ul>
+               </div>
+
             </div>
             <hr>
             <!-- Tabs -->
@@ -417,7 +431,7 @@
                                  Offer Infos
                               </label>
                               <div class="input-group" id="offerInfos">
-                                 <input type="text" class="form-control w-25" id="offerId" name="offerId" placeholder="Offer ID" style="height: 43px;" required>
+                                 <input type="text" class="form-control w-25" id="offerID" name="offerID" placeholder="Offer ID" style="height: 43px;" required>
                                  <input type="text" class="form-control w-75" id="offerName" name="offerName" placeholder="Offer Name" style="height: 43px;" required>
                               </div>
                            </div>
@@ -430,62 +444,62 @@
                                  <option value="" selected hidden style="color: #595C66;">Choose a country...</option>
                                  <!-- Europe Countries -->
                                  <optgroup label="Europe">
-                                    <option value="AL">Albania</option>
-                                    <option value="AD">Andorra</option>
-                                    <option value="AT">Austria</option>
-                                    <option value="BY">Belarus</option>
-                                    <option value="BE">Belgium</option>
-                                    <option value="BA">Bosnia and Herzegovina</option>
-                                    <option value="BG">Bulgaria</option>
-                                    <option value="HR">Croatia</option>
-                                    <option value="CY">Cyprus</option>
-                                    <option value="CZ">Czech Republic</option>
-                                    <option value="DK">Denmark</option>
-                                    <option value="EE">Estonia</option>
-                                    <option value="FO">Faroe Islands</option>
-                                    <option value="FI">Finland</option>
-                                    <option value="FR">France</option>
-                                    <option value="DE">Germany</option>
-                                    <option value="GI">Gibraltar</option>
-                                    <option value="GR">Greece</option>
-                                    <option value="HU">Hungary</option>
-                                    <option value="IS">Iceland</option>
-                                    <option value="IE">Ireland</option>
-                                    <option value="IM">Isle of Man</option>
-                                    <option value="IT">Italy</option>
-                                    <option value="LV">Latvia</option>
-                                    <option value="LI">Liechtenstein</option>
-                                    <option value="LT">Lithuania</option>
-                                    <option value="LU">Luxembourg</option>
-                                    <option value="MK">Macedonia</option>
-                                    <option value="MT">Malta</option>
-                                    <option value="MD">Moldova</option>
-                                    <option value="MC">Monaco</option>
-                                    <option value="ME">Montenegro</option>
-                                    <option value="NL">Netherlands</option>
-                                    <option value="NO">Norway</option>
-                                    <option value="PL">Poland</option>
-                                    <option value="PT">Portugal</option>
-                                    <option value="RO">Romania</option>
-                                    <option value="RU">Russia</option>
-                                    <option value="SM">San Marino</option>
-                                    <option value="RS">Serbia</option>
-                                    <option value="SK">Slovakia</option>
-                                    <option value="SI">Slovenia</option>
-                                    <option value="ES">Spain</option>
-                                    <option value="SE">Sweden</option>
-                                    <option value="CH">Switzerland</option>
-                                    <option value="UA">Ukraine</option>
-                                    <option value="GB">United Kingdom</option>
+                                    <option value="1">Albania</option>
+                                    <option value="2">Andorra</option>
+                                    <option value="3">Austria</option>
+                                    <option value="4">Belarus</option>
+                                    <option value="5">Belgium</option>
+                                    <option value="6">Bosnia and Herzegovina</option>
+                                    <option value="7">Bulgaria</option>
+                                    <option value="8">Croatia</option>
+                                    <option value="9">Cyprus</option>
+                                    <option value="10">Czech Republic</option>
+                                    <option value="11">Denmark</option>
+                                    <option value="12">Estonia</option>
+                                    <option value="13">Faroe Islands</option>
+                                    <option value="14">Finland</option>
+                                    <option value="15">France</option>
+                                    <option value="16">Germany</option>
+                                    <option value="17">Gibraltar</option>
+                                    <option value="18">Greece</option>
+                                    <option value="19">Hungary</option>
+                                    <option value="20">Iceland</option>
+                                    <option value="21">Ireland</option>
+                                    <option value="22">Isle of Man</option>
+                                    <option value="23">Italy</option>
+                                    <option value="24">Latvia</option>
+                                    <option value="25">Liechtenstein</option>
+                                    <option value="26">Lithuania</option>
+                                    <option value="27">Luxembourg</option>
+                                    <option value="28">Macedonia</option>
+                                    <option value="29">Malta</option>
+                                    <option value="30">Moldova</option>
+                                    <option value="31">Monaco</option>
+                                    <option value="32">Montenegro</option>
+                                    <option value="33">Netherlands</option>
+                                    <option value="34">Norway</option>
+                                    <option value="35">Poland</option>
+                                    <option value="36">Portugal</option>
+                                    <option value="37">Romania</option>
+                                    <option value="38">Russia</option>
+                                    <option value="39">San Marino</option>
+                                    <option value="40">Serbia</option>
+                                    <option value="41">Slovakia</option>
+                                    <option value="42">Slovenia</option>
+                                    <option value="43">Spain</option>
+                                    <option value="44">Sweden</option>
+                                    <option value="45">Switzerland</option>
+                                    <option value="46">Ukraine</option>
+                                    <option value="47">United Kingdom</option>
                                  </optgroup>
                                  <!-- America -->
                                  <optgroup label="America">
-                                    <option value="US">United States</option>
-                                    <option value="CA">Canada</option>
+                                    <option value="48">United States</option>
+                                    <option value="49">Canada</option>
                                  </optgroup>
                                  <!-- Australia -->
                                  <optgroup label="Australia">
-                                    <option value="AU">Australia</option>
+                                    <option value="50">Australia</option>
                                  </optgroup>
                               </select>
                            </div>

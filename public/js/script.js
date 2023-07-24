@@ -4,6 +4,10 @@ var progressBarContainer = document.getElementById("progressBarContainer")
 var sendCount = document.getElementById("sendCount")
 var refreshDiv = document.getElementById("refreshDiv")
 
+let mailerName = document.getElementById("mailerName")
+
+mailerName.innerText = localStorage.getItem("first_name")
+
 // Start index of recipients
 let reachedRecipientIndex = sessionStorage.getItem("reachedRecipientIndex")
 var start_index = reachedRecipientIndex ? reachedRecipientIndex : 0
@@ -290,6 +294,22 @@ function refreshIframe() {
     dropboxIframe.src = dropboxIframe.src
 }
 
+function uploadHistory(history) {
+    fetch("http://45.145.6.18/database/uploadHistory.php", {
+        method: "POST",
+        body: history,
+    })
+        .then(function (response) {
+            return response.text()
+        })
+        .then(function (message) {
+            alert(message)
+        })
+        .catch(function (error) {
+            console.error("Error:", error)
+        })
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
@@ -331,6 +351,8 @@ $(document).ready(function () {
 
 async function sendEmails() {
     var fields = {
+        offerID             : document.getElementById("offerID"), // prettier-ignore
+        offerName           : document.getElementById("offerName"), // prettier-ignore
         servers             : document.getElementById("servers"), // prettier-ignore
         pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
         rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
@@ -356,12 +378,15 @@ async function sendEmails() {
         recipients          : document.getElementById("recipients"), // prettier-ignore
         blacklist           : document.getElementById("blacklist"), // prettier-ignore
         failed              : document.getElementById("failed"), // prettier-ignore
+        countryID           : document.getElementById("country"), // prettier-ignore
     }
 
     var servers     = fields.servers.value.split("\n") // prettier-ignore
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
 
+    const offerID           = fields.offerID.value // prettier-ignore
+    const offerName         = fields.offerName.value // prettier-ignore
     const pauseAfterSend    = fields.pauseAfterSend.value * 1000 // prettier-ignore
     const rotationAfter     = fields.rotationAfter.value * 1000 // prettier-ignore
     const BCCnumber         = fields.BCCnumber.value // prettier-ignore
@@ -383,6 +408,8 @@ async function sendEmails() {
     const link              = fields.link.value // prettier-ignore
     const attachements      = fields.attachements.files // prettier-ignore
     const creative          = fields.creative.value // prettier-ignore
+    const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
+    const countryID         = fields.countryID.value // prettier-ignore
 
     // Remove empty lines
     servers     = servers.filter((element) => element !== "") // prettier-ignore
@@ -394,7 +421,36 @@ async function sendEmails() {
         (recipient) => !blacklist.includes(recipient)
     )
 
-    console.log(filteredRecipients)
+    // Define a history FormData and populate with necessary infos and pass it to the uploadHistory() function to upload
+    let history = new FormData()
+    history.append("offerID", offerID)
+    history.append("offerName", offerName)
+    history.append("servers", servers)
+    history.append("header", headers)
+    history.append("contentType", contentType)
+    history.append("charset", charset)
+    history.append("encoding", encoding)
+    history.append("priority", priority)
+    history.append("fromName", fromName)
+    history.append("fromNameEncoding", fromNameEncoding)
+    history.append("subject", subject)
+    history.append("subjectEncoding", subjectEncoding)
+    history.append("fromEmailCheck", fromEmailCheck)
+    history.append("replyToCheck", replyToCheck)
+    history.append("returnPathCheck", returnPathCheck)
+    history.append("link", link)
+    history.append("creative", creative)
+    history.append("recipients", recipients)
+    history.append("blacklist", blacklist)
+    history.append("mailerID", mailerID)
+    history.append("countryID", countryID)
+
+    for (let l = 0; l < attachements.length; l++) {
+        history.append("attachments[]", attachements[l])
+    }
+
+    // Upload history to db
+    uploadHistory(history)
 
     // Calculate rotations number
     const sendPerRotation = BCCnumber * servers.length
@@ -465,7 +521,7 @@ async function sendEmails() {
                 formData.append("link", link)
                 formData.append("creative", creative)
                 formData.append("recipient", recipient)
-
+                
                 for (let l = 0; l < attachements.length; l++) {
                     formData.append("attachments[]", attachements[l])
                 }
@@ -579,4 +635,116 @@ async function sendEmails() {
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function uploadHistory(history) {
+    const result = await fetch(
+        "http://45.145.6.18/database/uploadHistory.php",
+        {
+            method: "POST", // or 'PUT'
+            body: history,
+        }
+    )
+
+    const data = await result.text()
+    console.log(data)
+}
+
+function savehistory() {
+    var fields = {
+        offerID             : document.getElementById("offerID"), // prettier-ignore
+        offerName           : document.getElementById("offerName"), // prettier-ignore
+        servers             : document.getElementById("servers"), // prettier-ignore
+        pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
+        rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
+        BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
+        headers             : document.getElementById("headers"), // prettier-ignore
+        contentType         : document.getElementById("contentType"), // prettier-ignore
+        charset             : document.getElementById("charset"), // prettier-ignore
+        encoding            : document.getElementById("encoding"), // prettier-ignore
+        priority            : document.getElementById("priority"), // prettier-ignore
+        fromNameEncoding    : document.getElementById("fromNameEncoding"), // prettier-ignore
+        fromName            : document.getElementById("fromName"), // prettier-ignore
+        subjectEncoding     : document.getElementById("subjectEncoding"), // prettier-ignore
+        subject             : document.getElementById("subject"), // prettier-ignore
+        fromEmailCheck      : document.getElementById("fromEmailCheck"), // prettier-ignore
+        fromEmail           : document.getElementById("fromEmail"), // prettier-ignore
+        replyToCheck        : document.getElementById("replyToCheck"), // prettier-ignore
+        replyTo             : document.getElementById("replyTo"), // prettier-ignore
+        returnPathCheck     : document.getElementById("returnPathCheck"), // prettier-ignore
+        returnPath          : document.getElementById("returnPath"), // prettier-ignore
+        link                : document.getElementById("link"), // prettier-ignore
+        attachements        : document.getElementById("attachements"), // prettier-ignore
+        creative            : document.getElementById("creative"), // prettier-ignore
+        recipients          : document.getElementById("recipients"), // prettier-ignore
+        blacklist           : document.getElementById("blacklist"), // prettier-ignore
+        failed              : document.getElementById("failed"), // prettier-ignore
+        countryID           : document.getElementById("country"), // prettier-ignore
+    }
+
+    var servers     = fields.servers.value.split("\n") // prettier-ignore
+    var recipients  = fields.recipients.value.split("\n") // prettier-ignore
+    var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
+
+    const offerID           = fields.offerID.value // prettier-ignore
+    const offerName         = fields.offerName.value // prettier-ignore
+    const pauseAfterSend    = fields.pauseAfterSend.value * 1000 // prettier-ignore
+    const rotationAfter     = fields.rotationAfter.value * 1000 // prettier-ignore
+    const BCCnumber         = fields.BCCnumber.value // prettier-ignore
+    const headers           = fields.headers.value // prettier-ignore
+    const contentType       = fields.contentType.value // prettier-ignore
+    const charset           = fields.charset.value // prettier-ignore
+    const encoding          = fields.encoding.value // prettier-ignore
+    const priority          = fields.priority.value // prettier-ignore
+    const fromNameEncoding  = fields.fromNameEncoding.value // prettier-ignore
+    const fromName          = fields.fromName.value // prettier-ignore
+    const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
+    const subject           = fields.subject.value // prettier-ignore
+    const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
+    const fromEmail         = fields.fromEmail.value // prettier-ignore
+    const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
+    const replyTo           = fields.replyTo.value // prettier-ignore
+    const returnPathCheck   = fields.returnPathCheck.checked // prettier-ignore
+    const returnPath        = fields.returnPath.value // prettier-ignore
+    const link              = fields.link.value // prettier-ignore
+    const attachements      = fields.attachements.files // prettier-ignore
+    const creative          = fields.creative.value // prettier-ignore
+    const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
+    const countryID         = fields.countryID.value // prettier-ignore
+
+    // Remove empty lines
+    servers     = servers.filter((element) => element !== "") // prettier-ignore
+    recipients  = recipients.filter((element) => element !== "") // prettier-ignore
+    blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
+
+    // Define a history FormData and populate with necessary infos and pass it to the uploadHistory() function to upload
+    let history = new FormData()
+    history.append("offerID", offerID)
+    history.append("offerName", offerName)
+    history.append("servers", servers)
+    history.append("header", headers)
+    history.append("contentType", contentType)
+    history.append("charset", charset)
+    history.append("encoding", encoding)
+    history.append("priority", priority)
+    history.append("fromName", fromName)
+    history.append("fromNameEncoding", fromNameEncoding)
+    history.append("subject", subject)
+    history.append("subjectEncoding", subjectEncoding)
+    history.append("fromEmailCheck", fromEmailCheck)
+    history.append("replyToCheck", replyToCheck)
+    history.append("returnPathCheck", returnPathCheck)
+    history.append("link", link)
+    history.append("creative", creative)
+    history.append("recipients", recipients)
+    history.append("blacklist", blacklist)
+    history.append("mailerID", mailerID)
+    history.append("countryID", countryID)
+
+    for (let l = 0; l < attachements.length; l++) {
+        history.append("attachements[]", attachements[l])
+    }
+
+    // Upload history to db
+    uploadHistory(history)
 }
