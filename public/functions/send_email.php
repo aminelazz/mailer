@@ -157,29 +157,30 @@ function sendEmailsUsingPHPMailer($formData)
     }
 
     // Configure From Email
-    if ($fromEmailCheck) {
+    if (!$fromEmailCheck) {
         $fromEmail = $username;
     }
 
     // Configure ReplyTo
-    if ($replyToCheck) {
+    if (!$replyToCheck) {
         $replyTo = $username;
     }
 
     // Configure Return Path (Confirm Reading) and add it
-    if ($returnPathCheck) {
-        $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
+    if (!$returnPathCheck) {
+        $returnPath = $username;
     }
 
     // Add mail config
     $mail->setFrom(replaceTags($fromEmail, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     $mail->AddReplyTo(replaceTags($replyTo, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
-    $mail->Subject      = $subject;
-    $mail->MessageDate  = PHPMailer::rfcDate();
-    $mail->Encoding     = $encoding;
-    $mail->ContentType  = $contentType;
-    $mail->CharSet      = $charset;
-    $mail->Priority     = $priority;
+    $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
+    $mail->Subject          = $subject;
+    $mail->MessageDate      = PHPMailer::rfcDate();
+    $mail->Encoding         = $encoding;
+    $mail->ContentType      = $contentType;
+    $mail->CharSet          = $charset;
+    $mail->Priority         = $priority;
 
 
     // Configure SMTP
@@ -205,20 +206,20 @@ function sendEmailsUsingPHPMailer($formData)
 
     // Attachments
     // Attach files from the form
-    if (!empty($_FILES['attachments']['tmp_name'])) {
+    if (!empty($_FILES['attachements']['tmp_name'])) {
         // Check if multiple files were uploaded
-        if (is_array($_FILES['attachments']['tmp_name'])) {
+        if (is_array($_FILES['attachements']['tmp_name'])) {
             // Loop through each uploaded file
-            foreach ($_FILES['attachments']['tmp_name'] as $index => $tmp_name) {
+            foreach ($_FILES['attachements']['tmp_name'] as $index => $tmp_name) {
                 // Get the filename
-                $filename = $_FILES['attachments']['name'][$index];
+                $filename = $_FILES['attachements']['name'][$index];
                 // Add the attachment to the email
                 $mail->addAttachment($tmp_name, $filename);
             }
         } else {
             // Single file uploaded
-            $tmp_name = $_FILES['attachments']['tmp_name'];
-            $filename = $_FILES['attachments']['name'];
+            $tmp_name = $_FILES['attachements']['tmp_name'];
+            $filename = $_FILES['attachements']['name'];
             // Add the attachment to the email
             $mail->addAttachment($tmp_name, $filename);
         }

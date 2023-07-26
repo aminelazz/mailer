@@ -4,7 +4,7 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="icon" href="./public/assets/favicon.ico" type="image/x-icon">
+   <link rel="icon" href="./favicon.ico" type="image/x-icon">
    <link rel="stylesheet" href="./public/stylesheets/bootstrap_mod.css">
    <link rel="stylesheet" href="./public/stylesheets/styles.css">
    <script src="./public/js/auth.js"></script>
@@ -68,7 +68,6 @@
             </a>
             <!-- Start Button -->
             <button id="start" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
-            <button id="history" type="button" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="savehistory()">Save to history</button>
             <!-- Play & Pause & Stop Buttons -->
             <div id="controlArea" class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
                <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="startSend()">
@@ -123,7 +122,7 @@
                   <button class="nav-link" id="nav-history-tab" data-bs-toggle="tab" data-bs-target="#nav-history" type="button" role="tab" aria-controls="nav-history" aria-selected="false" onclick="showRefresh()">History</button>
                </li>
                <div class="me-2 invisible" id="refreshDiv">
-                  <button class="my-auto btn btn-primary border-0 refresh-dropbox" type="button" onclick="refreshIframe()">
+                  <button class="my-auto btn btn-primary border-0 d-flex gap-1 align-items-center refresh-dropbox" type="button" onclick="refreshIframe()">
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
                         <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"></path>
@@ -580,7 +579,7 @@
                                     </div>
                                  </div>
                                  <div class="col-8 p-0">
-                                    <input type="text" name="fromEmail" id="fromEmail" class="form-control border-start-0 rounded-start-0" style="height: 43px;">
+                                    <input type="text" name="fromEmail" id="fromEmail" class="form-control border-start-0 rounded-start-0" style="height: 43px;" value="[anl_20]@email.com">
                                  </div>
                               </div>
                            </div>
@@ -595,7 +594,7 @@
                                     </div>
                                  </div>
                                  <div class="col-8 p-0">
-                                    <input type="text" name="replyTo" id="replyTo" class="form-control border-start-0 rounded-start-0" style="height: 43px;">
+                                    <input type="text" name="replyTo" id="replyTo" class="form-control border-start-0 rounded-start-0" style="height: 43px;" value="[anl_20]@email.com">
                                  </div>
                               </div>
                            </div>
@@ -610,7 +609,7 @@
                                     </div>
                                  </div>
                                  <div class="col-8 p-0">
-                                    <input type="text" name="returnPath" id="returnPath" class="form-control border-start-0 rounded-start-0" style="height: 43px;">
+                                    <input type="text" name="returnPath" id="returnPath" class="form-control border-start-0 rounded-start-0" style="height: 43px;" value="[anl_20]@email.com">
                                  </div>
                               </div>
                            </div>
@@ -722,7 +721,7 @@
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="dropboxFolder" width="100%" height="100%" src="http://45.145.6.18/public/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="dropboxFolder" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
                </div>
             </div>
          </div>

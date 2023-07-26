@@ -294,22 +294,6 @@ function refreshIframe() {
     dropboxIframe.src = dropboxIframe.src
 }
 
-function uploadHistory(history) {
-    fetch("http://45.145.6.18/database/uploadHistory.php", {
-        method: "POST",
-        body: history,
-    })
-        .then(function (response) {
-            return response.text()
-        })
-        .then(function (message) {
-            alert(message)
-        })
-        .catch(function (error) {
-            console.error("Error:", error)
-        })
-}
-
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
@@ -421,36 +405,8 @@ async function sendEmails() {
         (recipient) => !blacklist.includes(recipient)
     )
 
-    // Define a history FormData and populate with necessary infos and pass it to the uploadHistory() function to upload
-    let history = new FormData()
-    history.append("offerID", offerID)
-    history.append("offerName", offerName)
-    history.append("servers", servers)
-    history.append("header", headers)
-    history.append("contentType", contentType)
-    history.append("charset", charset)
-    history.append("encoding", encoding)
-    history.append("priority", priority)
-    history.append("fromName", fromName)
-    history.append("fromNameEncoding", fromNameEncoding)
-    history.append("subject", subject)
-    history.append("subjectEncoding", subjectEncoding)
-    history.append("fromEmailCheck", fromEmailCheck)
-    history.append("replyToCheck", replyToCheck)
-    history.append("returnPathCheck", returnPathCheck)
-    history.append("link", link)
-    history.append("creative", creative)
-    history.append("recipients", recipients)
-    history.append("blacklist", blacklist)
-    history.append("mailerID", mailerID)
-    history.append("countryID", countryID)
-
-    for (let l = 0; l < attachements.length; l++) {
-        history.append("attachments[]", attachements[l])
-    }
-
     // Upload history to db
-    uploadHistory(history)
+    savehistory()
 
     // Calculate rotations number
     const sendPerRotation = BCCnumber * servers.length
@@ -523,7 +479,7 @@ async function sendEmails() {
                 formData.append("recipient", recipient)
                 
                 for (let l = 0; l < attachements.length; l++) {
-                    formData.append("attachments[]", attachements[l])
+                    formData.append("attachements[]", attachements[l])
                 }
 
                 const now = new Date()
@@ -646,7 +602,7 @@ async function uploadHistory(history) {
         }
     )
 
-    const data = await result.text()
+    const data = await result.json()
     console.log(data)
 }
 
@@ -732,8 +688,11 @@ function savehistory() {
     history.append("subject", subject)
     history.append("subjectEncoding", subjectEncoding)
     history.append("fromEmailCheck", fromEmailCheck)
+    history.append("fromEmail", fromEmail)
     history.append("replyToCheck", replyToCheck)
+    history.append("replyTo", replyTo)
     history.append("returnPathCheck", returnPathCheck)
+    history.append("returnPath", returnPath)
     history.append("link", link)
     history.append("creative", creative)
     history.append("recipients", recipients)

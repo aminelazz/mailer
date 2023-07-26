@@ -34,32 +34,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["files"])) {
 
         // Delete the temporary zip file from the server
         unlink($zipPath);
-
-        // // Your database connection configuration here
-        // $servername = "localhost";
-        // $username = "stcom";
-        // $password = "Maruil589";
-        // $dbname = "stcom";
-
-        // // Create connection
-        // $conn = new mysqli(
-        //     $servername,
-        //     $username,
-        //     $password,
-        //     $dbname
-        // );
-
-        // if ($conn->connect_error) {
-        //     die("Connection failed: " . $conn->connect_error);
-        // }
-        // // Insert the base64-encoded zip file data into the database
-        // $stmt = $conn->prepare("INSERT INTO files_table (zip_file_data) VALUES (?)");
-        // $stmt->bind_param("s", $base64EncodedZip);
-        // $stmt->execute();
-        // $stmt->close();
-        // $conn->close();
-
-        // echo "Files compressed and uploaded successfully!";
     } else {
         echo "Failed to create the zip file.";
     }
