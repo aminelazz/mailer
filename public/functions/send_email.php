@@ -97,11 +97,11 @@ function sendEmailsUsingPHPMailer($formData)
     $subjectEncoding    = $formData['subjectEncoding'];
     $subject            = $formData['subject'];
     $fromEmailCheck     = $formData['fromEmailCheck'];
-    $fromEmail          = (!empty($formData['fromEmail'])) ? true : false;
+    $fromEmail          = $formData['fromEmail'];
     $replyToCheck       = $formData['replyToCheck'];
-    $replyTo            = (!empty($formData['replyTo'])) ? true : false;
+    $replyTo            = $formData['replyTo'];
     $returnPathCheck    = $formData['returnPathCheck'];
-    $returnPath         = (!empty($formData['returnPath'])) ? true : false;
+    $returnPath         = $formData['returnPath'];
     $link               = $formData['link'];
     $creative           = $formData['creative'];
     $recipient          = $formData['recipient'];
@@ -157,24 +157,23 @@ function sendEmailsUsingPHPMailer($formData)
     }
 
     // Configure From Email
-    if (!$fromEmailCheck) {
+    if ($fromEmailCheck == "true") {
         $fromEmail = $username;
     }
 
     // Configure ReplyTo
-    if (!$replyToCheck) {
+    if ($replyToCheck == "true") {
         $replyTo = $username;
     }
 
     // Configure Return Path (Confirm Reading) and add it
-    if (!$returnPathCheck) {
-        $returnPath = $username;
+    if ($returnPathCheck == "true") {
+        $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
     }
 
     // Add mail config
     $mail->setFrom(replaceTags($fromEmail, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     $mail->AddReplyTo(replaceTags($replyTo, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
-    $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
     $mail->Subject          = $subject;
     $mail->MessageDate      = PHPMailer::rfcDate();
     $mail->Encoding         = $encoding;

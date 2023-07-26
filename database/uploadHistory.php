@@ -41,7 +41,7 @@ function uploadHistory($history)
     $returnPathCheck    = $history['returnPathCheck'];
     $returnPath         = $history['returnPath'];
     $link               = $history['link'];
-    $creative           = $history['creative'];
+    $creative           = base64_encode($history['creative']);
     $recipients         = $history['recipients'];
     $blacklist          = $history['blacklist'];
     $mailerID           = $history['mailerID'];
@@ -82,11 +82,13 @@ function uploadHistory($history)
                     $response = array(
                         "success" => true,
                         "message" => "History saved successfully!",
+                        "creative" => $creative,
                     );
                 } else {
                     $response = array(
-                        "success" => true,
+                        "success" => false,
                         "message" => "Error: " . $sql . "<br>" . $conn->error,
+                        "creative" => $creative,
                     );
                 }
 
@@ -96,16 +98,18 @@ function uploadHistory($history)
                 unlink($zipPath);
             }
         } else {
-            $sql = ("INSERT INTO `offer` (`offerID`, `offerName`, `servers`, `header`, `contentType`, `charset`, `encoding`, `priority`, `fromName`, `fromNameEncoding`, `subject`, `subjectEncoding`, `fromEmailCheck`, `replyToCheck`, `returnPathCheck`, `link`, `attachements`, `creative`, `recipients`, `blacklist`, `date`, `mailerID`, `countryID`) VALUES ('{$offerID}', '{$offerName}', '{$servers}', '{$header}', '{$contentType}', '{$charset}', '{$encoding}', '{$priority}', '{$fromName}', '{$fromNameEncoding}', '{$subject}', '{$subjectEncoding}', {$fromEmailCheck}, {$replyToCheck}, {$returnPathCheck}, '{$link}', '', '{$creative}', '{$recipients}', '{$blacklist}', '{$currentDateTime}', '{$mailerID}', '{$countryID}')");
+            $sql = ("INSERT INTO `offer` (`offerID`, `offerName`, `servers`, `header`, `contentType`, `charset`, `encoding`, `priority`, `fromName`, `fromNameEncoding`, `subject`, `subjectEncoding`, `fromEmailCheck`, `fromEmail`, `replyToCheck`, `replyTo`, `returnPathCheck`, `returnPath`, `link`, `attachements`, `creative`, `recipients`, `blacklist`, `date`, `mailerID`, `countryID`) VALUES ('{$offerID}', '{$offerName}', '{$servers}', '{$header}', '{$contentType}', '{$charset}', '{$encoding}', '{$priority}', '{$fromName}', '{$fromNameEncoding}', '{$subject}', '{$subjectEncoding}', {$fromEmailCheck}, '{$fromEmail}', {$replyToCheck}, '{$replyTo}', {$returnPathCheck}, '{$returnPath}', '{$link}', '', '{$creative}', '{$recipients}', '{$blacklist}', '{$currentDateTime}', '{$mailerID}', '{$countryID}')");
             if ($conn->query($sql) === TRUE) {
                 $response = array(
                     "success" => true,
                     "message" => "History saved successfully!",
+                    "creative" => $creative,
                 );
             } else {
                 $response = array(
-                    "success" => true,
+                    "success" => false,
                     "message" => "Error: " . $sql . "<br>" . $conn->error,
+                    "creative" => $creative,
                 );
             }
         }

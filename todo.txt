@@ -12,4 +12,7 @@ add multiple from names, subjects and creatives
 
 add test email after 100 send
 
-start index
+count and start like mfrm + test after
+
+get recipients from db based on country list (select)
+

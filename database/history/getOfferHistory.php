@@ -79,11 +79,19 @@ function getOfferHistory()
                 'blacklist'         => $row['blacklist'],
                 'date'              => $row['date'],
             );
-            $mailerData[$mailerId]['countries'] = array_values($mailerData[$mailerId]['countries']);
+            // $mailerData[$mailerId]['countries'][$countryId] = array_values($mailerData[$mailerId]['countries'][$countryId]);
 
             // $mailerData[$mailerId]['countries'][$countryId]['offers'][$offerId] = array_values($mailerData[$mailerId]['countries'][$countryId]['offers'][$offerId]);
         }
     }
+
+    // Convert the countries object to an array
+    foreach ($mailerData as &$item) {
+        if (isset($item['countries'])) {
+            $item['countries'] = array_values($item['countries']);
+        }
+    }
+
 
     $conn->close();
     return array_values($mailerData); // Re-index the array keys

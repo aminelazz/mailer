@@ -1,3 +1,20 @@
+window.addEventListener("message", receiveMessage, false)
+
+function receiveMessage(event) {
+    // Check the origin of the iframe to ensure it's trusted (optional but recommended)
+    // if (event.origin !== "https://your-iframe-origin.com") {
+    //     return
+    // }
+
+    // `event.data` contains the message sent from the iframe
+    console.log("Message from iframe:", event.data)
+
+    // Update the textarea's value in the parent page based on the received message
+    document.getElementById("creative").textContent = event.data
+
+    previewCreative()
+}
+
 var sendStatus = ""
 var progressBar = document.getElementById("progressBar")
 var progressBarContainer = document.getElementById("progressBarContainer")
@@ -384,6 +401,7 @@ async function sendEmails() {
     const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
     const subject           = fields.subject.value // prettier-ignore
     const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
+    console.log(fromEmailCheck)
     const fromEmail         = fields.fromEmail.value // prettier-ignore
     const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
     const replyTo           = fields.replyTo.value // prettier-ignore
@@ -639,15 +657,12 @@ function savehistory() {
     }
 
     var servers     = fields.servers.value.split("\n") // prettier-ignore
+    var headers     = fields.headers.value.split("\n") // prettier-ignore
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
 
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
-    const pauseAfterSend    = fields.pauseAfterSend.value * 1000 // prettier-ignore
-    const rotationAfter     = fields.rotationAfter.value * 1000 // prettier-ignore
-    const BCCnumber         = fields.BCCnumber.value // prettier-ignore
-    const headers           = fields.headers.value // prettier-ignore
     const contentType       = fields.contentType.value // prettier-ignore
     const charset           = fields.charset.value // prettier-ignore
     const encoding          = fields.encoding.value // prettier-ignore
@@ -694,7 +709,7 @@ function savehistory() {
     history.append("returnPathCheck", returnPathCheck)
     history.append("returnPath", returnPath)
     history.append("link", link)
-    history.append("creative", creative)
+    history.append("creative", `${creative}`)
     history.append("recipients", recipients)
     history.append("blacklist", blacklist)
     history.append("mailerID", mailerID)

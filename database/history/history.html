@@ -4,13 +4,23 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="../../public/stylesheets/bootstrap.css" />
+        <link rel="stylesheet" href="./style.css" />
         <title>Dropbox History Folder</title>
     </head>
-    <body class="w-100 h-100" style="position: fixed">
-        <div class="h-100 accordion p-2" id="offer-history"></div>
+    <body class="w-100 h-100 m-0" style="position: fixed">
+        <div class="d-flex justify-content-center align-items-center py-2">
+            <select name="offerAttr" id="offerAttr" class="form-select rounded-end-0 border-end-0" style="height: 43px; width: 10%" onchange="changeSearchType()">
+                <option value="offerID">ID</option>
+                <option value="offerName">Name</option>
+                <option value="date">Date</option>
+            </select>
+            <input type="search" class="form-control rounded-start-0" name="search" id="search" style="height: 43px; width: 35%" placeholder="Search offer..." oninput="searchOffer()" />
+        </div>
+        <div class="offer-history-container accordion p-2" id="offer-history"></div>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="../../public/js/bootstrap.bundle.js"></script>
+        <script src="../../public/js/script.js"></script>
         <script src="getHistory.js"></script>
     </body>
 </html>

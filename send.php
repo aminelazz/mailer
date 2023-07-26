@@ -147,7 +147,7 @@
                               <label for="servers" class="form-label fw-semibold">
                                  Servers
                               </label>
-                              <textarea name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
+                              <textarea spellcheck="false" name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
                            </div>
                            <!-- End Server Field -->
                            <div class="col">
@@ -199,7 +199,7 @@
                               <label for="headers" class="form-label fw-semibold">
                                  Custom Header
                               </label>
-                              <textarea name="headers" id="headers" class="form-control" style="height: 134px; resize: none; font-size: 0.85rem;">Message-ID: <[anl_20]@[domain]>&#10;X-Mailer: St-Com v1.0-Ref[n_2]&#10;Auto-Submitted: auto-generated&#10;X-Auto-Response-Suppress: OOF, AutoReply&#10;X-Abuse: Please report abuse here <mailto:abuse@[domain]?c=[n_10]></textarea>
+                              <textarea spellcheck="false" name="headers" id="headers" class="form-control" style="height: 134px; resize: none; font-size: 0.85rem;">Message-ID: <[anl_20]@[domain]>&#10;X-Mailer: St-Com v1.0-Ref[n_2]&#10;Auto-Submitted: auto-generated&#10;X-Auto-Response-Suppress: OOF, AutoReply&#10;X-Abuse: Please report abuse here <mailto:abuse@[domain]?c=[n_10]></textarea>
                            </div>
                            <!-- Message Properties -->
                            <div class="col">
@@ -660,7 +660,7 @@
                            <!-- Creative -->
                            <div class="col-6">
                               <label for="creative" class="form-label fw-semibold">Creative</label>
-                              <textarea name="creative" id="creative" rows="15" class="form-control w-100 language-html" style="font-family: monospace; resize: none;" oninput="previewCreative()" required></textarea>
+                              <textarea spellcheck="false" name="creative" id="creative" class="form-control w-100 language-html" style="height: 391px; font-family: monospace; resize: none;" oninput="previewCreative()" required></textarea>
                            </div>
                            <!-- Preview -->
                            <div class="col-6">
@@ -685,17 +685,17 @@
                            <!-- Recipients -->
                            <div class="col-4">
                               <label for="recipients" class="form-label fw-semibold">Recipients</label>
-                              <textarea name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()" required></textarea>
+                              <textarea spellcheck="false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()" required></textarea>
                            </div>
                            <!-- Blacklist -->
                            <div class=" col-4">
                               <label for="blacklist" class="form-label fw-semibold">Blacklist</label>
-                              <textarea name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea>
+                              <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea>
                            </div>
                            <!-- Failed -->
                            <div class="col-4">
                               <label for="failed" class="form-label fw-semibold">Failed</label>
-                              <textarea name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="resize: none;" disabled></textarea>
+                              <textarea spellcheck="false" name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="resize: none;" disabled></textarea>
                            </div>
                         </div>
                      </div>
@@ -721,7 +721,7 @@
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="dropboxFolder" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="dropboxFolder" width="100%" height="100%" src="./database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
                </div>
             </div>
          </div>
