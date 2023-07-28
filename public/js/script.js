@@ -1,18 +1,39 @@
 window.addEventListener("message", receiveMessage, false)
 
 function receiveMessage(event) {
-    // Check the origin of the iframe to ensure it's trusted (optional but recommended)
-    // if (event.origin !== "https://your-iframe-origin.com") {
-    //     return
-    // }
+    let offerData = event.data
 
-    // `event.data` contains the message sent from the iframe
-    console.log("Message from iframe:", event.data)
+    console.log(offerData)
 
-    // Update the textarea's value in the parent page based on the received message
-    document.getElementById("creative").textContent = event.data
+    // Update the fields in the parent page based on the received data
+    document.getElementById("servers").innerHTML = offerData.servers.replaceAll(",", "\n") // prettier-ignore
+    document.getElementById("headers").innerHTML = offerData.header.replaceAll("||", "\n") // prettier-ignore
+    document.getElementById("contentType").value = offerData.contentType // prettier-ignore
+    document.getElementById("charset").value = offerData.charset // prettier-ignore
+    document.getElementById("encoding").value = offerData.encoding // prettier-ignore
+    document.getElementById("priority").value = offerData.priority // prettier-ignore
+    document.getElementById("offerID").value = offerData.offerID // prettier-ignore
+    document.getElementById("offerName").value = offerData.offerName // prettier-ignore
+    document.getElementById("country").value = offerData.countryID // prettier-ignore
+    document.getElementById("fromNameEncoding").value = offerData.fromNameEncoding // prettier-ignore
+    document.getElementById("fromName").value = offerData.fromName // prettier-ignore
+    document.getElementById("subjectEncoding").value = offerData.subjectEncoding // prettier-ignore
+    document.getElementById("subject").value = offerData.subject // prettier-ignore
+    document.getElementById("fromEmailCheck").checked = !!+offerData.fromEmailCheck // prettier-ignore
+    document.getElementById("fromEmail").value = offerData.fromEmail // prettier-ignore
+    document.getElementById("replyToCheck").checked = !!+offerData.replyToCheck // prettier-ignore
+    document.getElementById("replyTo").value = offerData.replyTo // prettier-ignore
+    document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
+    document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
+    document.getElementById("link").value = offerData.link // prettier-ignore
+    document.getElementById("creative").innerHTML = offerData.creative // prettier-ignore
+    document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
+    document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
 
     previewCreative()
+
+    // Go to the send tab
+    document.getElementById("nav-send-tab").click()
 }
 
 var sendStatus = ""
@@ -21,34 +42,35 @@ var progressBarContainer = document.getElementById("progressBarContainer")
 var sendCount = document.getElementById("sendCount")
 var refreshDiv = document.getElementById("refreshDiv")
 
-let mailerName = document.getElementById("mailerName")
+try {
+    let mailerName = document.getElementById("mailerName")
+    mailerName.innerText = localStorage.getItem("first_name")
 
-mailerName.innerText = localStorage.getItem("first_name")
+    // Start index of recipients
+    var lastRecipientIndex = 0
+    var start_index = 0
 
-// Start index of recipients
-let reachedRecipientIndex = sessionStorage.getItem("reachedRecipientIndex")
-var start_index = reachedRecipientIndex ? reachedRecipientIndex : 0
+    var statusLabel = document.getElementById("status")
 
-var statusLabel = document.getElementById("status")
+    window.addEventListener("load", () => {
+        var attachementsName = document.getElementById("attachementsName")
+        var clearButton = document.getElementById("clearAttachements")
+        var failed = document.getElementById("failed")
 
-window.addEventListener("load", () => {
-    var attachementsName = document.getElementById("attachementsName")
-    var clearButton = document.getElementById("clearAttachements")
-    var failed = document.getElementById("failed")
+        statusLabel.innerText = "Status: Pending"
 
-    statusLabel.innerText = "Status: Pending"
+        // Clear the failed area
+        failed.value = ""
 
-    // Clear the failed area
-    failed.value = ""
+        if (attachementsName.value != "") {
+            clearButton.classList.toggle("invisible")
+        }
 
-    if (attachementsName.value != "") {
-        clearButton.classList.toggle("invisible")
-    }
-
-    previewCreative()
-    fileUpload()
-    clearFiles()
-})
+        previewCreative()
+        fileUpload()
+        clearFiles()
+    })
+} catch (e) {}
 
 function preventUnload() {
     return true
@@ -84,9 +106,7 @@ function changeTimeValues() {
             rotationAfterField.value = rotationAfter
 
             if (rotationAfter <= 0) {
-                rotationAfterField.setCustomValidity(
-                    "The 'Rotation After' field must be positive"
-                )
+                rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
             } else {
                 rotationAfterField.setCustomValidity("")
             }
@@ -175,40 +195,87 @@ function clearFiles() {
 }
 
 function checkFields() {
-    var servers = document.getElementById("servers")
-    var recipients = document.getElementById("recipients")
-    var recipientsCount = recipients.value.toString().split("\n").length
+    let servers = document.getElementById("servers")
+    let recipients = document.getElementById("recipients")
+    let testAfter = document.getElementById("testAfter")
+    let emailTest = document.getElementById("emailTest")
+    let start = document.getElementById("start")
+    let count = document.getElementById("count")
 
+    let recipientsArray = recipients.value.toString().split("\n")
+    recipientsArray = recipientsArray.filter((element) => element !== "")
+    let recipientsCount = recipientsArray.length
+
+    let emailTestArray = emailTest.value.toString().split("; ")
+    emailTestArray = emailTestArray.filter((element) => element !== "")
+    let emailTestCount = emailTestArray.length
+
+    let allRecipientsCount = recipientsCount + emailTestCount
+
+    // BCC number Validity
     BCCnumber.setCustomValidity("")
 
-    if (BCCnumber.value > recipientsCount) {
-        BCCnumber.setCustomValidity(
-            "The 'Number of Emails In Bcc' number must be smaller than number of recipients"
-        )
+    if (recipients.value != "" && emailTest.value != "") {
+        if (BCCnumber.value > allRecipientsCount) {
+            BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of recipients and test email addresses")
+        }
+    } else if (emailTest.value != "") {
+        if (BCCnumber.value > emailTestCount) {
+            BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of test email addresses")
+        }
+    } else if (recipients.value != "") {
+        if (BCCnumber.value > recipientsCount) {
+            BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of recipients")
+        }
     }
 
+    // servers validity
     let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gim
 
     servers.setCustomValidity("")
 
     if (!serverpattern.test(servers.value.toString())) {
-        servers.setCustomValidity(
-            "Please enter at least one valid smtp server or multi-line smtp servers"
-        )
+        servers.setCustomValidity("Please enter at least one valid smtp server or multi-line smtp servers")
     }
 
+    // recipients & email test validity
     let recipientspattern = /^[\w.-]+@[\w.-]+$/gim
 
     recipients.setCustomValidity("")
+    emailTest.setCustomValidity("")
 
-    if (!recipientspattern.test(recipients.value.toString())) {
-        recipients.setCustomValidity(
-            "Please enter at least one valid email address or multi-line email address"
-        )
+    if (emailTest.value == "") {
+        if (!recipientspattern.test(recipients.value.toString())) {
+            recipients.setCustomValidity("Please enter at least one valid email address or multi-line email address")
+            emailTest.setCustomValidity("Please enter at least one valid email address for test")
+        }
+    }
+
+    // test after validity
+    testAfter.setCustomValidity("")
+
+    if (emailTest.value != "" && recipients.value != "" && testAfter.value == "") {
+        testAfter.setCustomValidity("Please enter a number")
+    }
+
+    // Set custom validity to Start and Count (recipients)
+    start.setCustomValidity("")
+    count.setCustomValidity("")
+
+    if (recipientsCount != 0) {
+        if (start.value == "") {
+            start.setCustomValidity("Please enter a start index")
+        } else if (count.value == "") {
+            count.setCustomValidity("Please enter a valid number of recipients")
+        }
+    }
+
+    if (start.value >= allRecipientsCount) {
+        start.setCustomValidity("Please enter a start index smaller than number of recipients")
     }
 }
 
-function startSend() {
+function send() {
     sendStatus = "sending"
     statusLabel.innerText = `Status: Sending`
     sendEmails()
@@ -227,7 +294,7 @@ function stopSend() {
 }
 
 function controlButtons() {
-    var start       = document.getElementById("start") // prettier-ignore
+    var start       = document.getElementById("startSend") // prettier-ignore
     var controlArea = document.getElementById("controlArea") // prettier-ignore
     let play        = document.getElementById("play") // prettier-ignore
     let pause       = document.getElementById("pause") // prettier-ignore
@@ -239,12 +306,7 @@ function controlButtons() {
             start.disabled = true
             play.disabled = true
             pause.disabled = false
-            progressBar.classList.remove(
-                "bg-play",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-            )
+            progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-play")
             break
 
@@ -253,12 +315,7 @@ function controlButtons() {
             start.disabled = true
             play.disabled = false
             pause.disabled = true
-            progressBar.classList.remove(
-                "bg-play",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-            )
+            progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-warning")
             break
 
@@ -268,12 +325,7 @@ function controlButtons() {
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
-            progressBar.classList.remove(
-                "bg-play",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-            )
+            progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-danger")
             break
 
@@ -283,12 +335,7 @@ function controlButtons() {
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
-            progressBar.classList.remove(
-                "bg-play",
-                "bg-success",
-                "bg-warning",
-                "bg-danger"
-            )
+            progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("success")
             statusLabel.innerText = `Status: Completed`
             break
@@ -343,7 +390,11 @@ $(document).ready(function () {
         // Control buttons
         controlButtons()
 
-        start_index = 0
+        let start = document.getElementById("start").value
+        let count = document.getElementById("count").value
+
+        start_index = start
+        lastRecipientIndex = count + start
 
         // Send email
         sendEmails()
@@ -375,6 +426,10 @@ async function sendEmails() {
         returnPath          : document.getElementById("returnPath"), // prettier-ignore
         link                : document.getElementById("link"), // prettier-ignore
         attachements        : document.getElementById("attachements"), // prettier-ignore
+        testAfter           : document.getElementById("testAfter"), // prettier-ignore
+        emailTest           : document.getElementById("emailTest"), // prettier-ignore
+        start               : document.getElementById("start"), // prettier-ignore
+        count               : document.getElementById("count"), // prettier-ignore
         creative            : document.getElementById("creative"), // prettier-ignore
         recipients          : document.getElementById("recipients"), // prettier-ignore
         blacklist           : document.getElementById("blacklist"), // prettier-ignore
@@ -383,6 +438,7 @@ async function sendEmails() {
     }
 
     var servers     = fields.servers.value.split("\n") // prettier-ignore
+    var emailTest   = fields.emailTest.value.split("; ") // prettier-ignore
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
 
@@ -390,7 +446,7 @@ async function sendEmails() {
     const offerName         = fields.offerName.value // prettier-ignore
     const pauseAfterSend    = fields.pauseAfterSend.value * 1000 // prettier-ignore
     const rotationAfter     = fields.rotationAfter.value * 1000 // prettier-ignore
-    const BCCnumber         = fields.BCCnumber.value // prettier-ignore
+    let BCCnumber           = fields.BCCnumber.value // prettier-ignore
     const headers           = fields.headers.value // prettier-ignore
     const contentType       = fields.contentType.value // prettier-ignore
     const charset           = fields.charset.value // prettier-ignore
@@ -401,7 +457,6 @@ async function sendEmails() {
     const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
     const subject           = fields.subject.value // prettier-ignore
     const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
-    console.log(fromEmailCheck)
     const fromEmail         = fields.fromEmail.value // prettier-ignore
     const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
     const replyTo           = fields.replyTo.value // prettier-ignore
@@ -409,37 +464,65 @@ async function sendEmails() {
     const returnPath        = fields.returnPath.value // prettier-ignore
     const link              = fields.link.value // prettier-ignore
     const attachements      = fields.attachements.files // prettier-ignore
+    const testAfter         = fields.testAfter.value // prettier-ignore
+    const start             = fields.start.value // prettier-ignore
+    const count             = fields.count.value // prettier-ignore
     const creative          = fields.creative.value // prettier-ignore
     const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
     const countryID         = fields.countryID.value // prettier-ignore
 
     // Remove empty lines
     servers     = servers.filter((element) => element !== "") // prettier-ignore
+    emailTest   = emailTest.filter((element) => element !== "") // prettier-ignore
     recipients  = recipients.filter((element) => element !== "") // prettier-ignore
     blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
 
     // Remove recipients who are in the blacklist
-    const filteredRecipients = recipients.filter(
-        (recipient) => !blacklist.includes(recipient)
-    )
+    const filteredRecipients = recipients.filter((recipient) => !blacklist.includes(recipient))
+
+    let modifiedRecipients = []
+
+    // Add test emails to the recipients list
+    if (!recipients.length == 0) {
+        for (let i = 0; i < filteredRecipients.length; i++) {
+            modifiedRecipients.push(filteredRecipients[i])
+
+            if ((i + 1) % parseInt(testAfter) === 0) {
+                // Add emailTest at the specific index based on testAfter value
+                for (let j = 0; j < emailTest.length; j++) {
+                    modifiedRecipients.push(emailTest[j])
+                }
+            }
+        }
+    } else {
+        for (let k = 0; k < emailTest.length; k++) {
+            modifiedRecipients.push(emailTest[k])
+        }
+        // Set BCCnumber value to 1 so that
+        // BCCnumber = 1
+    }
+
+    console.log(modifiedRecipients)
 
     // Upload history to db
-    savehistory()
+    let status = document.getElementById("status").textContent
+    if (status.includes("Pending") || status.includes("Stopped")) {
+        savehistory()
+    }
 
     // Calculate rotations number
     const sendPerRotation = BCCnumber * servers.length
-    const result = filteredRecipients.length / sendPerRotation
-    const nbrRotations =
-        result !== Math.floor(result) ? Math.ceil(result) : result
+    const result = modifiedRecipients.length / sendPerRotation
+    const nbrRotations = result !== Math.floor(result) ? Math.ceil(result) : result
 
     // Perform the rotation
     rotation: for (let i = 0; i < nbrRotations; i++) {
-        var serverCount
-        if (servers.length >= filteredRecipients.length) {
-            if (BCCnumber == filteredRecipients.length) {
+        var serverCount = 0
+        if (servers.length >= modifiedRecipients.length) {
+            if (BCCnumber == modifiedRecipients.length) {
                 serverCount = 1
             } else {
-                serverCount = filteredRecipients.length - BCCnumber + 1
+                serverCount = modifiedRecipients.length - BCCnumber + 1
             }
         } else {
             serverCount = servers.length
@@ -450,17 +533,19 @@ async function sendEmails() {
             let server = servers[j]
 
             // prettier-ignore
-            // Loop through the filteredRecipients and send emails
+            // Loop through the modifiedRecipients and send emails
             for (let k = start_index; k < start_index + parseInt(BCCnumber); k++) {
 
                 // Stop the loops after finishing all recipients
-                if (k > (filteredRecipients.length - 1)) {
-                    break rotation
+                if (k != 0) {
+                    if ((k > (modifiedRecipients.length - 1)) || (k > lastRecipientIndex)) {
+                        
+                        break rotation
+                    }
                 }
 
                 switch (sendStatus) {
                     case "paused":
-                        sessionStorage.setItem("reachedRecipientIndex", k)
                         break rotation
                         break;
 
@@ -472,8 +557,7 @@ async function sendEmails() {
                         break;
                 }              
 
-                let recipient = filteredRecipients[k]
-                console.log(`Recipient: ${recipient}`)
+                let recipient = modifiedRecipients[k]
 
                 let formData = new FormData()
                 formData.append("server", server)
@@ -549,7 +633,7 @@ async function sendEmails() {
                                 $("#responseArea").append(
                                     `<tr id="responseN${k + 1}">
                                         <th scope="row" style="width: 10%;">
-                                            ${k + 1} / ${filteredRecipients.length}
+                                            ${k + 1} / ${count}
                                         </th>
                                         <td class="text-center" style="width: 40%;">
                                             ${emailResponse[0]}
@@ -571,12 +655,12 @@ async function sendEmails() {
                                 }
 
                                 // Configure the progress bar
-                                var percentage = ((k + 1) / filteredRecipients.length) * 100
+                                var percentage = ((k + 1) / modifiedRecipients.length) * 100
 
                                 progressBar.innerText = `${percentage.toFixed(0)}%`
                                 progressBar.style.width = `${percentage.toFixed(0)}%`
 
-                                sendCount.innerText = `${k + 1} / ${filteredRecipients.length}`
+                                sendCount.innerText = `${k + 1} / ${modifiedRecipients.length}`
 
                                 // Scroll to the last added response
                                 let responseTable = document.getElementById("responseTable")
@@ -589,7 +673,7 @@ async function sendEmails() {
                 }
 
                 // Set the sendStatus value to completed when reaching last recipient and set buttons properties
-                if (k == (filteredRecipients.length - 1)) {
+                if (k == (modifiedRecipients.length - 1)) {
                     setTimeout(() => {
                         sendStatus = "completed"
                         controlButtons()
@@ -612,13 +696,10 @@ function delay(ms) {
 }
 
 async function uploadHistory(history) {
-    const result = await fetch(
-        "http://45.145.6.18/database/uploadHistory.php",
-        {
-            method: "POST", // or 'PUT'
-            body: history,
-        }
-    )
+    const result = await fetch("http://45.145.6.18/database/uploadHistory.php", {
+        method: "POST", // or 'PUT'
+        body: history,
+    })
 
     const data = await result.json()
     console.log(data)
@@ -657,7 +738,7 @@ function savehistory() {
     }
 
     var servers     = fields.servers.value.split("\n") // prettier-ignore
-    var headers     = fields.headers.value.split("\n") // prettier-ignore
+    var headers     = fields.headers.value.split("\n").join("||") // prettier-ignore
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
 

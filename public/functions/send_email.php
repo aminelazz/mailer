@@ -157,23 +157,25 @@ function sendEmailsUsingPHPMailer($formData)
     }
 
     // Configure From Email
-    if ($fromEmailCheck == "true") {
+    if ($fromEmailCheck == "false") {
         $fromEmail = $username;
     }
 
     // Configure ReplyTo
-    if ($replyToCheck == "true") {
+    if ($replyToCheck == "false") {
         $replyTo = $username;
     }
 
     // Configure Return Path (Confirm Reading) and add it
-    if ($returnPathCheck == "true") {
-        $mail->ConfirmReadingTo = replaceTags($returnPath, $username, $recipient, $link);
+    if ($returnPathCheck == "false") {
+        $returnPath = $username;
     }
 
     // Add mail config
     $mail->setFrom(replaceTags($fromEmail, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     $mail->AddReplyTo(replaceTags($replyTo, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
+    // $mail->Sender           = replaceTags($returnPath, $username, $recipient, $link);
+    $mail->addCustomHeader("Return-Path", replaceTags($returnPath, $username, $recipient, $link));
     $mail->Subject          = $subject;
     $mail->MessageDate      = PHPMailer::rfcDate();
     $mail->Encoding         = $encoding;

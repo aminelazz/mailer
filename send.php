@@ -11,7 +11,7 @@
    <title>St-Com</title>
 </head>
 
-<body class="row w-100 h-100" onbeforeunload="return preventUnload()">
+<body class="row w-100 h-100" style="background-color: #E2E2E2;" onbeforeunload="return preventUnload()">
    <form action="public/functions/send_email.php" method="post" class="p-0" id="sendForm" enctype="multipart/form-data">
       <!-- Start Side panel -->
       <div class="col p-0 position-fixed start-0 h-100" style="max-width: 220px; background-color: #8fa1a3;">
@@ -67,10 +67,10 @@
                </div>
             </a>
             <!-- Start Button -->
-            <button id="start" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
+            <button id="startSend" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
             <!-- Play & Pause & Stop Buttons -->
             <div id="controlArea" class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
-               <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="startSend()">
+               <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="send()">
                   <img src="./public/assets/play.svg" alt="Play" class=" pb-1">
                </button>
                <button id="pause" type="button" class="col-3 btn btn-warning border-2" onclick="pauseSend()">
@@ -140,7 +140,7 @@
                      <h5 class="card-header fw-semibold">
                         Servers Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <div class="row">
                            <!-- Start Server Field -->
                            <div class="col">
@@ -192,7 +192,7 @@
                      <h5 class="card-header fw-semibold">
                         Header Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <div class="row">
                            <!-- Custom Header -->
                            <div class="col">
@@ -299,7 +299,7 @@
                      <h5 class="card-header fw-semibold">
                         Tools Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <div class="row">
                            <!-- Left Side -->
                            <div class="col">
@@ -311,7 +311,7 @@
                                     </label>
                                     <div class="row flex-nowrap mx-0">
                                        <div class="col-9">
-                                          <div class="row flex-nowrap align-items-center justify-content-around border rounded-2 rounded-end-0 w-auto p-0" style="height: 43px;">
+                                          <div class="row flex-nowrap align-items-center justify-content-around border rounded-2 rounded-end-0 w-auto p-0" style="height: 43px; background-color: white;">
                                              <div class="w-auto px-0">
                                                 <div class="form-check form-switch">
                                                    <input class="form-check-input" id="AZ" type="checkbox" role="switch" value="AZ">
@@ -421,7 +421,7 @@
                      <h5 class="card-header fw-semibold">
                         Properties Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Offer Infos & Country -->
                         <div class="row pb-3">
                            <!-- Offer Infos -->
@@ -430,7 +430,7 @@
                                  Offer Infos
                               </label>
                               <div class="input-group" id="offerInfos">
-                                 <input type="text" class="form-control w-25" id="offerID" name="offerID" placeholder="Offer ID" style="height: 43px;" required>
+                                 <input type="number" class="form-control w-25" id="offerID" name="offerID" placeholder="Offer ID" style="height: 43px;" required>
                                  <input type="text" class="form-control w-75" id="offerName" name="offerName" placeholder="Offer Name" style="height: 43px;" required>
                               </div>
                            </div>
@@ -572,9 +572,9 @@
                            <div class="col-4">
                               <label for="fromEmail" class="form-label fw-semibold">From Email</label>
                               <div class="row mx-0">
-                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center">
+                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center" style="background-color: white;">
                                     <div class="form-check form-switch">
-                                       <input class="form-check-input" id="fromEmailCheck" name="fromEmailCheck" type="checkbox" role="switch" value="true" checked>
+                                       <input class="form-check-input" id="fromEmailCheck" name="fromEmailCheck" type="checkbox" role="switch" value="true">
                                        <label class="form-check-label" for="fromEmailCheck">E.A.L</label>
                                     </div>
                                  </div>
@@ -587,7 +587,7 @@
                            <div class="col-4">
                               <label for="replyTo" class="form-label fw-semibold">Reply-To</label>
                               <div class="row mx-0">
-                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center">
+                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center" style="background-color: white;">
                                     <div class="form-check form-switch">
                                        <input class="form-check-input" id="replyToCheck" name="replyToCheck" type="checkbox" role="switch" value="true">
                                        <label class="form-check-label" for="replyToCheck">R.A.L</label>
@@ -602,7 +602,7 @@
                            <div class="col-4">
                               <label for="returnPath" class="form-label fw-semibold">Return Path</label>
                               <div class="row mx-0">
-                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center">
+                                 <div class="col-4 p-0 border rounded-2 rounded-end-0 d-flex align-items-center justify-content-center" style="background-color: white;">
                                     <div class="form-check form-switch">
                                        <input class="form-check-input" id="returnPathCheck" name="returnPathCheck" type="checkbox" role="switch" value="true">
                                        <label class="form-check-label" for="returnPathCheck">C.R</label>
@@ -625,7 +625,7 @@
                      <h5 class="card-header fw-semibold">
                         Body Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Link & Attachements -->
                         <div class="row pb-3">
                            <!-- Link -->
@@ -655,8 +655,8 @@
 
                            </div>
                         </div>
-                        <!-- Creative and Preview -->
-                        <div class="row">
+                        <!-- Creative & Preview -->
+                        <div class="row pb-3">
                            <!-- Creative -->
                            <div class="col-6">
                               <label for="creative" class="form-label fw-semibold">Creative</label>
@@ -666,6 +666,56 @@
                            <div class="col-6">
                               <label for="preview" class="form-label fw-semibold">Preview</label>
                               <div name="preview" id="preview" class="form-control w-100" style="height: 391px; overflow: auto;"></div>
+                           </div>
+                        </div>
+                        <!-- Test After & Email Test -->
+                        <div class="row pb-3">
+                           <!-- Test after -->
+                           <div class="col-6">
+                              <label for="testAfter" class="form-label fw-semibold">
+                                 Test after
+                              </label>
+                              <div class="row mx-0">
+                                 <div class="p-0">
+                                    <input type="number" class="form-control" id="testAfter" name="testAfter" placeholder="Test after" min="0" style="height: 43px;">
+                                 </div>
+                              </div>
+                           </div>
+                           <!-- Email Test -->
+                           <div class="col-6">
+                              <label for="emailTest" class="form-label fw-semibold">
+                                 Email Test
+                              </label>
+                              <div class="row mx-0">
+                                 <div class="p-0">
+                                    <input type="text" class="form-control" id="emailTest" name="emailTest" placeholder="test@example.com; another-test@example.com" style="height: 43px;">
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- Start & Count -->
+                        <div class="row pb-3">
+                           <!-- Start -->
+                           <div class="col-6">
+                              <label for="start" class="form-label fw-semibold">
+                                 Start
+                              </label>
+                              <div class="row mx-0">
+                                 <div class="p-0">
+                                    <input type="number" class="form-control" id="start" name="start" placeholder="Index of recipient to start with" min="0" style="height: 43px;">
+                                 </div>
+                              </div>
+                           </div>
+                           <!-- Count -->
+                           <div class="col-6">
+                              <label for="count" class="form-label fw-semibold">
+                                 Count
+                              </label>
+                              <div class="row mx-0">
+                                 <div class="p-0">
+                                    <input type="number" class="form-control" id="count" name="count" placeholder="Number of recipients" min="1" style="height: 43px;">
+                                 </div>
+                              </div>
                            </div>
                         </div>
                      </div>
@@ -679,13 +729,13 @@
                      <h5 class="card-header fw-semibold">
                         Recipients Section
                      </h5>
-                     <div class="card-body border-3 border-top border-success">
+                     <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Recipients & Blacklist & Failed -->
                         <div class="row">
                            <!-- Recipients -->
                            <div class="col-4">
                               <label for="recipients" class="form-label fw-semibold">Recipients</label>
-                              <textarea spellcheck="false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()" required></textarea>
+                              <textarea spellcheck="false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()"></textarea>
                            </div>
                            <!-- Blacklist -->
                            <div class=" col-4">
@@ -709,7 +759,7 @@
                      <h5 class="card-header fw-semibold">
                         Result Section
                      </h5>
-                     <div id="responseTable" class="card-body border-3 border-top border-success" style="height: 377px; overflow: auto;">
+                     <div id="responseTable" class="card-body border-3 border-top border-success" style="height: 377px; overflow: auto; background-color: white;">
                         <table class="table table-striped">
                            <tbody id="responseArea">
 
@@ -721,7 +771,7 @@
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="dropboxFolder" width="100%" height="100%" src="./database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="dropboxFolder" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
                </div>
             </div>
          </div>

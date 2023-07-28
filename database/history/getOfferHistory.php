@@ -24,7 +24,7 @@ function getOfferHistory()
     }
 
     // Perform the SQL query to fetch the offer history data
-    $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.replyToCheck, o.returnPathCheck, o.link, o.creative, o.recipients, o.blacklist, o.date, o.mailerID, o.countryID,
+    $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.replyToCheck, o.returnPathCheck, o.link, o.attachements, o.creative, o.recipients, o.blacklist, o.date, o.mailerID, o.countryID,
                    m.firstName AS mailerName,
                    c.name AS countryName
             FROM offer o
@@ -74,6 +74,7 @@ function getOfferHistory()
                 'replyToCheck'      => $row['replyToCheck'],
                 'returnPathCheck'   => $row['returnPathCheck'],
                 'link'              => $row['link'],
+                'attachements'      => $row['attachements'] != null ? true : false,
                 'creative'          => $row['creative'],
                 'recipients'        => $row['recipients'],
                 'blacklist'         => $row['blacklist'],

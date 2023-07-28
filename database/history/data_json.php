@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 header("Content-Type: application/json");
 
 // Function to get offer history data from the database
-function getOfferHistory($data)
+function data_json($data)
 {
     // Your database connection configuration here
     $servername = "localhost";
@@ -23,7 +23,7 @@ function getOfferHistory($data)
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $offerID = $data['offerID'];
+    $id = $data['id'];
 
     // Perform the SQL query to fetch the offer history data
     $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.fromEmail, o.replyToCheck, o.replyTo, o.returnPathCheck, o.returnPath, o.link, o.creative, o.recipients, o.blacklist, o.date, o.countryID, o.mailerID,
@@ -32,7 +32,7 @@ function getOfferHistory($data)
             FROM offer o
             JOIN country c ON o.countryID = c.id
             JOIN mailer m ON o.mailerID = m.id
-            WHERE o.id = $offerID";
+            WHERE o.id = $id";
 
     $result = $conn->query($sql);
 
@@ -99,19 +99,21 @@ function getOfferHistory($data)
                 'date'              => $date,
             ]);
         }
+    } else {
+        // Invalid or missing parameter, return an error response or handle it as needed
+        http_response_code(404); // Not found
+        echo json_encode(array('error' => 'No offer has been found.'));
+        exit;
     }
-
-    // // Set appropriate headers to force the browser to download the file
-    // header("Content-Type: application/zip");
-    // header("Content-Disposition: attachment; filename=\"attachements.zip\"");
-    // // header("Content-Length: " . strlen($zipFileData));
-
-    // // Output the zip file contents
-    // readfile('path/to/your/generated/zip/file.zip');
 
     $conn->close();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    getOfferHistory($_POST);
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
+    data_json($_GET);
+} else {
+    // Invalid or missing parameter, return an error response or handle it as needed
+    http_response_code(400); // Bad Request
+    echo json_encode(array('error' => 'Invalid or missing parameter.'));
+    exit;
 }

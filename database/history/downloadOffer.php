@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 header("Content-Type: application/json");
 
 // Function to get offer history data from the database
-function getOfferHistory()
+function downloadOffer($id)
 {
     // Your database connection configuration here
     $servername = "localhost";
@@ -23,45 +23,89 @@ function getOfferHistory()
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $offerId = $_GET['offerID'];
+    // $id = $_GET['id'];
 
     // Perform the SQL query to fetch the offer history data
-    $sql = "SELECT id, offerID, offerName, servers, header, contentType, charset, encoding, priority, fromName, fromNameEncoding, subject, subjectEncoding, fromEmailCheck, replyToCheck, returnPathCheck, link, creative, recipients, blacklist, date,
+    $sql = "SELECT id, offerID, offerName, attachements
             FROM offer
-            WHERE `id` = $offerId";
+            WHERE `id` = $id";
 
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $servers            = $row['servers'];
-            $header             = $row['header'];
-            $contentType        = $row['contentType'];
-            $charset            = $row['charset'];
-            $encoding           = $row['encoding'];
-            $priority           = $row['priority'];
-            $fromName           = $row['fromName'];
-            $fromNameEncoding   = $row['fromNameEncoding'];
-            $subject            = $row['subject'];
-            $subjectEncoding    = $row['subjectEncoding'];
-            $fromEmailCheck     = $row['fromEmailCheck'];
-            $replyToCheck       = $row['replyToCheck'];
-            $returnPathCheck    = $row['returnPathCheck'];
-            $link               = $row['link'];
-            $creative           = $row['creative'];
-            $recipients         = $row['recipients'];
-            $blacklist          = $row['blacklist'];
-            $date               = $row['date'];
+            $offerID = $row['offerID'];
+            $offerName = $row['offerName'];
+            $attachements = $row['attachements'];
+
+            // Call the data_json.php using file_get_contents
+            $data_json_url = "http://45.145.6.18/database/history/data_json.php?id=$id";
+            $json_data = file_get_contents($data_json_url);
+
+            $data = json_decode($json_data, true);
+
+            // Decode the creative
+            $data['creative'] = base64_decode($data['creative']);
+
+            $offer = json_encode($data);
+
+            // Decode the base64 encoded file data
+            $zipFileData = base64_decode($attachements);
+
+            // Create a temporary file to store the original zip file's content
+            $tempZipFile = tempnam(sys_get_temp_dir(), 'temp_zip');
+            file_put_contents($tempZipFile, $zipFileData);
+
+            $zip = new ZipArchive();
+            //zip file name
+            $zip_file_name = $offerID . '_' . $offerName . '.zip';
+            $zipPath = "/var/www/html/database/tmp_zip_files/$zip_file_name";
+
+            try {
+                //create the new zip archive using the $file_name above
+                if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                    if ($zipFileData != "") {
+                        $zip->addFile($tempZipFile, 'attachements.zip');
+                    }
+                    $zip->addFromString($offerID . '_' . $offerName . '.json', $offer);
+                    //close the archive
+                    $zip->close();
+
+                    unlink($tempZipFile);
+
+                    // Set appropriate headers to force the browser to download the file
+                    header("Content-Type: application/zip");
+                    header("Content-Disposition: attachment; filename=$zip_file_name");
+                    header("Content-Length: " . strlen($zip_file_name));
+
+                    // Output the zip file contents
+                    readfile($zipPath);
+
+                    // Delete the temporary zip file from the server
+                    unlink($zipPath);
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Error: {$e}",
+                ]);
+            }
         }
+    } else {
+        // Invalid or missing parameter, return an error response or handle it as needed
+        http_response_code(404); // Not found
+        echo json_encode(array('error' => 'No offer has been found.'));
+        exit;
     }
 
-    // Set appropriate headers to force the browser to download the file
-    header("Content-Type: application/zip");
-    header("Content-Disposition: attachment; filename=\"attachements.zip\"");
-    // header("Content-Length: " . strlen($zipFileData));
-
-    // Output the zip file contents
-    readfile('path/to/your/generated/zip/file.zip');
-
     $conn->close();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
+    downloadOffer($_GET['id']);
+} else {
+    // Invalid or missing parameter, return an error response or handle it as needed
+    http_response_code(400); // Bad Request
+    echo json_encode(array('error' => 'Invalid or missing parameter.'));
+    exit;
 }

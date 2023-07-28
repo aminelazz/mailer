@@ -7,18 +7,12 @@ async function getHistory() {
     const result = await fetch('http://45.145.6.18/database/history/getOfferHistory.php')
 
     data = await result.json()
+    document.getElementById('loadingSpinner').style.display = 'none'
 
     displayHistory(data)
 }
 
 function displayHistory(data) {
-    const numberMap = {
-        1: 'One',
-        2: 'Two',
-        3: 'Three',
-        4: 'Four',
-    }
-
     const offerHistory = document.getElementById('offer-history')
     offerHistory.innerHTML = ''
 
@@ -183,6 +177,9 @@ function displayHistory(data) {
                 loadOfferButton.classList.add('btn')
                 loadOfferButton.classList.add('btn-success')
                 loadOfferButton.innerText = 'Load offer'
+                loadOfferButton.addEventListener('click', function () {
+                    loadOffer(offer.id, offer.attachements, offer.offerID, offer.offerName, offer.date)
+                })
 
                 offerButtonsContainer.appendChild(downloadOfferButton)
                 offerButtonsContainer.appendChild(loadOfferButton)
@@ -217,6 +214,14 @@ function displayHistory(data) {
 
         mailerindex = mailerindex + 1
     })
+
+    if (offerHistory.innerHTML == '') {
+        offerHistory.style.display = 'none'
+        document.getElementById('notFound').style.display = 'flex'
+    } else {
+        offerHistory.style.display = 'block'
+        document.getElementById('notFound').style.display = 'none'
+    }
 }
 
 function changeSearchType() {
@@ -248,40 +253,62 @@ function searchOffer() {
 }
 
 async function downloadOffer(id, offerID, offerName, date) {
-    var urlencoded = new URLSearchParams()
-    urlencoded.append('offerID', id)
-
     try {
-        await fetch(`http://45.145.6.18/database/history/data_json.php`, { method: 'POST', body: urlencoded })
-            .then((response) => response.json())
-            .then((data) => {
-                // console.log(data)
-                data.creative = new TextDecoder('utf-8').decode(Uint8Array.from(atob(data.creative), (c) => c.charCodeAt(0)))
-                parent.postMessage(data.creative, '*')
+        await fetch(`http://45.145.6.18/database/history/downloadOffer.php?id=${id}`)
+            .then((response) => response.blob())
+            .then((blob) => {
+                const newDate = date.replaceAll(':', '_').replaceAll('-', '_')
 
-                // create div to get formatted text
-                let div = document.createElement('div')
-                div.innerText = data.creative
-                data.creative = div.innerText
-
-                data.header = data.header.replace(/\r\n/g, ',')
-
-                const jsonData = JSON.stringify(data, null, 2)
-                const blob = new Blob([jsonData], { type: 'application/json' })
                 const url = URL.createObjectURL(blob)
 
                 const a = document.createElement('a')
                 a.href = url
-                a.download = `${offerID}_${offerName}_${date.substring(11).replaceAll(':', '_')}.json`
+                a.download = `${offerID}_${offerName}_${newDate}.zip`
                 document.body.appendChild(a)
                 a.click()
 
                 URL.revokeObjectURL(url)
-                // const creative = parent.document.getElementById('creative')
-                // creative.innerText = jsonData.creative
+
+                a.remove()
             })
             .catch((error) => console.error('Error:', error))
     } catch (error) {
         console.error('Error downloading the offer:', error)
+    }
+}
+
+async function loadOffer(id, attachements, offerID, offerName, date) {
+    try {
+        await fetch(`http://45.145.6.18/database/history/data_json.php?id=${id}`)
+            .then((response) => response.json())
+            .then((data) => {
+                // console.log(data)
+                data.creative = new TextDecoder('utf-8').decode(Uint8Array.from(atob(data.creative), (c) => c.charCodeAt(0)))
+                parent.postMessage(data, '*')
+            })
+            .catch((error) => console.error('Error:', error))
+
+        if (attachements) {
+            await fetch(`http://45.145.6.18/database/history/attachements_zip.php?id=${id}`)
+                .then((response) => response.blob())
+                .then((blob) => {
+                    const newDate = date.replaceAll(':', '_').replaceAll('-', '_')
+
+                    const url = URL.createObjectURL(blob)
+
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${offerID}_${offerName}_${newDate}_attachements.zip`
+                    document.body.appendChild(a)
+                    a.click()
+
+                    URL.revokeObjectURL(url)
+
+                    a.remove()
+                })
+                .catch((error) => console.error('Error:', error))
+        }
+    } catch (error) {
+        console.error('Error loading the offer:', error)
     }
 }
