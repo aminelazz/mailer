@@ -1,6 +1,6 @@
 window.addEventListener("message", receiveMessage, false)
 
-function receiveMessage(event) {
+async function receiveMessage(event) {
     let offerData = event.data
 
     console.log(offerData)
@@ -16,9 +16,7 @@ function receiveMessage(event) {
     document.getElementById("offerName").value = offerData.offerName // prettier-ignore
     document.getElementById("country").value = offerData.countryID // prettier-ignore
     document.getElementById("fromNameEncoding").value = offerData.fromNameEncoding // prettier-ignore
-    document.getElementById("fromName").value = offerData.fromName // prettier-ignore
     document.getElementById("subjectEncoding").value = offerData.subjectEncoding // prettier-ignore
-    document.getElementById("subject").value = offerData.subject // prettier-ignore
     document.getElementById("fromEmailCheck").checked = !!+offerData.fromEmailCheck // prettier-ignore
     document.getElementById("fromEmail").value = offerData.fromEmail // prettier-ignore
     document.getElementById("replyToCheck").checked = !!+offerData.replyToCheck // prettier-ignore
@@ -26,11 +24,81 @@ function receiveMessage(event) {
     document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
     document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
     document.getElementById("link").value = offerData.link // prettier-ignore
-    document.getElementById("creative").innerHTML = offerData.creative // prettier-ignore
     document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
     document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
 
+    let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
+    let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
+    let creativeFields = document.getElementsByClassName("creative") // prettier-ignore
+
+    let fromNames = offerData.fromName.split("||")
+    let subjects = offerData.subject.split("||")
+    let creatives = offerData.creative.split("||||")
+
+    // From Names
+    fromNamesField.innerHTML = ""
+
+    for (let i = 0; i < fromNames.length; i++) {
+        const token = document.createElement("div")
+        token.classList.add("token")
+
+        const content = document.createElement("span")
+        content.classList.add("fromName")
+
+        content.textContent = fromNames[i]
+
+        const deleteButton = document.createElement("button")
+        deleteButton.classList.add("tokenButton")
+        deleteButton.textContent = "x"
+        deleteButton.addEventListener("click", () => {
+            token.remove()
+        })
+
+        token.appendChild(content)
+        token.appendChild(deleteButton)
+        fromNamesField.appendChild(token)
+    }
+
+    // Subjects
+    subjectsField.innerHTML = ""
+
+    for (let i = 0; i < subjects.length; i++) {
+        const token = document.createElement("div")
+        token.classList.add("token")
+
+        const content = document.createElement("span")
+        content.classList.add("subject")
+
+        content.textContent = subjects[i]
+
+        const deleteButton = document.createElement("button")
+        deleteButton.classList.add("tokenButton")
+        deleteButton.textContent = "x"
+        deleteButton.addEventListener("click", () => {
+            token.remove()
+        })
+
+        token.appendChild(content)
+        token.appendChild(deleteButton)
+        subjectsField.appendChild(token)
+    }
+
+    // Creatives
+    for (let i = 0; i < creativeFields.length; i++) {
+        if (i != 0) {
+            creativeFields[i].parentNode.parentNode.remove()
+        }
+    }
+    for (let i = 0; i < creatives.length; i++) {
+        if (creativeFields.length < creatives.length) {
+            await addCreative()
+        }
+        creativeFields[i].value = creatives[i]
+        previewCreative(creativeFields[i])
+    }
+
     previewCreative()
+    changeRecipientsNumber()
 
     // Go to the send tab
     document.getElementById("nav-send-tab").click()
@@ -43,14 +111,13 @@ var sendCount = document.getElementById("sendCount")
 var refreshDiv = document.getElementById("refreshDiv")
 
 try {
+    var recipientsField = document.getElementById("recipients")
+    recipientsField.addEventListener("input", () => {
+        changeRecipientsNumber()
+    })
+
     let mailerName = document.getElementById("mailerName")
     mailerName.innerText = localStorage.getItem("first_name")
-
-    // Start index of recipients
-    var lastRecipientIndex = 0
-    var start_index = 0
-
-    var statusLabel = document.getElementById("status")
 
     window.addEventListener("load", () => {
         var attachementsName = document.getElementById("attachementsName")
@@ -69,8 +136,15 @@ try {
         previewCreative()
         fileUpload()
         clearFiles()
+        changeRecipientsNumber()
     })
-} catch (e) {}
+} catch (error) {}
+
+// Start index of recipients
+var start_index = 0
+var counter = 0
+
+var statusLabel = document.getElementById("status")
 
 function preventUnload() {
     return true
@@ -114,12 +188,14 @@ function changeTimeValues() {
     }
 }
 
-function previewCreative() {
-    var creativeField = document.getElementById("creative")
-    var previewField = document.getElementById("preview")
-    var creative = creativeField.value
+function previewCreative(event) {
+    try {
+        var creativeField = event
+        var previewField = event.parentNode.parentNode.querySelector(".preview")
+        var creative = creativeField.value
 
-    previewField.innerHTML = creative
+        previewField.innerHTML = creative
+    } catch (error) {}
 }
 
 function generatePattern() {
@@ -201,6 +277,10 @@ function checkFields() {
     let emailTest = document.getElementById("emailTest")
     let start = document.getElementById("start")
     let count = document.getElementById("count")
+    let fromName = document.getElementById("fromName")
+    let fromNames = document.getElementsByClassName("fromNames")
+    let subject = document.getElementById("subject")
+    let subjects = document.getElementsByClassName("subjects")
 
     let recipientsArray = recipients.value.toString().split("\n")
     recipientsArray = recipientsArray.filter((element) => element !== "")
@@ -251,11 +331,29 @@ function checkFields() {
         }
     }
 
+    // fromNames & subjects validity
+    fromName.setCustomValidity("")
+    subject.setCustomValidity("")
+
+    if (fromNames[0].innerText == "") {
+        fromName.setCustomValidity("Please enter at least one From Name and press Enter")
+    }
+
+    if (subjects[0].innerText == "") {
+        subject.setCustomValidity("Please enter at least one Subject and press Enter")
+    }
+
     // test after validity
     testAfter.setCustomValidity("")
 
     if (emailTest.value != "" && recipients.value != "" && testAfter.value == "") {
         testAfter.setCustomValidity("Please enter a number")
+    }
+
+    if (emailTest.value != "" && recipients.value != "") {
+        if (testAfter.value >= count.value) {
+            testAfter.setCustomValidity(`Number should be lesser than Count`)
+        }
     }
 
     // Set custom validity to Start and Count (recipients)
@@ -268,11 +366,20 @@ function checkFields() {
         } else if (count.value == "") {
             count.setCustomValidity("Please enter a valid number of recipients")
         }
+        if (start.value >= recipientsCount) {
+            start.setCustomValidity("Please enter a start index smaller than number of recipients")
+        }
     }
+}
 
-    if (start.value >= allRecipientsCount) {
-        start.setCustomValidity("Please enter a start index smaller than number of recipients")
-    }
+function changeRecipientsNumber() {
+    let recipientsField = document.getElementById("recipients")
+    let recipientsArray = recipientsField.value.toString().split("\n")
+    recipientsArray = recipientsArray.filter((element) => element !== "")
+
+    let nbrRecipients = document.getElementById("nbrRecipients")
+
+    nbrRecipients.textContent = recipientsArray.length
 }
 
 function send() {
@@ -286,11 +393,13 @@ function pauseSend() {
     sendStatus = "paused"
     statusLabel.innerText = `Status: Paused`
     controlButtons()
+    sessionStorage.setItem("paused", true)
 }
 function stopSend() {
     sendStatus = "stopped"
     statusLabel.innerText = `Status: Stopped`
     controlButtons()
+    sessionStorage.setItem("paused", false)
 }
 
 function controlButtons() {
@@ -321,7 +430,9 @@ function controlButtons() {
 
         case "stopped":
             controlArea.classList.add("invisible")
-            start.disabled = false
+            setTimeout(() => {
+                start.disabled = false
+            }, 2000)
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
@@ -331,7 +442,9 @@ function controlButtons() {
 
         case "completed":
             controlArea.classList.add("invisible")
-            start.disabled = false
+            setTimeout(() => {
+                start.disabled = false
+            }, 2000)
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
@@ -358,13 +471,70 @@ function refreshIframe() {
     dropboxIframe.src = dropboxIframe.src
 }
 
+function addToken(event) {
+    if (event.key === "Enter") {
+        event.preventDefault()
+        const directText = event.target.value
+        if (directText.trim() !== "") {
+            let tokenContainer = document.getElementsByClassName(`${event.target.id}s`)[0]
+            const token = document.createElement("div")
+            token.classList.add("token")
+
+            const content = document.createElement("span")
+            content.classList.add(event.target.id)
+            content.textContent = directText
+
+            const deleteButton = document.createElement("button")
+            deleteButton.classList.add("tokenButton")
+            deleteButton.textContent = "x"
+            deleteButton.addEventListener("click", () => {
+                token.remove()
+            })
+
+            token.appendChild(content)
+            token.appendChild(deleteButton)
+            tokenContainer.appendChild(token)
+            event.target.value = "" // Clear the div after creating the token
+        }
+    }
+
+    // As a last resort
+    return false
+}
+
+async function addCreative() {
+    let creativeContainer = document.getElementById("creativeContainer")
+    let textareas = document.getElementsByClassName("textareas")[0]
+
+    let creativeNew = textareas.cloneNode(true)
+    creativeNew.classList.add("mt-2")
+
+    // Clear text in the textarea and div elements within the duplicated container
+    const creativeInCreativeNw = creativeNew.getElementsByTagName("textarea")
+    const previewInCreativeNw = creativeNew.querySelectorAll(".preview")
+    const removeButtonInCreativeNw = creativeNew.querySelectorAll(".removeCreative")[0]
+
+    removeButtonInCreativeNw.classList.remove("invisible")
+    removeButtonInCreativeNw.addEventListener("click", () => {
+        creativeNew.remove()
+    })
+
+    for (let textarea of creativeInCreativeNw) {
+        textarea.value = "" // Clear the text inside the textarea
+    }
+
+    for (let div of previewInCreativeNw) {
+        div.textContent = "" // Clear the text inside the div
+    }
+
+    creativeContainer.appendChild(creativeNew)
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
     $("#sendForm").submit(function (event) {
         event.preventDefault()
-
-        // uploadToDropbox()
 
         // Scroll to the Result Section
         const resultSection = document.getElementById("Result")
@@ -390,11 +560,19 @@ $(document).ready(function () {
         // Control buttons
         controlButtons()
 
-        let start = document.getElementById("start").value
-        let count = document.getElementById("count").value
+        var emailTest = document.getElementById("emailTest").value.split("; ")
 
-        start_index = start
-        lastRecipientIndex = count + start
+        emailTest = emailTest.filter((element) => element !== "")
+        start_index = 0
+
+        let recipients = document.getElementById("recipients")
+        let recipientsArray = recipients.value.toString().split("\n")
+        recipientsArray = recipientsArray.filter((element) => element !== "")
+        let recipientsCount = recipientsArray.length
+
+        if (recipientsCount > 50) {
+            savehistory()
+        }
 
         // Send email
         sendEmails()
@@ -415,9 +593,9 @@ async function sendEmails() {
         encoding            : document.getElementById("encoding"), // prettier-ignore
         priority            : document.getElementById("priority"), // prettier-ignore
         fromNameEncoding    : document.getElementById("fromNameEncoding"), // prettier-ignore
-        fromName            : document.getElementById("fromName"), // prettier-ignore
+        fromNames           : document.querySelectorAll(".fromName"), // prettier-ignore
         subjectEncoding     : document.getElementById("subjectEncoding"), // prettier-ignore
-        subject             : document.getElementById("subject"), // prettier-ignore
+        subjects            : document.querySelectorAll(".subject"), // prettier-ignore
         fromEmailCheck      : document.getElementById("fromEmailCheck"), // prettier-ignore
         fromEmail           : document.getElementById("fromEmail"), // prettier-ignore
         replyToCheck        : document.getElementById("replyToCheck"), // prettier-ignore
@@ -430,7 +608,7 @@ async function sendEmails() {
         emailTest           : document.getElementById("emailTest"), // prettier-ignore
         start               : document.getElementById("start"), // prettier-ignore
         count               : document.getElementById("count"), // prettier-ignore
-        creative            : document.getElementById("creative"), // prettier-ignore
+        creatives           : document.querySelectorAll(".creative"), // prettier-ignore
         recipients          : document.getElementById("recipients"), // prettier-ignore
         blacklist           : document.getElementById("blacklist"), // prettier-ignore
         failed              : document.getElementById("failed"), // prettier-ignore
@@ -441,6 +619,30 @@ async function sendEmails() {
     var emailTest   = fields.emailTest.value.split("; ") // prettier-ignore
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
+
+    // From Names
+    var fromNames    = fields.fromNames // prettier-ignore
+    let fromNameArray = []
+
+    for (let i = 0; i < fromNames.length; i++) {
+        fromNameArray.push(fromNames[i].textContent)
+    }
+
+    // Subjects
+    var subjects    = fields.subjects // prettier-ignore
+    let subjectArray = []
+
+    for (let i = 0; i < subjects.length; i++) {
+        subjectArray.push(subjects[i].textContent)
+    }
+
+    // Creative
+    var creatives    = fields.creatives // prettier-ignore
+    let creativeArray = []
+
+    for (let i = 0; i < creatives.length; i++) {
+        creativeArray.push(creatives[i].value)
+    }
 
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
@@ -453,9 +655,7 @@ async function sendEmails() {
     const encoding          = fields.encoding.value // prettier-ignore
     const priority          = fields.priority.value // prettier-ignore
     const fromNameEncoding  = fields.fromNameEncoding.value // prettier-ignore
-    const fromName          = fields.fromName.value // prettier-ignore
     const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
-    const subject           = fields.subject.value // prettier-ignore
     const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
     const fromEmail         = fields.fromEmail.value // prettier-ignore
     const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
@@ -465,17 +665,17 @@ async function sendEmails() {
     const link              = fields.link.value // prettier-ignore
     const attachements      = fields.attachements.files // prettier-ignore
     const testAfter         = fields.testAfter.value // prettier-ignore
-    const start             = fields.start.value // prettier-ignore
-    const count             = fields.count.value // prettier-ignore
-    const creative          = fields.creative.value // prettier-ignore
+    let start               = parseInt(fields.start.value) // prettier-ignore
+    let count               = fields.count.value // prettier-ignore
     const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
     const countryID         = fields.countryID.value // prettier-ignore
 
     // Remove empty lines
-    servers     = servers.filter((element) => element !== "") // prettier-ignore
-    emailTest   = emailTest.filter((element) => element !== "") // prettier-ignore
-    recipients  = recipients.filter((element) => element !== "") // prettier-ignore
-    blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
+    servers         = servers.filter((element) => element !== "") // prettier-ignore
+    emailTest       = emailTest.filter((element) => element !== "") // prettier-ignore
+    recipients      = recipients.filter((element) => element !== "") // prettier-ignore
+    blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
+    creativeArray   = creativeArray.filter((element) => element !== "") // prettier-ignore
 
     // Remove recipients who are in the blacklist
     const filteredRecipients = recipients.filter((recipient) => !blacklist.includes(recipient))
@@ -484,7 +684,7 @@ async function sendEmails() {
 
     // Add test emails to the recipients list
     if (!recipients.length == 0) {
-        for (let i = 0; i < filteredRecipients.length; i++) {
+        for (let i = start; i < filteredRecipients.length; i++) {
             modifiedRecipients.push(filteredRecipients[i])
 
             if ((i + 1) % parseInt(testAfter) === 0) {
@@ -498,16 +698,20 @@ async function sendEmails() {
         for (let k = 0; k < emailTest.length; k++) {
             modifiedRecipients.push(emailTest[k])
         }
-        // Set BCCnumber value to 1 so that
-        // BCCnumber = 1
     }
 
-    console.log(modifiedRecipients)
+    let paused = sessionStorage.getItem("paused")
+
+    let end = parseInt(start) - 1 + parseInt(count)
+    end = end > modifiedRecipients.length - 1 ? modifiedRecipients.length - 1 : end
+    const endElement = filteredRecipients[end]
+    count = modifiedRecipients.indexOf(endElement) + 1
+
+    count = filteredRecipients.length == 0 ? modifiedRecipients.length : count
 
     // Upload history to db
     let status = document.getElementById("status").textContent
     if (status.includes("Pending") || status.includes("Stopped")) {
-        savehistory()
     }
 
     // Calculate rotations number
@@ -537,12 +741,15 @@ async function sendEmails() {
             for (let k = start_index; k < start_index + parseInt(BCCnumber); k++) {
 
                 // Stop the loops after finishing all recipients
-                if (k != 0) {
-                    if ((k > (modifiedRecipients.length - 1)) || (k > lastRecipientIndex)) {
+                if (k + 1 > count) {
+                        setTimeout(() => {
+                            sendStatus = "completed"
+                            controlButtons()
+                            sessionStorage.setItem("paused", false)
+                        }, 1000)
                         
                         break rotation
                     }
-                }
 
                 switch (sendStatus) {
                     case "paused":
@@ -556,6 +763,10 @@ async function sendEmails() {
                     default:
                         break;
                 }              
+
+                let fromName    = fromNameArray[Math.floor(Math.random() * fromNameArray.length)] // Random From Name
+                let subject     = subjectArray[Math.floor(Math.random() * subjectArray.length)]   // Random Subject
+                let creative    = creativeArray[Math.floor(Math.random() * creativeArray.length)] // Random Creative
 
                 let recipient = modifiedRecipients[k]
 
@@ -608,64 +819,52 @@ async function sendEmails() {
                         data: formData,
                         contentType: false, // Set contentType to false, as FormData already sets it to 'multipart/form-data'
                         processData: false, // Set processData to false, as FormData already processes the data
-                        success: function (responses) {
-                            // responses is an a group of json objects delimited by '||'
-                            // remove the last '||'
-                            responses = responses.slice(0, -2)
-                            // Split responses to an array containing json objects
-                            var responsesArray = responses.split("||")
-                            // Iterate over the array to get the key and the value
-                            $.each(responsesArray, function (key, value) {
-                                // Convert the json object to a js object
-                                // Convert it again to an array which gives 2 nested arrays
-                                // Get the first nested array which contains the email and its response
-                                var emailResponse = Object.entries(
-                                    JSON.parse(value)
-                                )[0]
+                        success: function (response) {
+                            // Convert the json object to a js object
+                            // Convert it again to an array which gives 2 nested arrays
+                            // Get the first nested array which contains the email and its response
+                            var emailResponse = Object.entries(JSON.parse(response))[0]
 
-                                // Get the second value of the second nested array which contains the status (color of text in response using the bootstrap class)
-                                var status = Object.entries(
-                                    JSON.parse(value)
-                                )[1][1]
+                            // Get the second value of the second nested array which contains the status (color of text in response using the bootstrap class)
+                            var status = Object.entries(JSON.parse(response))[1][1]
 
-                                // prettier-ignore
-                                // Display the response message next to each recipient's email address
-                                $("#responseArea").append(
-                                    `<tr id="responseN${k + 1}">
-                                        <th scope="row" style="width: 10%;">
-                                            ${k + 1} / ${count}
-                                        </th>
-                                        <td class="text-center" style="width: 40%;">
-                                            ${emailResponse[0]}
-                                        </td>
-                                        <td class="text-${status}">
-                                            <div class="text-center response">
-                                                ${emailResponse[1]}
-                                            <div>
-                                        </td>
-                                        <td class="text-center" style="width: 10%;">
-                                            ${formattedHours}:${formattedMinutes}:${formattedSeconds}
-                                        </td>
-                                    </tr>`
-                                )
+                            // prettier-ignore
+                            // Display the response message next to each recipient's email address
+                            $("#responseArea").append(
+                                `<tr id="responseN${k + 1}">
+                                    <th scope="row" style="width: 10%;">
+                                        ${k + 1} / ${count}
+                                    </th>
+                                    <td class="text-center" style="width: 40%;">
+                                        ${emailResponse[0]}
+                                    </td>
+                                    <td class="text-${status}">
+                                        <div class="text-center response">
+                                            ${emailResponse[1]}
+                                        <div>
+                                    </td>
+                                    <td class="text-center" style="width: 10%;">
+                                        ${formattedHours}:${formattedMinutes}:${formattedSeconds}
+                                    </td>
+                                </tr>`
+                            )
 
-                                // Fill the Bounced area with failed sends
-                                if (status == "danger") {
-                                    fields.failed.value += `${emailResponse[0]}\n`
-                                }
+                            // Fill the Bounced area with failed sends
+                            if (status == "danger") {
+                                fields.failed.value += `${emailResponse[0]}\n`
+                            }
 
-                                // Configure the progress bar
-                                var percentage = ((k + 1) / modifiedRecipients.length) * 100
+                            // Configure the progress bar
+                            var percentage = ((k + 1) / count) * 100
 
-                                progressBar.innerText = `${percentage.toFixed(0)}%`
-                                progressBar.style.width = `${percentage.toFixed(0)}%`
+                            progressBar.innerText = `${percentage.toFixed(0)}%`
+                            progressBar.style.width = `${percentage.toFixed(0)}%`
 
-                                sendCount.innerText = `${k + 1} / ${modifiedRecipients.length}`
+                            sendCount.innerText = `${k + 1} / ${count}`
 
-                                // Scroll to the last added response
-                                let responseTable = document.getElementById("responseTable")
-                                responseTable.scroll(0, responseTable.scrollHeight)
-                            })
+                            // Scroll to the last added response
+                            let responseTable = document.getElementById("responseTable")
+                            responseTable.scroll(0, responseTable.scrollHeight)
                         },
                     })
                 } catch (error) {
@@ -673,11 +872,12 @@ async function sendEmails() {
                 }
 
                 // Set the sendStatus value to completed when reaching last recipient and set buttons properties
-                if (k == (modifiedRecipients.length - 1)) {
+                if (k + 1 == count) {
                     setTimeout(() => {
                         sendStatus = "completed"
                         controlButtons()
-                    },1000)
+                        sessionStorage.setItem("paused", false)
+                    }, 1000)
                 }
 
                 await delay(400)
@@ -719,9 +919,9 @@ function savehistory() {
         encoding            : document.getElementById("encoding"), // prettier-ignore
         priority            : document.getElementById("priority"), // prettier-ignore
         fromNameEncoding    : document.getElementById("fromNameEncoding"), // prettier-ignore
-        fromName            : document.getElementById("fromName"), // prettier-ignore
+        fromNames           : document.querySelectorAll(".fromName"), // prettier-ignore
         subjectEncoding     : document.getElementById("subjectEncoding"), // prettier-ignore
-        subject             : document.getElementById("subject"), // prettier-ignore
+        subjects            : document.querySelectorAll(".subject"), // prettier-ignore
         fromEmailCheck      : document.getElementById("fromEmailCheck"), // prettier-ignore
         fromEmail           : document.getElementById("fromEmail"), // prettier-ignore
         replyToCheck        : document.getElementById("replyToCheck"), // prettier-ignore
@@ -730,7 +930,7 @@ function savehistory() {
         returnPath          : document.getElementById("returnPath"), // prettier-ignore
         link                : document.getElementById("link"), // prettier-ignore
         attachements        : document.getElementById("attachements"), // prettier-ignore
-        creative            : document.getElementById("creative"), // prettier-ignore
+        creatives           : document.querySelectorAll(".creative"), // prettier-ignore
         recipients          : document.getElementById("recipients"), // prettier-ignore
         blacklist           : document.getElementById("blacklist"), // prettier-ignore
         failed              : document.getElementById("failed"), // prettier-ignore
@@ -742,6 +942,32 @@ function savehistory() {
     var recipients  = fields.recipients.value.split("\n") // prettier-ignore
     var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
 
+    // From Names
+    var fromNamesFields = fields.fromNames // prettier-ignore
+    let fromNameArray   = [] // prettier-ignore
+
+    for (let i = 0; i < fromNamesFields.length; i++) {
+        fromNameArray.push(fromNamesFields[i].textContent)
+    }
+
+    // Subjects
+    var subjectsField   = fields.subjects // prettier-ignore
+    let subjectArray    = [] // prettier-ignore
+
+    for (let i = 0; i < subjectsField.length; i++) {
+        subjectArray.push(subjectsField[i].textContent)
+    }
+
+    // Creative
+    var creatives    = fields.creatives // prettier-ignore
+    let creativeArray = []
+
+    for (let i = 0; i < creatives.length; i++) {
+        creativeArray.push(creatives[i].value)
+    }
+
+    creativeArray = creativeArray.filter((element) => element !== "") // prettier-ignore
+
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
     const contentType       = fields.contentType.value // prettier-ignore
@@ -749,9 +975,7 @@ function savehistory() {
     const encoding          = fields.encoding.value // prettier-ignore
     const priority          = fields.priority.value // prettier-ignore
     const fromNameEncoding  = fields.fromNameEncoding.value // prettier-ignore
-    const fromName          = fields.fromName.value // prettier-ignore
     const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
-    const subject           = fields.subject.value // prettier-ignore
     const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
     const fromEmail         = fields.fromEmail.value // prettier-ignore
     const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
@@ -760,7 +984,6 @@ function savehistory() {
     const returnPath        = fields.returnPath.value // prettier-ignore
     const link              = fields.link.value // prettier-ignore
     const attachements      = fields.attachements.files // prettier-ignore
-    const creative          = fields.creative.value // prettier-ignore
     const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
     const countryID         = fields.countryID.value // prettier-ignore
 
@@ -768,6 +991,10 @@ function savehistory() {
     servers     = servers.filter((element) => element !== "") // prettier-ignore
     recipients  = recipients.filter((element) => element !== "") // prettier-ignore
     blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
+
+    let fromNames = fromNameArray.join("||") // From Names
+    let subjects = subjectArray.join("||") // Subjects
+    creatives = creativeArray.join("||||") // Creatives
 
     // Define a history FormData and populate with necessary infos and pass it to the uploadHistory() function to upload
     let history = new FormData()
@@ -779,9 +1006,9 @@ function savehistory() {
     history.append("charset", charset)
     history.append("encoding", encoding)
     history.append("priority", priority)
-    history.append("fromName", fromName)
+    history.append("fromName", fromNames)
     history.append("fromNameEncoding", fromNameEncoding)
-    history.append("subject", subject)
+    history.append("subject", subjects)
     history.append("subjectEncoding", subjectEncoding)
     history.append("fromEmailCheck", fromEmailCheck)
     history.append("fromEmail", fromEmail)
@@ -790,7 +1017,7 @@ function savehistory() {
     history.append("returnPathCheck", returnPathCheck)
     history.append("returnPath", returnPath)
     history.append("link", link)
-    history.append("creative", `${creative}`)
+    history.append("creative", `${creatives}`)
     history.append("recipients", recipients)
     history.append("blacklist", blacklist)
     history.append("mailerID", mailerID)

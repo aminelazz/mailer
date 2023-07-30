@@ -52,3 +52,48 @@ button, [aria-selected=true]
 {
   background-color: #0062FF;
 }
+
+.random-divs:empty:before {
+  content: attr(data-placeholder);
+  color: #595C5F;
+}
+
+.random-divs{
+  overflow: auto;
+  max-height: 134px;
+}
+
+.properties{
+  resize: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.token
+{
+  background-color: #D7D7D7;
+  width: fit-content;
+  padding-block: 4px;
+  margin: 3px;
+  border: 0.5px solid #BFBFBF;
+  border-radius: 5px;
+  display: inline-flex;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+
+.tokenButton
+{
+  border: 0;
+  background-color: transparent;
+  margin-top: -2px;
+}
+
+.removeCreative{
+  width: 44px;
+  height: 41px;
+  position: absolute;
+  width: fit-content;
+  right: 0px;
+  padding-right: 0;
+}

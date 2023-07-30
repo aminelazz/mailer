@@ -2,17 +2,9 @@ add a button to blacklist and export them as txt
 
 pause send when smtp corrupt and write its name
 
-add a drive link to the history
-
 show the number of successes and fails
 
-Add authentication
-
 add multiple from names, subjects and creatives
-
-add test email after 100 send
-
-count and start like mfrm + test after
 
 get recipients from db based on country list (select)
 

@@ -2,8 +2,13 @@
 header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 header("Content-Type: application/json");
 
+error_reporting(E_ERROR | E_PARSE);
+
 function uploadHistory($history)
 {
+    // Initialize $response variable
+    $response = array();
+
     // Your database connection configuration here
     $servername = "localhost";
     $username = "stcom";
@@ -58,7 +63,7 @@ function uploadHistory($history)
     $randKey  = uniqid() . rand(0000, 9999);
     //zip file name
     $zip_file_name = "$randKey.zip";
-    $zipPath = "/var/www/html/database/tmp_zip_files/$zip_file_name";
+    $zipPath = "./tmp_zip_files/$zip_file_name";
 
     try {
         //create the new zip archive using the $file_name above

@@ -156,7 +156,7 @@
                                     <label for="pauseAfterSend" class="form-label fw-semibold">
                                        Pause After Send <span class="fst-italic">(Seconds)</span>
                                     </label>
-                                    <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="5" min="0" onchange="changeTimeValues()">
+                                    <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="2" min="0" onchange="changeTimeValues()">
                                  </div>
                                  <div class=" col">
                                     <label for="rotationAfter" class="form-label fw-semibold">
@@ -176,7 +176,7 @@
                                     <label for="BCCnumber" class="form-label fw-semibold">
                                        Number of Emails In Bcc
                                     </label>
-                                    <input type="number" name="BCCnumber" id="BCCnumber" class="form-control" style="height: 43px;" value="3" min="1" max="10" onchange="changeTimeValues()">
+                                    <input type="number" name="BCCnumber" id="BCCnumber" class="form-control" style="height: 43px;" value="1" min="1" max="10" onchange="changeTimeValues()">
                                  </div>
                               </div>
                            </div>
@@ -531,7 +531,7 @@
                                     </select>
                                  </div>
                                  <div class="col-8 p-0">
-                                    <input type="text" class="form-control rounded-start-0" id="fromName" name="fromName" placeholder="From Name" value="[au_10]" style="height: 43px;" required>
+                                    <input type="text" class="properties form-control rounded-start-0" id="fromName" name="fromName" placeholder="From Name" value="[au_10]" style="height: 43px;" onkeydown="addToken(event)">
                                  </div>
                               </div>
                            </div>
@@ -561,9 +561,20 @@
                                     </select>
                                  </div>
                                  <div class="col-8 p-0">
-                                    <input type="text" class="form-control rounded-start-0" id="subject" name="subject" placeholder="Subject" value="[au_10]" style="height: 43px;" required>
+                                    <input type="text" class="properties form-control rounded-start-0" id="subject" name="subject" placeholder="Subject" value="[au_10]" style="height: 43px;" onkeydown="addToken(event)">
                                  </div>
                               </div>
+                           </div>
+                        </div>
+                        <!-- From Names & Subjects -->
+                        <div class="row pb-3" style="height: 150px;">
+                           <!-- From Names -->
+                           <div class="col-6">
+                              <div class="random-divs fromNames row mx-0 form-control h-100" data-placeholder="From Names..."></div>
+                           </div>
+                           <!-- Subjects -->
+                           <div class="col-6">
+                              <div class="random-divs subjects row mx-0 form-control h-100" data-placeholder="Subjects..."></div>
                            </div>
                         </div>
                         <!-- From Email & Reply-To & Return Path -->
@@ -656,18 +667,43 @@
                            </div>
                         </div>
                         <!-- Creative & Preview -->
-                        <div class="row pb-3">
-                           <!-- Creative -->
-                           <div class="col-6">
-                              <label for="creative" class="form-label fw-semibold">Creative</label>
-                              <textarea spellcheck="false" name="creative" id="creative" class="form-control w-100 language-html" style="height: 391px; font-family: monospace; resize: none;" oninput="previewCreative()" required></textarea>
+                        <div id="creativeContainer" class="col">
+                           <div class="row">
+                              <!-- Labels -->
+                              <div class="row mx-0">
+                                 <!-- Creative Label -->
+                                 <div class="col-6 p-0">
+                                    <label for="creative" class="form-label fw-semibold">Creative</label>
+                                 </div>
+                                 <!-- Preview Label -->
+                                 <div class="col-6">
+                                    <label for="preview" class="form-label fw-semibold">Preview</label>
+                                 </div>
+                              </div>
                            </div>
-                           <!-- Preview -->
-                           <div class="col-6">
-                              <label for="preview" class="form-label fw-semibold">Preview</label>
-                              <div name="preview" id="preview" class="form-control w-100" style="height: 391px; overflow: auto;"></div>
+                           <!-- TextAreas -->
+                           <div class="textareas row mx-0" style="position: relative;">
+                              <!-- Creative TextArea -->
+                              <div class="col-6 ps-0">
+                                 <textarea spellcheck="false" name="creative" class="creative form-control w-100 language-html" style="height: 391px; font-family: monospace; resize: none;" oninput="previewCreative(this)" required></textarea>
+                              </div>
+                              <!-- Preview TextArea -->
+                              <div class="col-6 pe-0">
+                                 <div name="preview" class="preview form-control w-100" style="height: 391px; overflow: auto;"></div>
+                              </div>
+                              <div class="removeCreative invisible">
+                                 <button class="btn btn-danger w-100 h-100" type="button" style="padding-top: 5px;padding-bottom: 10px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                                       <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z"></path>
+                                    </svg>
+                                 </button>
+                              </div>
                            </div>
                         </div>
+                        <div class="pt-2 pb-3">
+                           <button type="button" class="btn btn-play w-100 mx-0" onclick="addCreative()">Add Creative</button>
+                        </div>
+
                         <!-- Test After & Email Test -->
                         <div class="row pb-3">
                            <!-- Test after -->
@@ -734,8 +770,12 @@
                         <div class="row">
                            <!-- Recipients -->
                            <div class="col-4">
-                              <label for="recipients" class="form-label fw-semibold">Recipients</label>
-                              <textarea spellcheck="false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()"></textarea>
+                              <label for="recipients" class="form-label fw-semibold">
+                                 Recipients
+                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
+                              </label>
+                              <textarea spellcheck=" false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()"></textarea>
                            </div>
                            <!-- Blacklist -->
                            <div class=" col-4">
@@ -779,7 +819,6 @@
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="./public/js/bootstrap.bundle.js"></script>
-   <script src="./public/js/uploadToDropbox.js"></script>
    <script src="./public/js/script.js"></script>
 </body>
 

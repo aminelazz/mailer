@@ -53,7 +53,7 @@ function downloadOffer($id)
             $zipFileData = base64_decode($attachements);
 
             // Create a temporary file to store the original zip file's content
-            $tempZipFile = tempnam(sys_get_temp_dir(), 'temp_zip');
+            $tempZipFile = tempnam(sys_get_temp_dir(), '../tmp_zip_files/temp_zip');
             file_put_contents($tempZipFile, $zipFileData);
 
             $zip = new ZipArchive();
@@ -75,11 +75,12 @@ function downloadOffer($id)
 
                     // Set appropriate headers to force the browser to download the file
                     header("Content-Type: application/zip");
-                    header("Content-Disposition: attachment; filename=$zip_file_name");
-                    header("Content-Length: " . strlen($zip_file_name));
+                    header("Content-Disposition: attachment; filename=$zipPath");
+                    header("Content-Length: " . filesize($zipPath));
 
                     // Output the zip file contents
                     readfile($zipPath);
+                    // echo $zip_file_name;
 
                     // Delete the temporary zip file from the server
                     unlink($zipPath);

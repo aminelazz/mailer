@@ -245,7 +245,7 @@ function sendEmailsUsingPHPMailer($formData)
     echo json_encode([
         $recipient => $response,
         'status'   => $status,
-    ]) . "||";
+    ]);
 
     // Flush the output buffer to send the response immediately
     ob_flush();

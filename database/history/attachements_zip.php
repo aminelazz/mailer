@@ -3,6 +3,7 @@ header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 header("Content-Type: application/json");
 
 if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["id"])) {
+
     // Your database connection configuration here
     $servername = "localhost";
     $username = "stcom";
@@ -36,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["id"])) {
 
             // Decode the base64 encoded file data
             $zipFileData = base64_decode($attachements);
-            echo $zipFileData;
             if ($zipFileData == null) {
                 http_response_code(404); // Not found
                 echo json_encode([
