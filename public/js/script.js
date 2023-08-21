@@ -112,7 +112,12 @@ var refreshDiv = document.getElementById("refreshDiv")
 
 try {
     var recipientsField = document.getElementById("recipients")
+    var blacklistField = document.getElementById("blacklist")
+
     recipientsField.addEventListener("input", () => {
+        changeRecipientsNumber()
+    })
+    blacklistField.addEventListener("input", () => {
         changeRecipientsNumber()
     })
 
@@ -377,9 +382,21 @@ function changeRecipientsNumber() {
     let recipientsArray = recipientsField.value.toString().split("\n")
     recipientsArray = recipientsArray.filter((element) => element !== "")
 
-    let nbrRecipients = document.getElementById("nbrRecipients")
+    let blacklist   = document.getElementById("blacklist").value.split("\n") // prettier-ignore
+    blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
 
-    nbrRecipients.textContent = recipientsArray.length
+    let count = document.getElementById("count")
+
+    const filteredRecipients = recipientsArray.filter((recipient) => !blacklist.includes(recipient))
+
+    let nbrRecipients = document.getElementById("nbrRecipients")
+    let nbrBlacklist = document.getElementById("nbrBlacklist")
+
+    nbrRecipients.textContent = filteredRecipients.length
+    count.value = filteredRecipients.length == "0" ? "" : filteredRecipients.length
+
+    const blacklisted = recipientsArray.length - filteredRecipients.length
+    nbrBlacklist.textContent = blacklisted
 }
 
 function send() {
@@ -528,6 +545,17 @@ async function addCreative() {
     }
 
     creativeContainer.appendChild(creativeNew)
+}
+
+function generateRandomFilename() {
+    const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    const length = 10
+    let randomFilename = ""
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length)
+        randomFilename += characters.charAt(randomIndex)
+    }
+    return randomFilename
 }
 
 // Handle form submit
@@ -792,7 +820,9 @@ async function sendEmails() {
                 formData.append("recipient", recipient)
                 
                 for (let l = 0; l < attachements.length; l++) {
-                    formData.append("attachements[]", attachements[l])
+                    const newFileName = generateRandomFilename() + attachements[l].name.substr(attachements[l].name.lastIndexOf("."))
+
+                    formData.append("attachements[]", attachements[l], newFileName)
                 }
 
                 const now = new Date()

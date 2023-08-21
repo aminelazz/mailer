@@ -779,7 +779,11 @@
                            </div>
                            <!-- Blacklist -->
                            <div class=" col-4">
-                              <label for="blacklist" class="form-label fw-semibold">Blacklist</label>
+                              <label for="blacklist" class="form-label fw-semibold">
+                                 Blacklist
+                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <span class="fst-italic">(<span id="nbrBlacklist">0</span> blacklisted)</span>
+                              </label>
                               <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea>
                            </div>
                            <!-- Failed -->
