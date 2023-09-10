@@ -98,6 +98,7 @@ async function receiveMessage(event) {
     }
 
     previewCreative()
+    organizeBlacklist(event)
     configureRecipientsBlacklist()
 
     // Go to the send tab
@@ -109,6 +110,7 @@ var progressBar = document.getElementById("progressBar")
 var progressBarContainer = document.getElementById("progressBarContainer")
 var sendCount = document.getElementById("sendCount")
 var refreshDiv = document.getElementById("refreshDiv")
+var test = false
 
 try {
     var recipientsField = document.getElementById("recipients")
@@ -173,7 +175,7 @@ function preventUnload() {
 //     if (recipientsCount > 50) {
 //         if ((servers && recipients) != "") {
 //             // Total number of mails sent in one batch
-//             let mailsPerBatch = serversCount * BCCnumber.value
+//             let mailsPerBatch = serversCount * parseInt(BCCnumber.value)
 
 //             // Total number of batches required
 //             let totalBatches = Math.ceil(recipientsCount / mailsPerBatch)
@@ -303,21 +305,21 @@ function checkFields() {
     BCCnumber.setCustomValidity("")
 
     if (recipients.value != "" && emailTest.value != "") {
-        if (BCCnumber.value > allRecipientsCount) {
+        if (parseInt(BCCnumber.value) > parseInt(allRecipientsCount)) {
             BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of recipients and test email addresses")
         }
     } else if (emailTest.value != "") {
-        if (BCCnumber.value > emailTestCount) {
+        if (parseInt(BCCnumber.value) > emailTestCount) {
             BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of test email addresses")
         }
     } else if (recipients.value != "") {
-        if (BCCnumber.value > recipientsCount) {
+        if (parseInt(BCCnumber.value) > recipientsCount) {
             BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of recipients")
         }
     }
 
     // Rotation After Validity
-    if (rotationAfterField.value <= 0) {
+    if (parseInt(rotationAfterField.value) <= 0) {
         rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
     } else {
         rotationAfterField.setCustomValidity("")
@@ -359,14 +361,17 @@ function checkFields() {
 
     // test after validity
     testAfter.setCustomValidity("")
+    testAfter.required = false
 
-    if (emailTest.value != "" && recipients.value != "" && testAfter.value == "") {
-        testAfter.setCustomValidity("Please enter a number")
+    if (parseInt(emailTest.value.length) !== 0 && parseInt(recipients.value.length) !== 0 && parseInt(testAfter.value.length) === 0) {
+        testAfter.required = true
     }
 
     if (emailTest.value != "" && recipients.value != "") {
-        if (testAfter.value >= count.value) {
+        if (parseInt(testAfter.value) >= parseInt(count.value)) {
             testAfter.setCustomValidity(`Number should be lesser than Count`)
+        } else {
+            testAfter.setCustomValidity("")
         }
     }
 
@@ -380,7 +385,7 @@ function checkFields() {
         } else if (count.value == "") {
             count.setCustomValidity("Please enter a valid number of recipients")
         }
-        if (start.value >= recipientsCount) {
+        if (parseInt(start.value) >= parseInt(recipientsCount)) {
             start.setCustomValidity("Please enter a start index smaller than number of recipients")
         }
     }
@@ -444,21 +449,30 @@ function organizeBlacklist(event) {
     let blacklistField  = document.getElementById("blacklist") // prettier-ignore
     let blacklistNodes  = blacklistField.childNodes // prettier-ignore
 
+    let blacklistSpinner = document.getElementById("blacklistSpinner")
+    blacklistSpinner.classList.remove("invisible")
+
     // Get the pasted text
-    const pastedText = (event.clipboardData || window.clipboardData).getData("text")
+    let pastedText
+    try {
+        pastedText = (event.clipboardData || window.clipboardData).getData("text")
+    } catch (error) {
+        pastedText = blacklistField.innerHTML
+    }
 
     // Append pasted text to the div
     blacklistField.innerHTML += pastedText.replaceAll("\n", "<br>")
 
     // Create a new div element for each text node and move the content to it
     const divsToAdd = []
-    blacklistNodes.forEach((node) => {
+    for (let i = 0; i < blacklistNodes.length; i++) {
+        const node = blacklistNodes[i]
         if (node.nodeType === Node.TEXT_NODE) {
             const div = document.createElement("div")
             div.textContent = node.textContent.trim()
             divsToAdd.push(div)
         }
-    })
+    }
 
     // Insert the new divs before each <br> element
     for (let i = 0; i < divsToAdd.length; i++) {
@@ -466,18 +480,21 @@ function organizeBlacklist(event) {
     }
 
     // Remove the original text nodes and <br> elements
-    blacklistNodes.forEach((node) => {
+    for (let i = 0; i < blacklistNodes.length; i++) {
+        const node = blacklistNodes[i]
         if (node.nodeType === Node.TEXT_NODE) {
             blacklistField.removeChild(node)
         }
-    })
+    }
 
     const brElements = blacklistField.querySelectorAll("br")
-    brElements.forEach((br) => {
+    for (let i = 0; i < brElements.length; i++) {
+        const br = brElements[i]
         br.remove()
-    })
+    }
 
     configureRecipientsBlacklist()
+    blacklistSpinner.classList.add("invisible")
 }
 
 function send() {
@@ -506,6 +523,7 @@ function controlButtons() {
     let play        = document.getElementById("play") // prettier-ignore
     let pause       = document.getElementById("pause") // prettier-ignore
     let stop        = document.getElementById("stop") // prettier-ignore
+    let test        = document.getElementById("test") // prettier-ignore
 
     switch (sendStatus) {
         case "sending":
@@ -513,6 +531,7 @@ function controlButtons() {
             start.disabled = true
             play.disabled = true
             pause.disabled = false
+            test.disabled = false
             progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-play")
             break
@@ -522,6 +541,7 @@ function controlButtons() {
             start.disabled = true
             play.disabled = false
             pause.disabled = true
+            test.disabled = true
             progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-warning")
             break
@@ -534,6 +554,7 @@ function controlButtons() {
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
+            test.disabled = true
             progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("bg-danger")
             break
@@ -546,6 +567,7 @@ function controlButtons() {
             play.disabled = false
             pause.disabled = false
             stop.disabled = false
+            test.disabled = true
             progressBar.classList.remove("bg-play", "bg-success", "bg-warning", "bg-danger")
             progressBar.classList.add("success")
             statusLabel.innerText = `Status: Completed`
@@ -649,6 +671,10 @@ function closeBlacklistDialogue() {
     blacklistDialogue.classList.add("invisible")
 }
 
+function testNow() {
+    test = true
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
@@ -689,7 +715,7 @@ $(document).ready(function () {
         recipientsArray = recipientsArray.filter((element) => element !== "")
         let recipientsCount = recipientsArray.length
 
-        if (recipientsCount > 50) {
+        if (parseInt(recipientsCount) > 50) {
             savehistory()
         }
 
@@ -865,7 +891,7 @@ async function sendEmails() {
             for (let k = start_index; k < start_index + parseInt(BCCnumber); k++) {
 
                 // Stop the loops after finishing all recipients
-                if (k + 1 > count) {
+                if (k + 1 > parseInt(count)) {
                         setTimeout(() => {
                             sendStatus = "completed"
                             controlButtons()
@@ -873,7 +899,7 @@ async function sendEmails() {
                         }, 1000)
                         
                         break rotation
-                    }
+                }
 
                 switch (sendStatus) {
                     case "paused":
@@ -886,7 +912,14 @@ async function sendEmails() {
                 
                     default:
                         break;
-                }              
+                }
+                
+                // Test button
+                if (test) {
+                    modifiedRecipients.splice(k, 0, ...emailTest)
+                    test = false
+                    count += emailTest.length
+                }
 
                 let fromName    = fromNameArray[Math.floor(Math.random() * fromNameArray.length)] // Random From Name
                 let subject     = subjectArray[Math.floor(Math.random() * subjectArray.length)]   // Random Subject
@@ -1022,13 +1055,21 @@ function delay(ms) {
 }
 
 async function uploadHistory(history) {
-    const result = await fetch("http://45.145.6.18/database/uploadHistory.php", {
+    // while (data) {
+    fetch("http://45.145.6.18/database/uploadHistory.php", {
         method: "POST", // or 'PUT'
         body: history,
     })
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => {
+            console.log(`Error: ${error}`)
+            uploadHistory(history)
+        })
 
-    const data = await result.json()
-    console.log(data)
+    // const data = await result.json()
+    // console.log(data)
+    // }
 }
 
 function savehistory() {

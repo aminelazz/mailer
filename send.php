@@ -97,7 +97,10 @@
          <div style="width: 250px"></div>
          <div class="col mb-4 container-xxl" style="padding-top: 10px; position: relative;">
             <div class="d-flex align-items-center justify-content-between">
-               <h4>St-Com Mailing</h4>
+               <div class="d-flex gap-4 align-items-center">
+                  <h4>St-Com Mailing</h4>
+                  <h6>Ver. 10.0</h6>
+               </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">
                   <button type="button" class="btn">Welcome, <span id="mailerName" class="fw-semibold"></span></button>
@@ -713,7 +716,7 @@
                               </label>
                               <div class="row mx-0">
                                  <div class="p-0">
-                                    <input type="number" class="form-control" id="testAfter" name="testAfter" placeholder="Test after" min="0" style="height: 43px;">
+                                    <input type="number" class="form-control" id="testAfter" name="testAfter" placeholder="Test after" min="0" value="0" style="height: 43px;">
                                  </div>
                               </div>
                            </div>
@@ -754,6 +757,9 @@
                               </div>
                            </div>
                         </div>
+                        <div class="d-flex justify-content-end">
+                           <button id="test" type="button" class="send btn btn-success fw-semibold" style="width: 20%; height: 43px;" onclick="testNow()" disabled>Test</button>
+                        </div>
                      </div>
                   </div>
                   <!-- End Body -->
@@ -785,7 +791,16 @@
                                  <span class="fst-italic text-danger" onclick="showBlacklistDialogue()">(<span id="nbrBlacklist">0</span> blacklisted)</span>
                               </label>
                               <!-- <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea> -->
-                              <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 391px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
+                              <div style="position: relative;">
+                                 <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 391px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
+                                 <div id="blacklistSpinner" class="d-flex align-items-center justify-content-center gap-3 h-100 w-100 bg-dark rounded invisible" style="position: absolute; top: 0; --bs-bg-opacity: 0.3">
+                                    <div class="spinner-border " role="status">
+                                       <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="fs-5 ">Please wait...</div>
+                                 </div>
+                              </div>
+
                            </div>
                            <!-- Failed -->
                            <div class="col-4">
