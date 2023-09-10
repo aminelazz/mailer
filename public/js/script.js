@@ -93,8 +93,8 @@ async function receiveMessage(event) {
         if (creativeFields.length < creatives.length) {
             await addCreative()
         }
-        creativeFields[i].value = creatives[i]
-        previewCreative(creativeFields[i])
+        $(".creative").eq(i).summernote("code", creatives[i])
+        // previewCreative(creativeFields[i])
     }
 
     previewCreative()
@@ -140,6 +140,11 @@ try {
         if (attachementsName.value != "") {
             clearButton.classList.toggle("invisible")
         }
+
+        const summernotes = document.querySelectorAll(".note-editor, .note-frame")
+        summernotes.forEach((summernote) => {
+            summernote.style.padding = "0"
+        })
 
         previewCreative()
         fileUpload()
@@ -597,29 +602,45 @@ function addToken(event) {
         const directText = event.target.value
         if (directText.trim() !== "") {
             let tokenContainer = document.getElementsByClassName(`${event.target.id}s`)[0]
-            const token = document.createElement("div")
-            token.classList.add("token")
 
-            const content = document.createElement("span")
-            content.classList.add(event.target.id)
-            content.textContent = directText
+            let splitedDirectText = directText.split("; ")
+            splitedDirectText = splitedDirectText.filter((element) => element !== "")
+            splitedDirectText.forEach((element) => {
+                const token = document.createElement("div")
+                token.classList.add("token")
 
-            const deleteButton = document.createElement("button")
-            deleteButton.classList.add("tokenButton")
-            deleteButton.textContent = "x"
-            deleteButton.addEventListener("click", () => {
-                token.remove()
+                const content = document.createElement("span")
+                content.classList.add(event.target.id)
+                content.textContent = element
+
+                const deleteButton = document.createElement("button")
+                deleteButton.classList.add("tokenButton")
+                deleteButton.textContent = "x"
+                deleteButton.addEventListener("click", () => {
+                    token.remove()
+                })
+
+                token.appendChild(content)
+                token.appendChild(deleteButton)
+                tokenContainer.appendChild(token)
             })
-
-            token.appendChild(content)
-            token.appendChild(deleteButton)
-            tokenContainer.appendChild(token)
             event.target.value = "" // Clear the div after creating the token
         }
     }
 
     // As a last resort
     return false
+}
+
+function getCreatives() {
+    let creatives = document.getElementsByClassName("creative")
+    let creativeArray = []
+
+    for (let i = 0; i < creatives.length; i++) {
+        creativeArray.push($(".creative").eq(i).summernote("code"))
+    }
+    // console.log(creativeArray)
+    return creativeArray
 }
 
 async function addCreative() {
@@ -631,8 +652,11 @@ async function addCreative() {
 
     // Clear text in the textarea and div elements within the duplicated container
     const creativeInCreativeNw = creativeNew.getElementsByTagName("textarea")
+    const divInCreativeNw = creativeNew.querySelectorAll("div>div")[0]
     const previewInCreativeNw = creativeNew.querySelectorAll(".preview")
     const removeButtonInCreativeNw = creativeNew.querySelectorAll(".removeCreative")[0]
+    const summernoteOld = creativeNew.querySelectorAll(".note-editor, .note-frame")[0]
+    summernoteOld.remove()
 
     removeButtonInCreativeNw.classList.remove("invisible")
     removeButtonInCreativeNw.addEventListener("click", () => {
@@ -643,11 +667,31 @@ async function addCreative() {
         textarea.value = "" // Clear the text inside the textarea
     }
 
+    // divInCreativeNw
+    divInCreativeNw.style.display = "block"
+    const customID = generateRandomFilename()
+    divInCreativeNw.id = customID
+
     for (let div of previewInCreativeNw) {
         div.textContent = "" // Clear the text inside the div
     }
 
     creativeContainer.appendChild(creativeNew)
+
+    $(`#${customID}`).summernote({
+        placeholder: "Creative...",
+        tabsize: 2,
+        height: 391,
+        minheight: 391,
+        fontNames: ["Arial", "Arial Black", "Comic Sans MS", "Courier New", "Helvetica", "Impact", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"],
+        addDefaultFonts: true,
+    }) // Initialize summernote
+
+    const summernotesNw = document.querySelectorAll(".note-editor, .note-frame")
+
+    summernotesNw.forEach((summernoteNw) => {
+        summernoteNw.style.padding = "0" // Remove padding
+    })
 }
 
 function generateRandomFilename() {
@@ -753,7 +797,7 @@ async function sendEmails() {
         emailTest           : document.getElementById("emailTest"), // prettier-ignore
         start               : document.getElementById("start"), // prettier-ignore
         count               : document.getElementById("count"), // prettier-ignore
-        creatives           : document.querySelectorAll(".creative"), // prettier-ignore
+        // creatives           : document.querySelectorAll(".creative"), // prettier-ignore
         recipients          : document.getElementById("recipients"), // prettier-ignore
         blacklist           : document.getElementById("blacklist"), // prettier-ignore
         failed              : document.getElementById("failed"), // prettier-ignore
@@ -787,12 +831,7 @@ async function sendEmails() {
     }
 
     // Creative
-    var creatives    = fields.creatives // prettier-ignore
-    let creativeArray = []
-
-    for (let i = 0; i < creatives.length; i++) {
-        creativeArray.push(creatives[i].value)
-    }
+    let creativeArray = getCreatives()
 
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
@@ -1131,14 +1170,7 @@ function savehistory() {
     }
 
     // Creative
-    var creatives    = fields.creatives // prettier-ignore
-    let creativeArray = []
-
-    for (let i = 0; i < creatives.length; i++) {
-        creativeArray.push(creatives[i].value)
-    }
-
-    creativeArray = creativeArray.filter((element) => element !== "") // prettier-ignore
+    let creativeArray = getCreatives()
 
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
@@ -1160,13 +1192,14 @@ function savehistory() {
     const countryID         = fields.countryID.value // prettier-ignore
 
     // Remove empty lines
-    servers     = servers.filter((element) => element !== "") // prettier-ignore
-    recipients  = recipients.filter((element) => element !== "") // prettier-ignore
-    blacklist   = blacklist.filter((element) => element !== "") // prettier-ignore
+    servers         = servers.filter((element) => element !== "") // prettier-ignore
+    recipients      = recipients.filter((element) => element !== "") // prettier-ignore
+    blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
+    creativeArray   = creativeArray.filter((element) => element !== "") // prettier-ignore
 
     let fromNames = fromNameArray.join("||") // From Names
     let subjects = subjectArray.join("||") // Subjects
-    creatives = creativeArray.join("||||") // Creatives
+    let creatives = creativeArray.join("||||") // Creatives
 
     // Define a history FormData and populate with necessary infos and pass it to the uploadHistory() function to upload
     let history = new FormData()

@@ -7,6 +7,8 @@
    <link rel="icon" href="./favicon.ico" type="image/x-icon">
    <link rel="stylesheet" href="./public/stylesheets/bootstrap_mod.css">
    <link rel="stylesheet" href="./public/stylesheets/styles.css">
+   <!-- include summernote css-->
+   <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
    <script src="./public/js/auth.js"></script>
    <title>St-Com</title>
 </head>
@@ -99,7 +101,7 @@
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 10.0</h6>
+                  <h6>Ver. 11.0</h6>
                </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">
@@ -685,15 +687,9 @@
                               </div>
                            </div>
                            <!-- TextAreas -->
-                           <div class="textareas row mx-0" style="position: relative;">
+                           <div class="textareas row mx-0 px-0 bg-white rounded" style="position: relative;">
                               <!-- Creative TextArea -->
-                              <div class="col-6 ps-0">
-                                 <textarea spellcheck="false" name="creative" class="creative form-control w-100 language-html" style="height: 391px; font-family: monospace; resize: none;" oninput="previewCreative(this)" required></textarea>
-                              </div>
-                              <!-- Preview TextArea -->
-                              <div class="col-6 pe-0">
-                                 <div name="preview" class="preview form-control w-100" style="height: 391px; overflow: auto;"></div>
-                              </div>
+                              <div spellcheck="false" name="creative" class="creative form-control w-100 mx-0 px-0" style="height: 391px;" oninput="previewCreative(this)" required></div>
                               <div class="removeCreative invisible">
                                  <button class="btn btn-danger w-100 h-100" type="button" style="padding-top: 5px;padding-bottom: 10px;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
@@ -705,6 +701,7 @@
                         </div>
                         <div class="pt-2 pb-3">
                            <button type="button" class="btn btn-play w-100 mx-0" onclick="addCreative()">Add Creative</button>
+                           <!-- <button type="button" class="btn btn-secondary w-100 mx-0" onclick="getCreatives()">Get creatives</button> -->
                         </div>
 
                         <!-- Test After & Email Test -->
@@ -855,7 +852,18 @@
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="./public/js/bootstrap.bundle.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
    <script src="./public/js/script.js"></script>
+   <script>
+      $('.creative').summernote({
+         placeholder: 'Creative...',
+         tabsize: 2,
+         height: 391,
+         minheight: 391,
+         fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Helvetica', 'Impact', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'],
+         addDefaultFonts: true
+      });
+   </script>
 </body>
 
 </html>
