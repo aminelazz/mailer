@@ -101,7 +101,7 @@
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 11.1</h6>
+                  <h6>Ver. 11.2</h6>
                </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">
@@ -572,14 +572,37 @@
                            </div>
                         </div>
                         <!-- From Names & Subjects -->
-                        <div class="row pb-3" style="height: 150px;">
+                        <div class="row pb-3">
                            <!-- From Names -->
-                           <div class="col-6">
-                              <div class="random-divs fromNames row mx-0 form-control h-100" data-placeholder="From Names..."></div>
+                           <div class="col">
+                              <div class="position-relative">
+                                 <div id="fromNames" class="random-divs fromNames row mx-0 form-control" style="height: 120px;" data-placeholder="From Names..."></div>
+                                 <textarea id="importfromNames" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported from names here..."></textarea>
+                                 <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
+                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(event)">Import</button>
+                                    <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
+                                 </div>
+                                 <div class="w-100 mt-2 d-flex justify-content-center invisible" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="okFromName" class="send btn btn-success flex-fill" type="button" style="margin-inline: 30%;" onclick="ok(this)">OK</button>
+                                 </div>
+                              </div>
                            </div>
+
                            <!-- Subjects -->
-                           <div class="col-6">
-                              <div class="random-divs subjects row mx-0 form-control h-100" data-placeholder="Subjects..."></div>
+                           <div class="col">
+                              <div class="position-relative">
+                                 <div id="subjects" class="random-divs subjects row mx-0 form-control" style="height: 120px;" data-placeholder="Subjects..."></div>
+                                 <textarea id="importsubjectss" class="row mx-0 form-control position-absolute top-0" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported subjects here..."></textarea>
+                                 <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
+                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
+                                    <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
+                                 </div>
+                                 <!-- <div class="w-100 mt-2 d-flex justify-content-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="okSubject" class="send btn btn-success flex-fill" type="button" style="margin-inline: 30%;" onclick="ok(this)">OK</button>
+                                 </div> -->
+                              </div>
                            </div>
                         </div>
                         <!-- From Email & Reply-To & Return Path -->
@@ -681,9 +704,9 @@
                                     <label for="creative" class="form-label fw-semibold">Creative</label>
                                  </div>
                                  <!-- Preview Label -->
-                                 <div class="col-6">
+                                 <!-- <div class="col-6">
                                     <label for="preview" class="form-label fw-semibold">Preview</label>
-                                 </div>
+                                 </div> -->
                               </div>
                            </div>
                            <!-- TextAreas -->
@@ -860,7 +883,19 @@
          tabsize: 2,
          height: 391,
          minheight: 391,
+         spellCheck: false,
          fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Helvetica', 'Impact', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'],
+         toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video']],
+            ['view', ['fullscreen', 'codeview', 'help']],
+         ],
          addDefaultFonts: true
       });
    </script>

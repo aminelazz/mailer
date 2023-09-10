@@ -2,7 +2,6 @@ window.addEventListener("message", receiveMessage, false)
 
 async function receiveMessage(event) {
     let offerData = event.data
-
     console.log(offerData)
 
     // Update the fields in the parent page based on the received data
@@ -111,6 +110,7 @@ var progressBarContainer = document.getElementById("progressBarContainer")
 var sendCount = document.getElementById("sendCount")
 var refreshDiv = document.getElementById("refreshDiv")
 var test = false
+var lastRecipientCount = 0
 
 try {
     var recipientsField = document.getElementById("recipients")
@@ -597,6 +597,8 @@ function refreshIframe() {
 }
 
 function addToken(event) {
+    console.log(event)
+
     if (event.key === "Enter") {
         event.preventDefault()
         const directText = event.target.value
@@ -684,7 +686,19 @@ async function addCreative() {
         tabsize: 2,
         height: 391,
         minheight: 391,
+        spellCheck: false,
         fontNames: ["Arial", "Arial Black", "Comic Sans MS", "Courier New", "Helvetica", "Impact", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"],
+        toolbar: [
+            ["style", ["style"]],
+            ["font", ["bold", "underline", "clear"]],
+            ["fontname", ["fontname"]],
+            ["fontsize", ["fontsize"]],
+            ["color", ["color"]],
+            ["para", ["ul", "ol", "paragraph"]],
+            ["table", ["table"]],
+            ["insert", ["link", "picture", "video"]],
+            ["view", ["fullscreen", "codeview", "help"]],
+        ],
         addDefaultFonts: true,
     }) // Initialize summernote
 
@@ -718,6 +732,26 @@ function closeBlacklistDialogue() {
 
 function testNow() {
     test = true
+}
+
+function exportTokens(event) {
+    const target = event
+    const container = target.parentNode.parentNode.querySelector("div")
+
+    // Put innerHTML in the clipboard
+    navigator.clipboard.writeText(container.innerHTML)
+}
+
+async function importTokens(event) {
+    console.log(event)
+    const target = event.target
+    const pastContainer = target.parentNode.parentNode.querySelector("textarea")
+    const buttonsContainer = target.parentNode.parentNode.querySelectorAll("div")[1]
+    const okButtonContainer = target.parentNode.parentNode.querySelectorAll("div")[2]
+
+    pastContainer.classList.remove("invisible")
+    buttonsContainer.classList.add("d-none")
+    okButtonContainer.classList.remove("invisible")
 }
 
 // Handle form submit
@@ -763,6 +797,8 @@ $(document).ready(function () {
         if (parseInt(recipientsCount) > 50) {
             savehistory()
         }
+
+        lastRecipientCount = 0
 
         // Send email
         sendEmails()
@@ -961,6 +997,11 @@ async function sendEmails() {
                     count += emailTest.length
                 }
 
+                // set var of the last recipient count and update it only if its greater than the last one
+                if ((k + 1) > lastRecipientCount) {
+                    lastRecipientCount = k + 1
+                }
+
                 let fromName    = fromNameArray[Math.floor(Math.random() * fromNameArray.length)] // Random From Name
                 let subject     = subjectArray[Math.floor(Math.random() * subjectArray.length)]   // Random Subject
                 let creative    = creativeArray[Math.floor(Math.random() * creativeArray.length)] // Random Creative
@@ -1054,12 +1095,12 @@ async function sendEmails() {
                             }
 
                             // Configure the progress bar
-                            var percentage = ((k + 1) / count) * 100
+                            var percentage = (lastRecipientCount / count) * 100
 
                             progressBar.innerText = `${percentage.toFixed(0)}%`
                             progressBar.style.width = `${percentage.toFixed(0)}%`
 
-                            sendCount.innerText = `${k + 1} / ${count}`
+                            sendCount.innerText = `${lastRecipientCount} / ${count}`
 
                             // Scroll to the last added response
                             let responseTable = document.getElementById("responseTable")

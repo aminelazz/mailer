@@ -24,7 +24,14 @@ function getOfferHistory()
     }
 
     // Perform the SQL query to fetch the offer history data
-    $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.replyToCheck, o.returnPathCheck, o.link, o.attachements, o.creative, o.recipients, o.blacklist, o.date, o.mailerID, o.countryID,
+    // $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.replyToCheck, o.returnPathCheck, o.link, o.attachements, o.creative, o.recipients, o.blacklist, o.date, o.mailerID, o.countryID,
+    //                m.firstName AS mailerName,
+    //                c.name AS countryName
+    //         FROM offer o
+    //         JOIN country c ON o.countryID = c.id
+    //         JOIN mailer m ON o.mailerID = m.id";
+
+    $sql = "SELECT o.id, o.offerID, o.offerName, o.date, o.mailerID, o.countryID,
                    m.firstName AS mailerName,
                    c.name AS countryName
             FROM offer o
@@ -60,24 +67,24 @@ function getOfferHistory()
                 'id'                => $row['id'],
                 'offerID'           => $row['offerID'],
                 'offerName'         => $row['offerName'],
-                'servers'           => $row['servers'],
-                'header'            => $row['header'],
-                'contentType'       => $row['contentType'],
-                'charset'           => $row['charset'],
-                'encoding'          => $row['encoding'],
-                'priority'          => $row['priority'],
-                'fromName'          => $row['fromName'],
-                'fromNameEncoding'  => $row['fromNameEncoding'],
-                'subject'           => $row['subject'],
-                'subjectEncoding'   => $row['subjectEncoding'],
-                'fromEmailCheck'    => $row['fromEmailCheck'],
-                'replyToCheck'      => $row['replyToCheck'],
-                'returnPathCheck'   => $row['returnPathCheck'],
-                'link'              => $row['link'],
-                'attachements'      => $row['attachements'] != null ? true : false,
-                'creative'          => $row['creative'],
-                'recipients'        => $row['recipients'],
-                'blacklist'         => $row['blacklist'],
+                // 'servers'           => $row['servers'],
+                // 'header'            => $row['header'],
+                // 'contentType'       => $row['contentType'],
+                // 'charset'           => $row['charset'],
+                // 'encoding'          => $row['encoding'],
+                // 'priority'          => $row['priority'],
+                // 'fromName'          => $row['fromName'],
+                // 'fromNameEncoding'  => $row['fromNameEncoding'],
+                // 'subject'           => $row['subject'],
+                // 'subjectEncoding'   => $row['subjectEncoding'],
+                // 'fromEmailCheck'    => $row['fromEmailCheck'],
+                // 'replyToCheck'      => $row['replyToCheck'],
+                // 'returnPathCheck'   => $row['returnPathCheck'],
+                // 'link'              => $row['link'],
+                // 'attachements'      => $row['attachements'] != null ? true : false,
+                // 'creative'          => $row['creative'],
+                // 'recipients'        => $row['recipients'],
+                // 'blacklist'         => $row['blacklist'],
                 'date'              => $row['date'],
             );
             // $mailerData[$mailerId]['countries'][$countryId] = array_values($mailerData[$mailerId]['countries'][$countryId]);

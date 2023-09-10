@@ -1,4 +1,4 @@
-add a button to blacklist and export them as txt
+~~add a button to blacklist and export them as txt (partial)~~
 
 pause send when smtp corrupt and write its name
 
