@@ -95,7 +95,7 @@
       <!-- Start Main Menu -->
       <div class="d-flex h-100">
          <div style="width: 250px"></div>
-         <div class="col mb-4 container-xxl" style="padding-top: 10px;">
+         <div class="col mb-4 container-xxl" style="padding-top: 10px; position: relative;">
             <div class="d-flex align-items-center justify-content-between">
                <h4>St-Com Mailing</h4>
                <!-- Welcome & Logout -->
@@ -147,7 +147,7 @@
                               <label for="servers" class="form-label fw-semibold">
                                  Servers
                               </label>
-                              <textarea spellcheck="false" name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" oninput="changeTimeValues()" required></textarea>
+                              <textarea spellcheck="false" name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" required></textarea>
                            </div>
                            <!-- End Server Field -->
                            <div class="col">
@@ -156,13 +156,13 @@
                                     <label for="pauseAfterSend" class="form-label fw-semibold">
                                        Pause After Send <span class="fst-italic">(Seconds)</span>
                                     </label>
-                                    <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="2" min="0" onchange="changeTimeValues()">
+                                    <input type="number" name="pauseAfterSend" id="pauseAfterSend" class="form-control" style="height: 43px;" value="2" min="0">
                                  </div>
                                  <div class=" col">
                                     <label for="rotationAfter" class="form-label fw-semibold">
                                        Rotation After <span class="fst-italic">(Seconds)</span>
                                     </label>
-                                    <input type="number" name="rotationAfter" id="rotationAfter" class="form-control" style="height: 43px;" value="1" min="0">
+                                    <input type="number" name="rotationAfter" id="rotationAfter" class="form-control" style="height: 43px;" value="1" min="0" onchange="checkFields()">
                                  </div>
                               </div>
                               <div class=" row">
@@ -170,13 +170,13 @@
                                     <label for="emailPerSecond" class="form-label fw-semibold">
                                        Email per second
                                     </label>
-                                 <input type="number" name="emailPerSecond" id="emailPerSecond" class="form-control" style="height: 43px;" value="1" min="1" onchange="changeTimeValues()">
+                                 <input type="number" name="emailPerSecond" id="emailPerSecond" class="form-control" style="height: 43px;" value="1" min="1">
                                  </div> -->
                                  <div class="col">
                                     <label for="BCCnumber" class="form-label fw-semibold">
                                        Number of Emails In Bcc
                                     </label>
-                                    <input type="number" name="BCCnumber" id="BCCnumber" class="form-control" style="height: 43px;" value="1" min="1" max="10" onchange="changeTimeValues()">
+                                    <input type="number" name="BCCnumber" id="BCCnumber" class="form-control" style="height: 43px;" value="1" min="1" max="10">
                                  </div>
                               </div>
                            </div>
@@ -775,16 +775,17 @@
                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                  <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
                               </label>
-                              <textarea spellcheck=" false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;" oninput="changeTimeValues()"></textarea>
+                              <textarea spellcheck=" false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;"></textarea>
                            </div>
                            <!-- Blacklist -->
                            <div class=" col-4">
-                              <label for="blacklist" class="form-label fw-semibold">
+                              <label for="blacklist" class="form-label fw-semibold" style="user-select: none; cursor: pointer;">
                                  Blacklist
                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                 <span class="fst-italic">(<span id="nbrBlacklist">0</span> blacklisted)</span>
+                                 <span class="fst-italic text-danger" onclick="showBlacklistDialogue()">(<span id="nbrBlacklist">0</span> blacklisted)</span>
                               </label>
-                              <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea>
+                              <!-- <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea> -->
+                              <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 391px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
                            </div>
                            <!-- Failed -->
                            <div class="col-4">
@@ -818,8 +819,24 @@
                   <iframe id="dropboxFolder" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="Dropbox history folder" frameborder="0" allowfullscreen></iframe>
                </div>
             </div>
+            <!-- Blacklist Dialogue -->
+            <div id="blacklistDialogue" class="h-100 w-100 bg-dark d-flex invisible" style="position: fixed; top: 0; left: 0; --bs-bg-opacity: .5;">
+               <div class="bg-white m-auto border border-black rounded p-4" style="height: 55%; width: 40%; position: relative;">
+                  <div class="d-flex justify-content-end w-100" style="position: absolute; top: 0; left: 0;">
+                     <button type="button" id="clearAttachements" class="btn btn-outline-dark p-auto m-2" style="z-index: 1; height: 43px; width: 43px; border-color: transparent; padding-top: 2px;" onclick="closeBlacklistDialogue()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                           <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z"></path>
+                        </svg>
+                     </button>
+                  </div>
+                  <div class="fw-semibold"><u>List of blacklisted recipients:</u></div>
+                  <textarea id="blacklistList" class="form-control border border-danger rounded mt-4 text-black" style="height: 90%; width: 100%; resize: none; cursor: text;" disabled></textarea>
+               </div>
+            </div>
          </div>
-         <!-- End Main Menu -->
+      </div>
+      <!-- End Main Menu -->
+
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="./public/js/bootstrap.bundle.js"></script>

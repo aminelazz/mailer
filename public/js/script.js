@@ -98,7 +98,7 @@ async function receiveMessage(event) {
     }
 
     previewCreative()
-    changeRecipientsNumber()
+    configureRecipientsBlacklist()
 
     // Go to the send tab
     document.getElementById("nav-send-tab").click()
@@ -115,10 +115,11 @@ try {
     var blacklistField = document.getElementById("blacklist")
 
     recipientsField.addEventListener("input", () => {
-        changeRecipientsNumber()
+        configureRecipientsBlacklist()
     })
+
     blacklistField.addEventListener("input", () => {
-        changeRecipientsNumber()
+        configureRecipientsBlacklist()
     })
 
     let mailerName = document.getElementById("mailerName")
@@ -141,7 +142,7 @@ try {
         previewCreative()
         fileUpload()
         clearFiles()
-        changeRecipientsNumber()
+        configureRecipientsBlacklist()
     })
 } catch (error) {}
 
@@ -155,43 +156,43 @@ function preventUnload() {
     return true
 }
 
-function changeTimeValues() {
-    var servers = document.getElementById("servers").value.split("\n")
-    var recipients = document.getElementById("recipients").value.split("\n")
-    var pauseAfterSend = document.getElementById("pauseAfterSend").value
-    var rotationAfterField = document.getElementById("rotationAfter")
-    var BCCnumber = document.getElementById("BCCnumber")
-    var hours = 24 * 3600
+// function changeTimeValues() {
+//     var servers = document.getElementById("servers").value.split("\n")
+//     var recipients = document.getElementById("recipients").value.split("\n")
+//     var pauseAfterSend = document.getElementById("pauseAfterSend").value
+//     var rotationAfterField = document.getElementById("rotationAfter")
+//     var BCCnumber = document.getElementById("BCCnumber")
+//     var hours = 24 * 3600
 
-    recipients = recipients.filter((element) => element !== "")
-    servers = servers.filter((element) => element !== "")
+//     recipients = recipients.filter((element) => element !== "")
+//     servers = servers.filter((element) => element !== "")
 
-    var serversCount = servers.length
-    var recipientsCount = recipients.length
+//     var serversCount = servers.length
+//     var recipientsCount = recipients.length
 
-    if (recipientsCount > 50) {
-        if ((servers && recipients) != "") {
-            // Total number of mails sent in one batch
-            let mailsPerBatch = serversCount * BCCnumber.value
+//     if (recipientsCount > 50) {
+//         if ((servers && recipients) != "") {
+//             // Total number of mails sent in one batch
+//             let mailsPerBatch = serversCount * BCCnumber.value
 
-            // Total number of batches required
-            let totalBatches = Math.ceil(recipientsCount / mailsPerBatch)
+//             // Total number of batches required
+//             let totalBatches = Math.ceil(recipientsCount / mailsPerBatch)
 
-            // Total time spent sending emails
-            let totalSendTime = totalBatches * pauseAfterSend
+//             // Total time spent sending emails
+//             let totalSendTime = totalBatches * pauseAfterSend
 
-            // Rotation after (seconds)
-            let rotationAfter = Math.floor((hours - totalSendTime) / 60)
-            rotationAfterField.value = rotationAfter
+//             // Rotation after (seconds)
+//             let rotationAfter = Math.floor((hours - totalSendTime) / 60)
+//             rotationAfterField.value = rotationAfter
 
-            if (rotationAfter <= 0) {
-                rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
-            } else {
-                rotationAfterField.setCustomValidity("")
-            }
-        }
-    }
-}
+//             if (rotationAfterField.value <= 0) {
+//                 rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
+//             } else {
+//                 rotationAfterField.setCustomValidity("")
+//             }
+//         }
+//     }
+// }
 
 function previewCreative(event) {
     try {
@@ -278,6 +279,7 @@ function clearFiles() {
 function checkFields() {
     let servers = document.getElementById("servers")
     let recipients = document.getElementById("recipients")
+    let rotationAfterField = document.getElementById("rotationAfter")
     let testAfter = document.getElementById("testAfter")
     let emailTest = document.getElementById("emailTest")
     let start = document.getElementById("start")
@@ -312,6 +314,13 @@ function checkFields() {
         if (BCCnumber.value > recipientsCount) {
             BCCnumber.setCustomValidity("The 'Number of Emails In Bcc' number must be smaller than number of recipients")
         }
+    }
+
+    // Rotation After Validity
+    if (rotationAfterField.value <= 0) {
+        rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
+    } else {
+        rotationAfterField.setCustomValidity("")
     }
 
     // servers validity
@@ -377,17 +386,47 @@ function checkFields() {
     }
 }
 
-function changeRecipientsNumber() {
+function configureRecipientsBlacklist() {
     let recipientsField = document.getElementById("recipients")
     let recipientsArray = recipientsField.value.toString().split("\n")
     recipientsArray = recipientsArray.filter((element) => element !== "")
 
-    let blacklist   = document.getElementById("blacklist").value.split("\n") // prettier-ignore
-    blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
+    let blacklistField  = document.getElementById("blacklist") // prettier-ignore
+    let blacklistNodes  = blacklistField.childNodes // prettier-ignore
+    let blacklist = []
+
+    blacklistNodes.forEach((node) => {
+        blacklist.push(node.textContent.replace("<br>", ""))
+    })
+
+    blacklist = blacklist.filter((element) => element !== "") // prettier-ignore
 
     let count = document.getElementById("count")
 
     const filteredRecipients = recipientsArray.filter((recipient) => !blacklist.includes(recipient))
+    const blacklistedRecipients = recipientsArray.filter((recipient) => blacklist.includes(recipient))
+
+    let blacklistList = document.getElementById("blacklistList")
+    blacklistList.value = blacklistedRecipients.join("\n")
+
+    blacklistNodes.forEach((node) => {
+        let nodeContent = node.textContent.replace("<br>", "")
+        if (blacklistedRecipients.includes(nodeContent)) {
+            blacklistField.className = "form-control w-100"
+            node.className = ""
+
+            if (node.nodeType == 3) {
+                blacklistField.classList.add("text-danger")
+                blacklistField.classList.add("fw-semibold")
+            } else {
+                node.classList.add("text-danger")
+                node.classList.add("fw-semibold")
+            }
+        } else {
+            blacklistField.className = "form-control w-100"
+            node.className = ""
+        }
+    })
 
     let nbrRecipients = document.getElementById("nbrRecipients")
     let nbrBlacklist = document.getElementById("nbrBlacklist")
@@ -397,6 +436,48 @@ function changeRecipientsNumber() {
 
     const blacklisted = recipientsArray.length - filteredRecipients.length
     nbrBlacklist.textContent = blacklisted
+}
+
+function organizeBlacklist(event) {
+    event.preventDefault()
+
+    let blacklistField  = document.getElementById("blacklist") // prettier-ignore
+    let blacklistNodes  = blacklistField.childNodes // prettier-ignore
+
+    // Get the pasted text
+    const pastedText = (event.clipboardData || window.clipboardData).getData("text")
+
+    // Append pasted text to the div
+    blacklistField.innerHTML += pastedText.replaceAll("\n", "<br>")
+
+    // Create a new div element for each text node and move the content to it
+    const divsToAdd = []
+    blacklistNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const div = document.createElement("div")
+            div.textContent = node.textContent.trim()
+            divsToAdd.push(div)
+        }
+    })
+
+    // Insert the new divs before each <br> element
+    for (let i = 0; i < divsToAdd.length; i++) {
+        blacklistField.appendChild(divsToAdd[i])
+    }
+
+    // Remove the original text nodes and <br> elements
+    blacklistNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            blacklistField.removeChild(node)
+        }
+    })
+
+    const brElements = blacklistField.querySelectorAll("br")
+    brElements.forEach((br) => {
+        br.remove()
+    })
+
+    configureRecipientsBlacklist()
 }
 
 function send() {
@@ -558,6 +639,16 @@ function generateRandomFilename() {
     return randomFilename
 }
 
+function showBlacklistDialogue() {
+    let blacklistDialogue = document.getElementById("blacklistDialogue")
+    blacklistDialogue.classList.remove("invisible")
+}
+
+function closeBlacklistDialogue() {
+    let blacklistDialogue = document.getElementById("blacklistDialogue")
+    blacklistDialogue.classList.add("invisible")
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
@@ -643,10 +734,15 @@ async function sendEmails() {
         countryID           : document.getElementById("country"), // prettier-ignore
     }
 
-    var servers     = fields.servers.value.split("\n") // prettier-ignore
-    var emailTest   = fields.emailTest.value.split("; ") // prettier-ignore
-    var recipients  = fields.recipients.value.split("\n") // prettier-ignore
-    var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
+    var servers         = fields.servers.value.split("\n") // prettier-ignore
+    var emailTest       = fields.emailTest.value.split("; ") // prettier-ignore
+    var recipients      = fields.recipients.value.split("\n") // prettier-ignore
+    var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
+
+    const blacklist = []
+    blacklistNodes.forEach((node) => {
+        blacklist.push(node.textContent)
+    })
 
     // From Names
     var fromNames    = fields.fromNames // prettier-ignore
@@ -967,10 +1063,15 @@ function savehistory() {
         countryID           : document.getElementById("country"), // prettier-ignore
     }
 
-    var servers     = fields.servers.value.split("\n") // prettier-ignore
-    var headers     = fields.headers.value.split("\n").join("||") // prettier-ignore
-    var recipients  = fields.recipients.value.split("\n") // prettier-ignore
-    var blacklist   = fields.blacklist.value.split("\n") // prettier-ignore
+    var servers         = fields.servers.value.split("\n") // prettier-ignore
+    var headers         = fields.headers.value.split("\n").join("||") // prettier-ignore
+    var recipients      = fields.recipients.value.split("\n") // prettier-ignore
+    var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
+
+    const blacklist = []
+    blacklistNodes.forEach((node) => {
+        blacklist.push(node.textContent)
+    })
 
     // From Names
     var fromNamesFields = fields.fromNames // prettier-ignore
