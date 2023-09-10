@@ -101,7 +101,7 @@
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 11.0</h6>
+                  <h6>Ver. 11.1</h6>
                </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">

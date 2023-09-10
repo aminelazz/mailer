@@ -615,6 +615,7 @@ function addToken(event) {
 
                 const deleteButton = document.createElement("button")
                 deleteButton.classList.add("tokenButton")
+                deleteButton.type = "button"
                 deleteButton.textContent = "x"
                 deleteButton.addEventListener("click", () => {
                     token.remove()
