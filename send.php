@@ -430,7 +430,7 @@
                                  Offer Infos
                               </label>
                               <div class="input-group" id="offerInfos">
-                                 <input type="number" class="form-control w-25" id="offerID" name="offerID" placeholder="Offer ID" style="height: 43px;" required>
+                                 <input type="number" class="form-control w-25" id="offerID" name="offerID" placeholder="Offer ID" min="1" style="height: 43px;" required>
                                  <input type="text" class="form-control w-75" id="offerName" name="offerName" placeholder="Offer Name" style="height: 43px;" required>
                               </div>
                            </div>
@@ -738,7 +738,7 @@
                               </label>
                               <div class="row mx-0">
                                  <div class="p-0">
-                                    <input type="number" class="form-control" id="start" name="start" placeholder="Index of recipient to start with" min="0" style="height: 43px;">
+                                    <input type="number" class="form-control" id="start" name="start" placeholder="Index of recipient to start with" min="0" value="0" style="height: 43px;">
                                  </div>
                               </div>
                            </div>

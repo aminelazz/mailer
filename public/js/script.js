@@ -739,7 +739,7 @@ async function sendEmails() {
     var recipients      = fields.recipients.value.split("\n") // prettier-ignore
     var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
 
-    const blacklist = []
+    let blacklist = []
     blacklistNodes.forEach((node) => {
         blacklist.push(node.textContent)
     })
@@ -1068,7 +1068,7 @@ function savehistory() {
     var recipients      = fields.recipients.value.split("\n") // prettier-ignore
     var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
 
-    const blacklist = []
+    let blacklist = []
     blacklistNodes.forEach((node) => {
         blacklist.push(node.textContent)
     })
