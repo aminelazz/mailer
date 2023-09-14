@@ -580,11 +580,11 @@
                                  <textarea id="importfromNames" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported from names here..."></textarea>
                                  <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
                                     <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
-                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(event)">Import</button>
+                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
                                     <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
                                  </div>
-                                 <div class="w-100 mt-2 d-flex justify-content-center invisible" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="okFromName" class="send btn btn-success flex-fill" type="button" style="margin-inline: 30%;" onclick="ok(this)">OK</button>
+                                 <div class="w-100 mt-2 justify-content-center" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="okFromName" class="send btn btn-success w-100" type="button" style="margin-inline: 100%; height: 38px;" onclick="okTokens(this)">OK</button>
                                  </div>
                               </div>
                            </div>
@@ -593,15 +593,15 @@
                            <div class="col">
                               <div class="position-relative">
                                  <div id="subjects" class="random-divs subjects row mx-0 form-control" style="height: 120px;" data-placeholder="Subjects..."></div>
-                                 <textarea id="importsubjectss" class="row mx-0 form-control position-absolute top-0" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported subjects here..."></textarea>
+                                 <textarea id="importsubjectss" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported subjects here..."></textarea>
                                  <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
                                     <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
                                     <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
                                     <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
                                  </div>
-                                 <!-- <div class="w-100 mt-2 d-flex justify-content-center" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="okSubject" class="send btn btn-success flex-fill" type="button" style="margin-inline: 30%;" onclick="ok(this)">OK</button>
-                                 </div> -->
+                                 <div class="w-100 mt-2 justify-content-center" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="okSubject" class="send btn btn-success w-100" type="button" style="margin-inline: 100%; height: 38px;" onclick="okTokens(this)">OK</button>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -869,8 +869,7 @@
                </div>
             </div>
          </div>
-      </div>
-      <!-- End Main Menu -->
+         <!-- End Main Menu -->
 
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

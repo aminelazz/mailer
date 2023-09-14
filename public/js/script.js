@@ -1,107 +1,109 @@
 window.addEventListener("message", receiveMessage, false)
 
 async function receiveMessage(event) {
-    let offerData = event.data
-    console.log(offerData)
+    if (event.origin == "http://45.145.6.18") {
+        let offerData = event.data
+        console.log(offerData)
 
-    // Update the fields in the parent page based on the received data
-    document.getElementById("servers").innerHTML = offerData.servers.replaceAll(",", "\n") // prettier-ignore
-    document.getElementById("headers").innerHTML = offerData.header.replaceAll("||", "\n") // prettier-ignore
-    document.getElementById("contentType").value = offerData.contentType // prettier-ignore
-    document.getElementById("charset").value = offerData.charset // prettier-ignore
-    document.getElementById("encoding").value = offerData.encoding // prettier-ignore
-    document.getElementById("priority").value = offerData.priority // prettier-ignore
-    document.getElementById("offerID").value = offerData.offerID // prettier-ignore
-    document.getElementById("offerName").value = offerData.offerName // prettier-ignore
-    document.getElementById("country").value = offerData.countryID // prettier-ignore
-    document.getElementById("fromNameEncoding").value = offerData.fromNameEncoding // prettier-ignore
-    document.getElementById("subjectEncoding").value = offerData.subjectEncoding // prettier-ignore
-    document.getElementById("fromEmailCheck").checked = !!+offerData.fromEmailCheck // prettier-ignore
-    document.getElementById("fromEmail").value = offerData.fromEmail // prettier-ignore
-    document.getElementById("replyToCheck").checked = !!+offerData.replyToCheck // prettier-ignore
-    document.getElementById("replyTo").value = offerData.replyTo // prettier-ignore
-    document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
-    document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
-    document.getElementById("link").value = offerData.link // prettier-ignore
-    document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
-    document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
+        // Update the fields in the parent page based on the received data
+        document.getElementById("servers").innerHTML = offerData.servers.replaceAll(",", "\n") // prettier-ignore
+        document.getElementById("headers").innerHTML = offerData.header.replaceAll("||", "\n") // prettier-ignore
+        document.getElementById("contentType").value = offerData.contentType // prettier-ignore
+        document.getElementById("charset").value = offerData.charset // prettier-ignore
+        document.getElementById("encoding").value = offerData.encoding // prettier-ignore
+        document.getElementById("priority").value = offerData.priority // prettier-ignore
+        document.getElementById("offerID").value = offerData.offerID // prettier-ignore
+        document.getElementById("offerName").value = offerData.offerName // prettier-ignore
+        document.getElementById("country").value = offerData.countryID // prettier-ignore
+        document.getElementById("fromNameEncoding").value = offerData.fromNameEncoding // prettier-ignore
+        document.getElementById("subjectEncoding").value = offerData.subjectEncoding // prettier-ignore
+        document.getElementById("fromEmailCheck").checked = !!+offerData.fromEmailCheck // prettier-ignore
+        document.getElementById("fromEmail").value = offerData.fromEmail // prettier-ignore
+        document.getElementById("replyToCheck").checked = !!+offerData.replyToCheck // prettier-ignore
+        document.getElementById("replyTo").value = offerData.replyTo // prettier-ignore
+        document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
+        document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
+        document.getElementById("link").value = offerData.link // prettier-ignore
+        document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
+        document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
 
-    let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
-    let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
-    let creativeFields = document.getElementsByClassName("creative") // prettier-ignore
+        let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
+        let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
+        let creativeFields = document.getElementsByClassName("creative") // prettier-ignore
 
-    let fromNames = offerData.fromName.split("||")
-    let subjects = offerData.subject.split("||")
-    let creatives = offerData.creative.split("||||")
+        let fromNames = offerData.fromName.split("||")
+        let subjects = offerData.subject.split("||")
+        let creatives = offerData.creative.split("||||")
 
-    // From Names
-    fromNamesField.innerHTML = ""
+        // From Names
+        fromNamesField.innerHTML = ""
 
-    for (let i = 0; i < fromNames.length; i++) {
-        const token = document.createElement("div")
-        token.classList.add("token")
+        for (let i = 0; i < fromNames.length; i++) {
+            const token = document.createElement("div")
+            token.classList.add("token")
 
-        const content = document.createElement("span")
-        content.classList.add("fromName")
+            const content = document.createElement("span")
+            content.classList.add("fromName")
 
-        content.textContent = fromNames[i]
+            content.textContent = fromNames[i]
 
-        const deleteButton = document.createElement("button")
-        deleteButton.classList.add("tokenButton")
-        deleteButton.textContent = "x"
-        deleteButton.addEventListener("click", () => {
-            token.remove()
-        })
+            const deleteButton = document.createElement("button")
+            deleteButton.classList.add("tokenButton")
+            deleteButton.textContent = "x"
+            deleteButton.addEventListener("click", () => {
+                token.remove()
+            })
 
-        token.appendChild(content)
-        token.appendChild(deleteButton)
-        fromNamesField.appendChild(token)
-    }
-
-    // Subjects
-    subjectsField.innerHTML = ""
-
-    for (let i = 0; i < subjects.length; i++) {
-        const token = document.createElement("div")
-        token.classList.add("token")
-
-        const content = document.createElement("span")
-        content.classList.add("subject")
-
-        content.textContent = subjects[i]
-
-        const deleteButton = document.createElement("button")
-        deleteButton.classList.add("tokenButton")
-        deleteButton.textContent = "x"
-        deleteButton.addEventListener("click", () => {
-            token.remove()
-        })
-
-        token.appendChild(content)
-        token.appendChild(deleteButton)
-        subjectsField.appendChild(token)
-    }
-
-    // Creatives
-    for (let i = 0; i < creativeFields.length; i++) {
-        if (i != 0) {
-            creativeFields[i].parentNode.parentNode.remove()
+            token.appendChild(content)
+            token.appendChild(deleteButton)
+            fromNamesField.appendChild(token)
         }
-    }
-    for (let i = 0; i < creatives.length; i++) {
-        if (creativeFields.length < creatives.length) {
-            await addCreative()
+
+        // Subjects
+        subjectsField.innerHTML = ""
+
+        for (let i = 0; i < subjects.length; i++) {
+            const token = document.createElement("div")
+            token.classList.add("token")
+
+            const content = document.createElement("span")
+            content.classList.add("subject")
+
+            content.textContent = subjects[i]
+
+            const deleteButton = document.createElement("button")
+            deleteButton.classList.add("tokenButton")
+            deleteButton.textContent = "x"
+            deleteButton.addEventListener("click", () => {
+                token.remove()
+            })
+
+            token.appendChild(content)
+            token.appendChild(deleteButton)
+            subjectsField.appendChild(token)
         }
-        $(".creative").eq(i).summernote("code", creatives[i])
-        // previewCreative(creativeFields[i])
+
+        // Creatives
+        for (let i = 0; i < creativeFields.length; i++) {
+            if (i != 0) {
+                creativeFields[i].parentNode.parentNode.remove()
+            }
+        }
+        for (let i = 0; i < creatives.length; i++) {
+            if (creativeFields.length < creatives.length) {
+                await addCreative()
+            }
+            $(".creative").eq(i).summernote("code", creatives[i])
+            // previewCreative(creativeFields[i])
+        }
+
+        previewCreative()
+        organizeBlacklist(event)
+        configureRecipientsBlacklist()
+
+        // Go to the send tab
+        document.getElementById("nav-send-tab").click()
     }
-
-    previewCreative()
-    organizeBlacklist(event)
-    configureRecipientsBlacklist()
-
-    // Go to the send tab
-    document.getElementById("nav-send-tab").click()
 }
 
 var sendStatus = ""
@@ -465,38 +467,21 @@ function organizeBlacklist(event) {
         pastedText = blacklistField.innerHTML
     }
 
-    // Append pasted text to the div
-    blacklistField.innerHTML += pastedText.replaceAll("\n", "<br>")
+    // Split the text by new line
+    pastedText = pastedText.split("\n")
 
-    // Create a new div element for each text node and move the content to it
-    const divsToAdd = []
-    for (let i = 0; i < blacklistNodes.length; i++) {
-        const node = blacklistNodes[i]
-        if (node.nodeType === Node.TEXT_NODE) {
-            const div = document.createElement("div")
-            div.textContent = node.textContent.trim()
-            divsToAdd.push(div)
-        }
-    }
+    // Remove empy value from array
+    pastedText = pastedText.filter((element) => element !== "")
 
-    // Insert the new divs before each <br> element
-    for (let i = 0; i < divsToAdd.length; i++) {
-        blacklistField.appendChild(divsToAdd[i])
-    }
+    let content = ""
 
-    // Remove the original text nodes and <br> elements
-    for (let i = 0; i < blacklistNodes.length; i++) {
-        const node = blacklistNodes[i]
-        if (node.nodeType === Node.TEXT_NODE) {
-            blacklistField.removeChild(node)
-        }
-    }
+    // for each element of array add to it the div html attributes and br
+    pastedText.forEach((element) => {
+        element = `<div>${element}<br></div>`
+        content += element
+    })
 
-    const brElements = blacklistField.querySelectorAll("br")
-    for (let i = 0; i < brElements.length; i++) {
-        const br = brElements[i]
-        br.remove()
-    }
+    blacklistField.innerHTML = content
 
     configureRecipientsBlacklist()
     blacklistSpinner.classList.add("invisible")
@@ -597,8 +582,6 @@ function refreshIframe() {
 }
 
 function addToken(event) {
-    console.log(event)
-
     if (event.key === "Enter") {
         event.preventDefault()
         const directText = event.target.value
@@ -734,24 +717,100 @@ function testNow() {
     test = true
 }
 
+function deleteTokensEvent(tokens) {
+    tokens.forEach((token) => {
+        const deleteButton = token.querySelector("button")
+        deleteButton.addEventListener("click", () => {
+            token.remove()
+        })
+    })
+}
+
 function exportTokens(event) {
     const target = event
     const container = target.parentNode.parentNode.querySelector("div")
 
     // Put innerHTML in the clipboard
     navigator.clipboard.writeText(container.innerHTML)
+
+    target.textContent = "Copied!"
+
+    setTimeout(() => {
+        target.textContent = "Export"
+    }, 2000)
 }
 
 async function importTokens(event) {
-    console.log(event)
-    const target = event.target
+    const target = event
+    if (navigator.clipboard.readText) {
+        const clipboardText = await navigator.clipboard.readText()
+        const container = target.parentElement.parentElement.querySelector("div")
+
+        // Check if the clipboard content is a valid tokens
+        try {
+            let div = document.createElement("div")
+            div.innerHTML = clipboardText
+            const tokens = div.querySelectorAll(".token")
+            if (tokens.length == 0) {
+                throw new Error("Invalid tokens")
+            } else {
+                container.innerHTML += clipboardText
+            }
+        } catch (error) {
+            console.error(`Error: ${error.message}`)
+        }
+    } else {
+        const pastContainer = target.parentNode.parentNode.getElementsByTagName("textarea")[0]
+        const buttonsContainer = target.parentNode.parentNode.getElementsByTagName("div")[1]
+        const okButtonContainer = target.parentNode.parentNode.getElementsByTagName("div")[2]
+
+        pastContainer.value = ""
+
+        pastContainer.classList.remove("invisible")
+        buttonsContainer.style.display = "none"
+        okButtonContainer.style.display = "grid"
+    }
+
+    // Add event listener to the x button of each token to remove it
+    const tokens = target.parentNode.parentNode.querySelectorAll(".token")
+    deleteTokensEvent(tokens)
+}
+
+function clearTokens(event) {
+    const target = event
+    const container = target.parentNode.parentNode.querySelector("div")
+
+    container.innerHTML = ""
+}
+
+function okTokens(event) {
+    const target = event
+    const container = target.parentElement.parentElement.querySelector("div")
     const pastContainer = target.parentNode.parentNode.querySelector("textarea")
     const buttonsContainer = target.parentNode.parentNode.querySelectorAll("div")[1]
     const okButtonContainer = target.parentNode.parentNode.querySelectorAll("div")[2]
 
-    pastContainer.classList.remove("invisible")
-    buttonsContainer.classList.add("d-none")
-    okButtonContainer.classList.remove("invisible")
+    // Check if the clipboard content is a valid tokens
+    try {
+        let div = document.createElement("div")
+        div.innerHTML = pastContainer.value
+        const tokens = div.querySelectorAll(".token")
+        if (tokens.length == 0) {
+            throw new Error("Invalid tokens")
+        } else {
+            container.innerHTML += pastContainer.value
+        }
+    } catch (error) {
+        console.error(`Error: ${error.message}`)
+    }
+
+    // Add event listener to the x button of each token to remove it
+    const tokens = target.parentNode.parentNode.querySelectorAll(".token")
+    deleteTokensEvent(tokens)
+
+    pastContainer.classList.add("invisible")
+    buttonsContainer.style.display = "grid"
+    okButtonContainer.style.display = "none"
 }
 
 // Handle form submit
