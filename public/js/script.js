@@ -1,109 +1,125 @@
 window.addEventListener("message", receiveMessage, false)
 
+const dropZone = document.getElementById("dropZone")
+const fileInput = document.getElementById("data")
+
+var nbrRotations
+
 async function receiveMessage(event) {
-    if (event.origin == "http://45.145.6.18") {
+    if (event.origin == "https://45.145.6.18") {
         let offerData = event.data
         console.log(offerData)
-
-        // Update the fields in the parent page based on the received data
-        document.getElementById("servers").innerHTML = offerData.servers.replaceAll(",", "\n") // prettier-ignore
-        document.getElementById("headers").innerHTML = offerData.header.replaceAll("||", "\n") // prettier-ignore
-        document.getElementById("contentType").value = offerData.contentType // prettier-ignore
-        document.getElementById("charset").value = offerData.charset // prettier-ignore
-        document.getElementById("encoding").value = offerData.encoding // prettier-ignore
-        document.getElementById("priority").value = offerData.priority // prettier-ignore
-        document.getElementById("offerID").value = offerData.offerID // prettier-ignore
-        document.getElementById("offerName").value = offerData.offerName // prettier-ignore
-        document.getElementById("country").value = offerData.countryID // prettier-ignore
-        document.getElementById("fromNameEncoding").value = offerData.fromNameEncoding // prettier-ignore
-        document.getElementById("subjectEncoding").value = offerData.subjectEncoding // prettier-ignore
-        document.getElementById("fromEmailCheck").checked = !!+offerData.fromEmailCheck // prettier-ignore
-        document.getElementById("fromEmail").value = offerData.fromEmail // prettier-ignore
-        document.getElementById("replyToCheck").checked = !!+offerData.replyToCheck // prettier-ignore
-        document.getElementById("replyTo").value = offerData.replyTo // prettier-ignore
-        document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
-        document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
-        document.getElementById("link").value = offerData.link // prettier-ignore
-        // document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
-        // document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
-
-        let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
-        let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
-        let creativeFields = document.getElementsByClassName("creative") // prettier-ignore
-
-        let fromNames = offerData.fromName.split("||")
-        let subjects = offerData.subject.split("||")
-        let creatives = offerData.creative.split("||||")
-
-        // From Names
-        fromNamesField.innerHTML = ""
-
-        for (let i = 0; i < fromNames.length; i++) {
-            const token = document.createElement("div")
-            token.classList.add("token")
-
-            const content = document.createElement("span")
-            content.classList.add("fromName")
-
-            content.textContent = fromNames[i]
-
-            const deleteButton = document.createElement("button")
-            deleteButton.classList.add("tokenButton")
-            deleteButton.textContent = "x"
-            deleteButton.addEventListener("click", () => {
-                token.remove()
-            })
-
-            token.appendChild(content)
-            token.appendChild(deleteButton)
-            fromNamesField.appendChild(token)
-        }
-
-        // Subjects
-        subjectsField.innerHTML = ""
-
-        for (let i = 0; i < subjects.length; i++) {
-            const token = document.createElement("div")
-            token.classList.add("token")
-
-            const content = document.createElement("span")
-            content.classList.add("subject")
-
-            content.textContent = subjects[i]
-
-            const deleteButton = document.createElement("button")
-            deleteButton.classList.add("tokenButton")
-            deleteButton.textContent = "x"
-            deleteButton.addEventListener("click", () => {
-                token.remove()
-            })
-
-            token.appendChild(content)
-            token.appendChild(deleteButton)
-            subjectsField.appendChild(token)
-        }
-
-        // Creatives
-        for (let i = 0; i < creativeFields.length; i++) {
-            if (i != 0) {
-                creativeFields[i].parentNode.parentNode.remove()
-            }
-        }
-        for (let i = 0; i < creatives.length; i++) {
-            if (creativeFields.length < creatives.length) {
-                await addCreative()
-            }
-            $(".creative").eq(i).summernote("code", creatives[i])
-            // previewCreative(creativeFields[i])
-        }
-
-        previewCreative()
-        organizeBlacklist(event)
-        configureRecipientsBlacklist()
-
-        // Go to the send tab
-        document.getElementById("nav-send-tab").click()
+        await organizeData(offerData)
     }
+}
+
+async function organizeData(data) {
+    // Update the fields in the parent page based on the received data
+    document.getElementById("servers").innerHTML = data.servers.replaceAll(",", "\n") // prettier-ignore
+    document.getElementById("pauseAfterSend").value = data.pauseAfterSend // prettier-ignore
+    document.getElementById("rotationAfter").value = data.rotationAfter // prettier-ignore
+    document.getElementById("BCCnumber").value = data.BCCnumber // prettier-ignore
+    document.getElementById("headers").innerHTML = data.header.replaceAll("||", "\n") // prettier-ignore
+    document.getElementById("contentType").value = data.contentType // prettier-ignore
+    document.getElementById("charset").value = data.charset // prettier-ignore
+    document.getElementById("encoding").value = data.encoding // prettier-ignore
+    document.getElementById("priority").value = data.priority // prettier-ignore
+    document.getElementById("offerID").value = data.offerID // prettier-ignore
+    document.getElementById("offerName").value = data.offerName // prettier-ignore
+    document.getElementById("country").value = data.countryID // prettier-ignore
+    document.getElementById("fromNameEncoding").value = data.fromNameEncoding // prettier-ignore
+    document.getElementById("subjectEncoding").value = data.subjectEncoding // prettier-ignore
+    document.getElementById("fromEmailCheck").checked = !!+data.fromEmailCheck // prettier-ignore
+    document.getElementById("fromEmail").value = data.fromEmail // prettier-ignore
+    document.getElementById("replyToCheck").checked = !!+data.replyToCheck // prettier-ignore
+    document.getElementById("replyTo").value = data.replyTo // prettier-ignore
+    document.getElementById("returnPathCheck").checked = !!+data.returnPathCheck // prettier-ignore
+    document.getElementById("returnPath").value = data.returnPath // prettier-ignore
+    document.getElementById("link").value = data.link // prettier-ignore
+    // document.getElementById("recipients").innerHTML = data.recipients.replaceAll(",", "\n") // prettier-ignore
+    // document.getElementById("blacklist").innerHTML = data.blacklist.replaceAll(",", "\n") // prettier-ignore
+
+    let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
+    let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
+    let creativeFields = document.getElementsByClassName("creative") // prettier-ignore
+
+    let fromNames = data.fromName.split("||")
+    let subjects = data.subject.split("||")
+    let creatives = data.creative.split("||||")
+
+    // From Names
+    fromNamesField.innerHTML = ""
+
+    if (fromNames.length == 1 && fromNames[0] == "") {
+        fromNames = []
+    }
+    for (let i = 0; i < fromNames.length; i++) {
+        const token = document.createElement("div")
+        token.classList.add("token")
+
+        const content = document.createElement("span")
+        content.classList.add("fromName")
+
+        content.textContent = fromNames[i]
+
+        const deleteButton = document.createElement("button")
+        deleteButton.classList.add("tokenButton")
+        deleteButton.textContent = "x"
+        deleteButton.addEventListener("click", () => {
+            token.remove()
+        })
+
+        token.appendChild(content)
+        token.appendChild(deleteButton)
+        fromNamesField.appendChild(token)
+    }
+
+    // Subjects
+    subjectsField.innerHTML = ""
+
+    if (subjects.length == 1 && subjects[0] == "") {
+        subjects = []
+    }
+    for (let i = 0; i < subjects.length; i++) {
+        const token = document.createElement("div")
+        token.classList.add("token")
+
+        const content = document.createElement("span")
+        content.classList.add("subject")
+
+        content.textContent = subjects[i]
+
+        const deleteButton = document.createElement("button")
+        deleteButton.classList.add("tokenButton")
+        deleteButton.textContent = "x"
+        deleteButton.addEventListener("click", () => {
+            token.remove()
+        })
+
+        token.appendChild(content)
+        token.appendChild(deleteButton)
+        subjectsField.appendChild(token)
+    }
+
+    // Creatives
+    for (let i = 0; i < creativeFields.length; i++) {
+        if (i != 0) {
+            creativeFields[i].parentNode.parentNode.remove()
+        }
+    }
+    for (let i = 0; i < creatives.length; i++) {
+        if (creativeFields.length < creatives.length) {
+            await addCreative()
+        }
+        $(".creative").eq(i).summernote("code", creatives[i])
+        // previewCreative(creativeFields[i])
+    }
+
+    organizeBlacklist(event)
+    configureRecipientsBlacklist()
+
+    // Go to the send tab
+    document.getElementById("nav-send-tab").click()
 }
 
 var sendStatus = ""
@@ -115,6 +131,7 @@ var test = false
 var lastRecipientCount = 0
 
 try {
+    var serversField = document.getElementById("servers")
     var recipientsField = document.getElementById("recipients")
     var blacklistField = document.getElementById("blacklist")
 
@@ -133,25 +150,54 @@ try {
         var attachementsName = document.getElementById("attachementsName")
         var clearButton = document.getElementById("clearAttachements")
         var failed = document.getElementById("failed")
+        var writeType = document.getElementById("writeType")
+
+        writeType.selectedIndex = 0 // Select the first option
 
         statusLabel.innerText = "Status: Pending"
 
         // Clear the failed area
         failed.innerText = ""
 
+        // hide the clear attachements button
         if (attachementsName.value != "") {
             clearButton.classList.toggle("invisible")
         }
 
+        // initiate summernote editor
         const summernotes = document.querySelectorAll(".note-editor, .note-frame")
         summernotes.forEach((summernote) => {
             summernote.style.padding = "0"
         })
 
-        previewCreative()
+        // organize copy/paste/edit buttons of from names and subjects
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            let copy_pasteButtons = document.querySelectorAll(".copy_paste")
+            copy_pasteButtons.forEach((button) => {
+                button.classList.remove("d-none")
+            })
+            let editButtons = document.querySelectorAll(".edit")
+            editButtons.forEach((button) => {
+                button.classList.add("d-none")
+                button.classList.remove("rounded-end", "rounded-bottom-0")
+            })
+        } else {
+            let copy_pasteButtons = document.querySelectorAll(".copy_paste")
+            copy_pasteButtons.forEach((button) => {
+                button.classList.add("d-none")
+            })
+            let editButtons = document.querySelectorAll(".edit")
+            editButtons.forEach((button) => {
+                button.classList.remove("d-none")
+                button.classList.add("rounded-end", "rounded-bottom-0")
+            })
+        }
+
         fileUpload()
         clearFiles()
         configureRecipientsBlacklist()
+
+        initializeTooltip()
     })
 } catch (error) {}
 
@@ -165,52 +211,16 @@ function preventUnload() {
     return true
 }
 
-// function changeTimeValues() {
-//     var servers = document.getElementById("servers").value.split("\n")
-//     var recipients = document.getElementById("recipients").value.split("\n")
-//     var pauseAfterSend = document.getElementById("pauseAfterSend").value
-//     var rotationAfterField = document.getElementById("rotationAfter")
-//     var BCCnumber = document.getElementById("BCCnumber")
-//     var hours = 24 * 3600
+function initializeTooltip(boundary = null) {
+    boundary = boundary || document.body
 
-//     recipients = recipients.filter((element) => element !== "")
-//     servers = servers.filter((element) => element !== "")
-
-//     var serversCount = servers.length
-//     var recipientsCount = recipients.length
-
-//     if (recipientsCount > 50) {
-//         if ((servers && recipients) != "") {
-//             // Total number of mails sent in one batch
-//             let mailsPerBatch = serversCount * parseInt(BCCnumber.value)
-
-//             // Total number of batches required
-//             let totalBatches = Math.ceil(recipientsCount / mailsPerBatch)
-
-//             // Total time spent sending emails
-//             let totalSendTime = totalBatches * pauseAfterSend
-
-//             // Rotation after (seconds)
-//             let rotationAfter = Math.floor((hours - totalSendTime) / 60)
-//             rotationAfterField.value = rotationAfter
-
-//             if (rotationAfterField.value <= 0) {
-//                 rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
-//             } else {
-//                 rotationAfterField.setCustomValidity("")
-//             }
-//         }
-//     }
-// }
-
-function previewCreative(event) {
-    try {
-        var creativeField = event
-        var previewField = event.parentNode.parentNode.querySelector(".preview")
-        var creative = creativeField.value
-
-        previewField.innerHTML = creative
-    } catch (error) {}
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(
+        (tooltipTriggerEl) =>
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                boundary: boundary, // or document.querySelector('#boundary')
+            })
+    )
 }
 
 function generatePattern() {
@@ -333,7 +343,7 @@ function checkFields() {
     }
 
     // servers validity
-    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gim
+    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl|):[\w.-]+@[\w.-]+:\S+)$/gim
 
     servers.setCustomValidity("")
 
@@ -623,7 +633,32 @@ function getCreatives() {
     let creativeArray = []
 
     for (let i = 0; i < creatives.length; i++) {
-        creativeArray.push($(".creative").eq(i).summernote("code"))
+        const creativesContainer = creatives[i].parentNode.parentNode
+        const subcreativesContainer = creativesContainer.querySelector(".subcreativesContainer")
+        const subcreatives = subcreativesContainer.querySelectorAll(".subcreative")
+
+        let creative = $(".creative").eq(i).summernote("code")
+        if (creative.trim() == "") {
+            continue
+        }
+        let subcreativesArray = []
+        subcreatives.forEach((subcreative) => {
+            if (subcreative.value.trim() !== "") {
+                const subcreativeAttachement = subcreative.parentNode.querySelector("input[type=file]")
+                let subcreativeObject = {
+                    subcreative: subcreative.value,
+                    attachement: subcreativeAttachement.files[0],
+                }
+                subcreativesArray.push(subcreativeObject)
+            }
+        })
+
+        const creativeObject = {
+            creative: creative,
+            subcreatives: subcreativesArray,
+        }
+
+        creativeArray.push(creativeObject)
     }
     // console.log(creativeArray)
     return creativeArray
@@ -637,31 +672,39 @@ async function addCreative() {
     creativeNew.classList.add("mt-2")
 
     // Clear text in the textarea and div elements within the duplicated container
-    const creativeInCreativeNw = creativeNew.getElementsByTagName("textarea")
-    const divInCreativeNw = creativeNew.querySelectorAll("div>div")[0]
-    const previewInCreativeNw = creativeNew.querySelectorAll(".preview")
+    const divInCreativeNw = creativeNew.querySelectorAll("div>div>div>div")[0]
     const removeButtonInCreativeNw = creativeNew.querySelectorAll(".removeCreative")[0]
     const summernoteOld = creativeNew.querySelectorAll(".note-editor, .note-frame")[0]
     summernoteOld.remove()
 
+    const subcreativesContainer = creativeNew.querySelectorAll(".subcreativesContainer")[0]
+    const fileContainers = creativeNew.querySelectorAll(".fileContainer")
+
+    fileContainers.forEach((fileContainer) => {
+        const fileInput = fileContainer.querySelector("input[type=file]")
+        const fileLabel = fileContainer.querySelector("label")
+        const generatedID = generateRandomFilename()
+
+        fileInput.id = generatedID
+        fileLabel.setAttribute("for", generatedID)
+    })
+
+    // Separator
+    const hr = document.createElement("hr")
+    hr.classList.add("my-3")
+
     removeButtonInCreativeNw.classList.remove("invisible")
     removeButtonInCreativeNw.addEventListener("click", () => {
         creativeNew.remove()
+        hr.remove()
     })
-
-    for (let textarea of creativeInCreativeNw) {
-        textarea.value = "" // Clear the text inside the textarea
-    }
 
     // divInCreativeNw
     divInCreativeNw.style.display = "block"
     const customID = generateRandomFilename()
     divInCreativeNw.id = customID
 
-    for (let div of previewInCreativeNw) {
-        div.textContent = "" // Clear the text inside the div
-    }
-
+    creativeContainer.appendChild(hr)
     creativeContainer.appendChild(creativeNew)
 
     $(`#${customID}`).summernote({
@@ -726,55 +769,76 @@ function deleteTokensEvent(tokens) {
     })
 }
 
-function exportTokens(event) {
+function copyTokens(event) {
     const target = event
     const container = target.parentNode.parentNode.querySelector("div")
-
     // Put innerHTML in the clipboard
     navigator.clipboard.writeText(container.innerHTML)
 
-    target.textContent = "Copied!"
+    target.classList.replace("idle", "ok")
+    target.querySelector("svg:first-child").classList.add("d-none")
+    target.querySelector("svg:last-child").classList.remove("d-none")
 
     setTimeout(() => {
-        target.textContent = "Export"
+        target.classList.replace("ok", "idle")
+
+        target.querySelector("svg:first-child").classList.remove("d-none")
+        target.querySelector("svg:last-child").classList.add("d-none")
     }, 2000)
 }
 
-async function importTokens(event) {
+async function pasteTokens(event) {
     const target = event
-    const pastContainer = target.parentNode.parentNode.getElementsByTagName("textarea")[0]
-    const buttonsContainer = target.parentNode.parentNode.getElementsByTagName("div")[1]
-    const okButtonContainer = target.parentNode.parentNode.getElementsByTagName("div")[2]
+    console.log("Clipboard API available")
+    const clipboardText = await navigator.clipboard.readText()
+    // console.log(clipboardText)
+    const container = target.parentElement.parentElement.querySelector("div")
 
-    if (navigator.clipboard.readText) {
-        console.log("Clipboard API available")
-        const clipboardText = await navigator.clipboard.readText()
-        const container = target.parentElement.parentElement.querySelector("div")
+    // Check if the clipboard content is a valid tokens
+    try {
+        let div = document.createElement("div")
+        div.innerHTML = clipboardText
+        const tokens = div.querySelectorAll(".token")
+        if (tokens.length == 0) {
+            throw new Error("Invalid tokens")
+        } else {
+            container.innerHTML += clipboardText
 
-        // Check if the clipboard content is a valid tokens
-        try {
-            let div = document.createElement("div")
-            div.innerHTML = clipboardText
-            const tokens = div.querySelectorAll(".token")
-            if (tokens.length == 0) {
-                throw new Error("Invalid tokens")
-            } else {
-                container.innerHTML += clipboardText
-            }
-        } catch (error) {
-            console.error(`Error: ${error.message}`)
+            target.classList.replace("idle", "ok")
+            target.querySelector("svg:first-child").classList.add("d-none")
+            target.querySelector("svg:last-child").classList.remove("d-none")
+
+            setTimeout(() => {
+                target.classList.replace("ok", "idle")
+
+                target.querySelector("svg:first-child").classList.remove("d-none")
+                target.querySelector("svg:last-child").classList.add("d-none")
+            }, 2000)
         }
-    } else {
-        pastContainer.value = ""
-
-        pastContainer.classList.remove("invisible")
-        buttonsContainer.style.display = "none"
-        okButtonContainer.style.display = "grid"
+    } catch (error) {
+        console.error(`Error: ${error.message}`)
     }
 
     // Add event listener to the x button of each token to remove it
     const tokens = target.parentNode.parentNode.querySelectorAll(".token")
     deleteTokensEvent(tokens)
+}
+
+function editTokens(event) {
+    const target = event
+    const allContainer = target.parentNode.parentNode.parentNode
+    const tokensDivContainer = allContainer.children[0]
+    const tokensDiv = tokensDivContainer.children[0]
+
+    const pastContainer = allContainer.children[1]
+    const pastetextarea = pastContainer.children[0]
+
+    tokensDivContainer.classList.replace("d-flex", "d-none")
+    pastContainer.classList.replace("d-none", "d-flex")
+
+    pastetextarea.value = tokensDiv.innerHTML
+    pastetextarea.focus()
+    pastetextarea.select()
 }
 
 function clearTokens(event) {
@@ -786,32 +850,336 @@ function clearTokens(event) {
 
 function okTokens(event) {
     const target = event
-    const container = target.parentElement.parentElement.querySelector("div")
-    const pastContainer = target.parentNode.parentNode.querySelector("textarea")
-    const buttonsContainer = target.parentNode.parentNode.querySelectorAll("div")[1]
-    const okButtonContainer = target.parentNode.parentNode.querySelectorAll("div")[2]
+    const allContainer = target.parentNode.parentNode.parentNode
+    const tokensDivContainer = allContainer.children[0]
+    const tokensDiv = tokensDivContainer.children[0]
+
+    const pastContainer = allContainer.children[1]
+    const pastetextarea = pastContainer.children[0]
 
     // Check if the clipboard content is a valid tokens
     try {
         let div = document.createElement("div")
-        div.innerHTML = pastContainer.value
+        div.innerHTML = pastetextarea.value
         const tokens = div.querySelectorAll(".token")
         if (tokens.length == 0) {
             throw new Error("Invalid tokens")
         } else {
-            container.innerHTML += pastContainer.value
+            // Check if div has TEXTNODE
+            div.childNodes.forEach((child) => {
+                if (child.nodeType == 3) {
+                    throw new Error("Invalid tokens")
+                }
+            })
+            tokensDiv.innerHTML = pastetextarea.value
         }
     } catch (error) {
         console.error(`Error: ${error.message}`)
     }
 
     // Add event listener to the x button of each token to remove it
-    const tokens = target.parentNode.parentNode.querySelectorAll(".token")
+    const tokens = tokensDiv.querySelectorAll(".token")
     deleteTokensEvent(tokens)
 
-    pastContainer.classList.add("invisible")
-    buttonsContainer.style.display = "grid"
-    okButtonContainer.style.display = "none"
+    tokensDivContainer.classList.replace("d-none", "d-flex")
+    pastContainer.classList.replace("d-flex", "d-none")
+}
+
+function changeRcptsWriteType(event) {
+    const target = event
+    const rcptsWriteType = target.value
+    const rcptsTextarea = document.getElementById("recipients")
+    const rcptsDragnDrop = document.getElementById("dropZone")
+    const rcptsDBContainer = document.getElementById("dbContainer")
+
+    const dbRefreshBtn = document.getElementById("dbRefreshBtn")
+
+    switch (rcptsWriteType) {
+        case "manual":
+            rcptsTextarea.classList.remove("d-none")
+            rcptsDragnDrop.classList.replace("d-flex", "d-none")
+            rcptsDBContainer.classList.add("d-none")
+            dbRefreshBtn.classList.add("invisible")
+            break
+
+        case "drag":
+            rcptsTextarea.classList.add("d-none")
+            rcptsDragnDrop.classList.replace("d-none", "d-flex")
+            rcptsDBContainer.classList.add("d-none")
+            dbRefreshBtn.classList.add("invisible")
+            break
+
+        case "db":
+            rcptsTextarea.classList.add("d-none")
+            rcptsDragnDrop.classList.replace("d-flex", "d-none")
+            rcptsDBContainer.classList.remove("d-none")
+            dbRefreshBtn.classList.remove("invisible")
+            break
+
+        default:
+            break
+    }
+}
+
+// Drop Zone of Recipients field
+function handleDragOver(event) {
+    event.preventDefault()
+    dropZone.classList.add("drag-over")
+    event.dataTransfer.dropEffect = "copy"
+}
+
+function handleDragLeave(event) {
+    event.preventDefault()
+    dropZone.classList.remove("drag-over")
+}
+
+function handleDrop(event) {
+    event.preventDefault()
+    dropZone.classList.remove("drag-over")
+    const file = event.dataTransfer.files[0]
+    const fileExtension = file.name.split(".").pop()
+
+    // Check file type is .txt or .csv
+    if (fileExtension === "txt" || fileExtension === "csv") {
+        fileInput.files = event.dataTransfer.files
+
+        dropZone.classList.add("d-none")
+
+        // Show the recipients field
+        recipientsField.classList.remove("d-none")
+
+        writeRecipients(file)
+        // Read file content
+        // const reader = new FileReader()
+
+        // reader.onload = function (e) {
+        //   const fileContent = e.target.result
+        //   console.log(fileContent) // or do something else with the content
+        // }
+
+        // reader.readAsText(fileInput.files[0])
+    } else {
+        alert("Please upload a .txt or .csv file")
+    }
+}
+
+function handleFileInput(event) {
+    const file = event.target.files[0]
+
+    dropZone.classList.add("d-none")
+
+    // Show the recipients field
+    recipientsField.classList.remove("d-none")
+
+    writeRecipients(file)
+}
+
+function writeRecipients(file) {
+    let recipients = document.getElementById("recipients")
+
+    // Read file content
+    const reader = new FileReader()
+    reader.onload = function (e) {
+        const fileContent = e.target.result
+        // console.log(fileContent) // or do something else with the content
+        recipients.value = fileContent
+        configureRecipientsBlacklist()
+    }
+    reader.readAsText(file)
+}
+
+async function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onload = function (e) {
+            const fileContent = e.target.result
+            resolve(fileContent)
+        }
+
+        reader.onerror = function (e) {
+            reject(e.target.error)
+        }
+
+        reader.readAsText(file)
+    })
+}
+
+// DB Field functions
+async function refreshFromDB(event) {
+    const countryID = document.getElementById("country").value
+
+    const refreshBtn = event.target
+    const dbIcon = document.getElementById("dbIcon")
+    const dbLoader = document.getElementById("dbLoader")
+
+    if (countryID == "") {
+        alert("Please select a country first")
+        return
+    }
+
+    refreshBtn.disabled = true
+    dbIcon.classList.add("d-none")
+    dbLoader.classList.remove("d-none")
+
+    const result = await fetch(`https://45.145.6.18/database/data/php/data.php?countryID=${countryID}`)
+    const response = await result.json()
+
+    console.log(response)
+
+    refreshBtn.disabled = false
+    dbIcon.classList.remove("d-none")
+    dbLoader.classList.add("d-none")
+
+    if (response.status != "success") {
+        alert(`${response.status}\n\n${response.message}`)
+        return
+    }
+    displayData(response.data)
+}
+
+function displayData(data) {
+    const db = document.getElementById("db")
+    db.querySelector("#selectPlaceholder").classList.add("d-none")
+
+    data.forEach((element) => {
+        const id = element.id
+        const name = element.name
+        const nbrRecipients = `${element.nbrRecipients} recipients`
+
+        // Create a new data entry and set its attributes
+        const dataEntry = document.getElementById("dataEntryExample").cloneNode(true)
+        dataEntry.id = ""
+        dataEntry.setAttribute("data-id", id)
+        dataEntry.classList.replace("d-none", "d-flex")
+
+        // Add event listener to the data entry
+        dataEntry.addEventListener("click", (event) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            const dataEntries = db.querySelectorAll(".dataEntry")
+            dataEntries.forEach((dataEntry) => {
+                dataEntry.setAttribute("data-selected", false)
+            })
+
+            dataEntry.setAttribute("data-selected", true)
+
+            // Set the recipients number
+            const nbrRecipients = document.getElementById("nbrRecipients")
+            nbrRecipients.textContent = element.nbrRecipients
+        })
+
+        // Set the data entry content
+        const dataName = dataEntry.querySelector(".dataName")
+        const dataNbrRecipients = dataEntry.querySelector(".dataNbrRecipients")
+        const loadRecipientBtn = dataEntry.querySelector(".loadRecipientBtn")
+
+        dataName.textContent = name
+        dataNbrRecipients.textContent = nbrRecipients
+        loadRecipientBtn.addEventListener("click", (event) => loadDataToRecipientsField(event, id, element.nbrRecipients))
+
+        const tooltip = new bootstrap.Tooltip(loadRecipientBtn, {
+            boundary: loadRecipientBtn, // or document.querySelector('#boundary')
+        })
+
+        // Append the data entry to the db div
+        db.appendChild(dataEntry)
+    })
+}
+
+async function loadDataToRecipientsField(event, id, nbrRecipients) {
+    event.stopPropagation()
+
+    const recipientsLoader = document.getElementById("recipientsLoader")
+    recipientsLoader.classList.remove("invisible")
+
+    // Load data to the recipients field
+    const result = await fetch(`https://45.145.6.18/database/data/php/download_data.php?id=${id}`)
+    const response = await result.json()
+
+    recipientsField.value = response.data
+
+    configureRecipientsBlacklist()
+
+    let writeType = document.getElementById("writeType")
+    writeType.selectedIndex = 0
+    changeRcptsWriteType(writeType)
+
+    recipientsLoader.classList.add("invisible")
+    // console.log(response)
+}
+
+function setSchedule(setButton) {
+    const schedule = document.getElementById("schedule").value
+    const startSend = document.getElementById("startSend")
+    const cancelSchedule = document.getElementById("cancelSchedule")
+
+    // convert schedule to date object
+    const scheduleDate = new Date(schedule)
+    // test if the date is bigger than now
+    const now = new Date()
+    if (scheduleDate <= now) {
+        alert("Please select a date bigger than now")
+        return
+    }
+
+    setButton.disabled = true
+    cancelSchedule.classList.remove("d-none")
+
+    let scheduled = true
+
+    cancelSchedule.addEventListener("click", () => {
+        scheduled = false
+    })
+
+    function updateCountdown() {
+        const currentTime = new Date()
+        const timeDifference = scheduleDate - currentTime
+
+        if (timeDifference <= 0 || !scheduled) {
+            // Timer has reached zero or went negative
+            clearInterval(timer)
+            setButton.textContent = "Set"
+            setButton.disabled = false
+            cancelSchedule.classList.add("d-none")
+            if (timeDifference <= 0) startSend.click()
+        } else {
+            // Calculate remaining time
+            // 1 hour = 3600000 milliseconds
+            const hours = Math.floor(timeDifference / 3600000).toString().padStart(2, '0') //prettier-ignore
+            // 1 minute = 60000 milliseconds
+            const minutes = Math.floor((timeDifference % 3600000) / 60000).toString().padStart(2, '0') //prettier-ignore
+            // 1 second = 1000 milliseconds
+            const seconds = Math.floor((timeDifference % 60000) / 1000).toString().padStart(2, '0') //prettier-ignore
+
+            // Display the remaining time
+            setButton.textContent = `${hours}:${minutes}:${seconds}`
+        }
+    }
+
+    // Update the countdown every second
+    const timer = setInterval(updateCountdown, 1000)
+
+    // Initial update
+    updateCountdown()
+}
+
+function showSubcreativeAttachementName(event) {
+    const target = event.target
+    const subcreativeAttachementLabel = target.parentNode.querySelector(".subcreativeAttachementLabel")
+    subcreativeAttachementLabel.textContent = target.files[0].name
+    subcreativeAttachementLabel.classList.replace("btn-secondary", "btn-success")
+}
+
+function clearSubcreativeAttachement(event) {
+    const target = event
+    const subcreativeAttachementLabel = target.parentNode.querySelector(".subcreativeAttachementLabel")
+    subcreativeAttachementLabel.textContent = "Choose file"
+    subcreativeAttachementLabel.classList.replace("btn-success", "btn-secondary")
+
+    const subcreativeAttachement = target.parentNode.querySelector("input[type=file]")
+    subcreativeAttachement.value = ""
 }
 
 // Handle form submit
@@ -862,6 +1230,9 @@ $(document).ready(function () {
 
         // Send email
         sendEmails()
+
+        // Calculate remaining time
+        displayRemainingTime()
     })
 })
 
@@ -888,6 +1259,7 @@ async function sendEmails() {
         replyTo             : document.getElementById("replyTo"), // prettier-ignore
         returnPathCheck     : document.getElementById("returnPathCheck"), // prettier-ignore
         returnPath          : document.getElementById("returnPath"), // prettier-ignore
+        tracking            : document.getElementById("tracking"), // prettier-ignore
         link                : document.getElementById("link"), // prettier-ignore
         attachements        : document.getElementById("attachements"), // prettier-ignore
         testAfter           : document.getElementById("testAfter"), // prettier-ignore
@@ -927,9 +1299,6 @@ async function sendEmails() {
         subjectArray.push(subjects[i].textContent)
     }
 
-    // Creative
-    let creativeArray = getCreatives()
-
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
     const pauseAfterSend    = fields.pauseAfterSend.value * 1000 // prettier-ignore
@@ -948,6 +1317,7 @@ async function sendEmails() {
     const replyTo           = fields.replyTo.value // prettier-ignore
     const returnPathCheck   = fields.returnPathCheck.checked // prettier-ignore
     const returnPath        = fields.returnPath.value // prettier-ignore
+    const tracking          = fields.tracking.checked // prettier-ignore
     const link              = fields.link.value // prettier-ignore
     const attachements      = fields.attachements.files // prettier-ignore
     const testAfter         = fields.testAfter.value // prettier-ignore
@@ -956,12 +1326,55 @@ async function sendEmails() {
     const mailerID          = localStorage.getItem("mailerID") // prettier-ignore
     const countryID         = fields.countryID.value // prettier-ignore
 
+    // Get current date and time and format it like (YYYY-MM-DD HH:MM:SS)
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const seconds = date.getSeconds()
+    const currentDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+
     // Remove empty lines
     servers         = servers.filter((element) => element !== "") // prettier-ignore
     emailTest       = emailTest.filter((element) => element !== "") // prettier-ignore
     recipients      = recipients.filter((element) => element !== "") // prettier-ignore
     blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
-    creativeArray   = creativeArray.filter((element) => element !== "") // prettier-ignore
+
+    // Creative
+    let creativeArray = getCreatives()
+    // console.log(creativeArray)
+    let UID = generateUID()
+    // console.log(`Generated UID: ${UID}`)
+    if (tracking) {
+        const subData = {
+            offerName:          offerName, // prettier-ignore
+            headers:            headers, // prettier-ignore
+            servers:            servers, // prettier-ignore
+            contentType:        contentType, // prettier-ignore
+            charset:            charset, // prettier-ignore
+            encoding:           encoding, // prettier-ignore
+            priority:           priority, // prettier-ignore
+            fromNameEncoding:   fromNameEncoding, // prettier-ignore
+            fromNames:          fromNameArray, // prettier-ignore
+            subjectEncoding:    subjectEncoding, // prettier-ignore
+            subjects:           subjectArray, // prettier-ignore
+            fromEmailCheck:     fromEmailCheck, // prettier-ignore
+            fromEmail:          fromEmail, // prettier-ignore
+            replyToCheck:       replyToCheck, // prettier-ignore
+            replyTo:            replyTo, // prettier-ignore
+            returnPathCheck:    returnPathCheck, // prettier-ignore
+            returnPath:         returnPath, // prettier-ignore
+            tracking:           tracking, // prettier-ignore
+            link:               link, // prettier-ignore
+            countryID:          countryID, // prettier-ignore
+            date:               currentDate, // prettier-ignore
+        }
+
+        // Save the subData in the database
+        saveSubcreatives(creativeArray, UID, subData)
+    }
 
     // Remove recipients who are in the blacklist
     const filteredRecipients = recipients.filter((recipient) => !blacklist.includes(recipient))
@@ -995,15 +1408,10 @@ async function sendEmails() {
 
     count = filteredRecipients.length == 0 ? modifiedRecipients.length : count
 
-    // Upload history to db
-    let status = document.getElementById("status").textContent
-    if (status.includes("Pending") || status.includes("Stopped")) {
-    }
-
     // Calculate rotations number
     const sendPerRotation = BCCnumber * servers.length
     const result = modifiedRecipients.length / sendPerRotation
-    const nbrRotations = result !== Math.floor(result) ? Math.ceil(result) : result
+    nbrRotations = result !== Math.floor(result) ? Math.ceil(result) : result
 
     // Perform the rotation
     rotation: for (let i = 0; i < nbrRotations; i++) {
@@ -1040,11 +1448,9 @@ async function sendEmails() {
                 switch (sendStatus) {
                     case "paused":
                         break rotation
-                        break;
 
                     case "stopped":
                         break rotation
-                        break;
                 
                     default:
                         break;
@@ -1062,13 +1468,18 @@ async function sendEmails() {
                     lastRecipientCount = k + 1
                 }
 
-                let fromName    = fromNameArray[Math.floor(Math.random() * fromNameArray.length)] // Random From Name
-                let subject     = subjectArray[Math.floor(Math.random() * subjectArray.length)]   // Random Subject
-                let creative    = creativeArray[Math.floor(Math.random() * creativeArray.length)] // Random Creative
+                let fromName        = fromNameArray[Math.floor(Math.random() * fromNameArray.length)] // Random From Name
+                let subject         = subjectArray[Math.floor(Math.random() * subjectArray.length)]   // Random Subject
+                let creativeIndex   = Math.floor(Math.random() * creativeArray.length) // Random Creative
+
+                let creativeObject      = creativeArray[creativeIndex]
+                let creative            = creativeObject.creative
 
                 let recipient = modifiedRecipients[k]
 
                 let formData = new FormData()
+                formData.append("UID", UID)
+                formData.append("offerName", offerName)
                 formData.append("server", server)
                 formData.append("headers", headers)
                 formData.append("contentType", contentType)
@@ -1085,10 +1496,15 @@ async function sendEmails() {
                 formData.append("replyTo", replyTo)
                 formData.append("returnPathCheck", returnPathCheck)
                 formData.append("returnPath", returnPath)
+                formData.append("tracking", tracking)
                 formData.append("link", link)
                 formData.append("creative", creative)
+                formData.append("creativeID", creativeIndex)
                 formData.append("recipient", recipient)
+                formData.append("countryID", countryID)
+                formData.append("date", currentDate)
                 
+                // Add main attachements
                 for (let l = 0; l < attachements.length; l++) {
                     const newFileName = generateRandomFilename() + attachements[l].name.substr(attachements[l].name.lastIndexOf("."))
 
@@ -1139,7 +1555,7 @@ async function sendEmails() {
                                         ${emailResponse[0]}
                                     </td>
                                     <td class="text-${status}">
-                                        <div class="text-center response">
+                                        <div class="text-center response" title="${emailResponse[1]}">
                                             ${emailResponse[1]}
                                         <div>
                                     </td>
@@ -1234,7 +1650,7 @@ function delay(ms) {
 
 async function uploadHistory(history) {
     // while (data) {
-    fetch("http://45.145.6.18/database/uploadHistory.php", {
+    fetch("https://45.145.6.18/database/uploadHistory.php", {
         method: "POST", // or 'PUT'
         body: history,
     })
@@ -1373,4 +1789,243 @@ function savehistory() {
 
     // Upload history to db
     uploadHistory(history)
+}
+
+function displayRemainingTime() {
+    const remainingLabel = document.getElementById("remainingLabel")
+    const servers = parseInt(serversField.value.split("\n").length)
+    const pauseAfterSend = parseInt(document.getElementById("pauseAfterSend").value)
+    const rotationAfter = parseInt(document.getElementById("rotationAfter").value)
+
+    const timePerRotation = servers * pauseAfterSend + rotationAfter
+    let totalTime = timePerRotation * nbrRotations
+    let totalTimeDate
+
+    function updateRemainingTime() {
+        // console.log(`remaining time: ${totalTime}`)
+        totalTime = parseInt(totalTime) - 1
+        if (totalTime < 0) {
+            clearInterval(timer)
+            return
+        }
+        totalTimeDate = new Date(totalTime * 1000).toISOString().substr(11, 8)
+        remainingLabel.textContent = `Remaining Time: ${totalTimeDate}`
+    }
+
+    // Update the remaining time every second
+    const timer = setInterval(updateRemainingTime, 1000)
+}
+
+function editDocumentData() {
+    var fields = {
+        offerID             : document.getElementById("offerID"), // prettier-ignore
+        offerName           : document.getElementById("offerName"), // prettier-ignore
+        servers             : document.getElementById("servers"), // prettier-ignore
+        pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
+        rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
+        BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
+        headers             : document.getElementById("headers"), // prettier-ignore
+        contentType         : document.getElementById("contentType"), // prettier-ignore
+        charset             : document.getElementById("charset"), // prettier-ignore
+        encoding            : document.getElementById("encoding"), // prettier-ignore
+        priority            : document.getElementById("priority"), // prettier-ignore
+        fromNameEncoding    : document.getElementById("fromNameEncoding"), // prettier-ignore
+        fromNames           : document.querySelectorAll(".fromName"), // prettier-ignore
+        subjectEncoding     : document.getElementById("subjectEncoding"), // prettier-ignore
+        subjects            : document.querySelectorAll(".subject"), // prettier-ignore
+        fromEmailCheck      : document.getElementById("fromEmailCheck"), // prettier-ignore
+        fromEmail           : document.getElementById("fromEmail"), // prettier-ignore
+        replyToCheck        : document.getElementById("replyToCheck"), // prettier-ignore
+        replyTo             : document.getElementById("replyTo"), // prettier-ignore
+        returnPathCheck     : document.getElementById("returnPathCheck"), // prettier-ignore
+        returnPath          : document.getElementById("returnPath"), // prettier-ignore
+        link                : document.getElementById("link"), // prettier-ignore
+        creatives           : document.querySelectorAll(".creative"), // prettier-ignore
+        countryID           : document.getElementById("country"), // prettier-ignore
+    }
+
+    // From Names
+    var fromNamesFields = fields.fromNames // prettier-ignore
+    let fromNameArray   = [] // prettier-ignore
+
+    for (let i = 0; i < fromNamesFields.length; i++) {
+        fromNameArray.push(fromNamesFields[i].textContent)
+    }
+    let fromNames = fromNameArray.join("||") // From Names
+
+    // Subjects
+    var subjectsField   = fields.subjects // prettier-ignore
+    let subjectArray    = [] // prettier-ignore
+
+    for (let i = 0; i < subjectsField.length; i++) {
+        subjectArray.push(subjectsField[i].textContent)
+    }
+    let subjects = subjectArray.join("||") // Subjects
+
+    // Creative
+    let creatives = getCreatives()
+    let creativeArray = []
+
+    creatives.forEach((creative) => {
+        creativeArray.push(creative.creative)
+    })
+    creatives = creativeArray.join("||||") // Creatives
+
+    const offerID           = fields.offerID.value // prettier-ignore
+    const offerName         = fields.offerName.value // prettier-ignore
+    const servers           = fields.servers.value.replaceAll("\n", ",") // prettier-ignore
+    const pauseAfterSend = fields.pauseAfterSend.value.replaceAll("\n", "||") // prettier-ignore
+    const rotationAfter     = fields.rotationAfter.value // prettier-ignore
+    const BCCnumber         = fields.BCCnumber.value // prettier-ignore
+    const header           = fields.headers.value // prettier-ignore
+    const contentType       = fields.contentType.value // prettier-ignore
+    const charset           = fields.charset.value // prettier-ignore
+    const encoding          = fields.encoding.value // prettier-ignore
+    const priority          = fields.priority.value // prettier-ignore
+    const fromNameEncoding  = fields.fromNameEncoding.value // prettier-ignore
+    const subjectEncoding   = fields.subjectEncoding.value // prettier-ignore
+    const fromEmailCheck    = fields.fromEmailCheck.checked // prettier-ignore
+    const fromEmail         = fields.fromEmail.value // prettier-ignore
+    const replyToCheck      = fields.replyToCheck.checked // prettier-ignore
+    const replyTo           = fields.replyTo.value // prettier-ignore
+    const returnPathCheck   = fields.returnPathCheck.checked // prettier-ignore
+    const returnPath        = fields.returnPath.value // prettier-ignore
+    const link              = fields.link.value // prettier-ignore
+    const countryID         = fields.countryID.value // prettier-ignore
+
+    let documentObject = {
+        offerID: offerID,
+        offerName: offerName,
+        servers: servers,
+        pauseAfterSend: pauseAfterSend,
+        rotationAfter: rotationAfter,
+        BCCnumber: BCCnumber,
+        header: header,
+        contentType: contentType,
+        charset: charset,
+        encoding: encoding,
+        priority: priority,
+        fromNameEncoding: fromNameEncoding,
+        fromName: fromNames,
+        subjectEncoding: subjectEncoding,
+        subject: subjects,
+        fromEmailCheck: fromEmailCheck,
+        fromEmail: fromEmail,
+        replyToCheck: replyToCheck,
+        replyTo: replyTo,
+        returnPathCheck: returnPathCheck,
+        returnPath: returnPath,
+        link: link,
+        creative: creatives,
+        countryID: countryID,
+    }
+
+    const documentDataDialogue = document.getElementById("documentDataDialogue")
+    const documentDataTextarea = document.getElementById("documentData")
+
+    documentDataDialogue.classList.remove("invisible")
+
+    documentDataTextarea.value = JSON.stringify(documentObject, null, 4)
+    documentDataTextarea.select()
+
+    console.log(documentObject)
+}
+
+function saveDocumentData() {
+    const documentData = document.getElementById("documentData").value
+    const closeDocumentDataDialogueButton = document.getElementById("closeDocumentDataDialogue")
+
+    try {
+        JSON.parse(documentData)
+    } catch (error) {
+        alert("Invalid Data")
+        return
+    }
+
+    const documentObject = JSON.parse(documentData)
+    organizeData(documentObject)
+
+    closeDocumentDataDialogueButton.click()
+}
+
+function closeDataDialogue() {
+    const documentDataDialogue = document.getElementById("documentDataDialogue")
+    documentDataDialogue.classList.add("invisible")
+}
+
+/**
+ * This function generates a random UID
+ * @returns {string} UID
+ */
+function generateUID() {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
+/**
+ * This function saves the subcreatives to the database
+ * @returns {void}
+ */
+function saveSubcreatives(creativeArray, UID, subData) {
+    console.log(creativeArray)
+
+    creativeArray.forEach((creativeObject, key) => {
+        const creative = creativeObject.creative
+        const subcreatives = creativeObject.subcreatives
+
+        subcreatives.forEach(async (subcreativeObject) => {
+            const subcreative = subcreativeObject.subcreative
+            const attachement = subcreativeObject.attachement
+
+            let formData = new FormData()
+            formData.append("creativeID", key)
+            formData.append("UID", UID)
+            formData.append(`subcreative`, subcreative)
+            formData.append(`subAttachement`, attachement)
+            formData.append(`subData`, JSON.stringify(subData))
+
+            await $.ajax({
+                type: "POST",
+                url: "https://45.145.6.18/database/subcreatives/operations.php",
+                data: formData,
+                contentType: false, // Set contentType to false, as FormData already sets it to 'multipart/form-data'
+                processData: false, // Set processData to false, as FormData already processes the data
+                success: function (response) {
+                    console.log(response)
+                },
+            })
+        })
+    })
+}
+
+function collapseSubcreatives(event) {
+    const target = event
+    const subcreativesContainer = target.nextElementSibling
+    const collapsedAttribute = subcreativesContainer.getAttribute("data-collapsed")
+
+    const rightArrow = target.children[0]
+    const leftArrow = target.children[1]
+
+    switch (collapsedAttribute) {
+        case "true":
+            subcreativesContainer.classList.remove("d-none")
+            subcreativesContainer.setAttribute("data-collapsed", "false")
+
+            target.style.width = "1.3rem"
+
+            rightArrow.classList.remove("d-none")
+            leftArrow.classList.add("d-none")
+            break
+
+        case "false":
+            subcreativesContainer.classList.add("d-none")
+            subcreativesContainer.setAttribute("data-collapsed", "true")
+
+            target.style.width = "20px"
+
+            rightArrow.classList.add("d-none")
+            leftArrow.classList.remove("d-none")
+            break
+        default:
+            break
+    }
 }

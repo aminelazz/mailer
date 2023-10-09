@@ -1,0 +1,177 @@
+:root {
+    --tabs-color: #0079FE;
+    --input-type-color: #555358;
+    --token-border-radius: 10px;
+    --token-color: black;
+    --token-background-color: #f0f0f0;
+}
+
+.drop-zone {
+    background-color: white;
+}
+
+.drag-over {
+    background-color: #cef0db;
+}
+
+/* Navigation tab buttons container (navigation bar) */
+.navg-bar {
+    margin-block: 1rem;
+    margin-inline: auto;
+    display: flex;
+    justify-content: center;
+}
+
+/* Navigation tab buttons */
+.navg-tab {
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: white;
+    color: var(--tabs-color);
+    padding: 12px 18px;
+    border: 2px solid var(--tabs-color);
+    user-select: none;
+    position: relative;
+}
+
+.navg-tab>div {
+    pointer-events: none;
+}
+
+/* First tab button */
+.navg-tab:first-child {
+    border-radius: 10px 0px 0px 10px;
+}
+
+/* Second tab button */
+.navg-tab:nth-child(2) {
+    border-inline: none;
+}
+
+
+/* Last tab button */
+.navg-tab:last-child {
+    border-radius: 0px 10px 10px 0px;
+}
+
+.navg-tab:hover {
+    background-color: var(--tabs-color);
+    color: white;
+}
+
+.navg-tab[aria-selected="true"] {
+    background-color: var(--tabs-color);
+    color: white;
+}
+
+.notification {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 4px;
+    padding: 4px;
+    border-radius: 50%;
+    background-color: var(--bs-red);
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+}
+
+/* Input type for match domains area (manual or drag & drop */
+.input-type {
+    font-weight: 600;
+    background-color: white;
+    color: var(--input-type-color);
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--input-type-color);
+    user-select: none;
+}
+
+.input-type:first-child {
+    border-radius: 8px 0px 0px 8px;
+    border-inline-end: 1px solid var(--input-type-color);
+}
+
+.input-type:last-child {
+    border-radius: 0px 8px 8px 0px;
+    border-inline-start: 1px solid var(--input-type-color);
+}
+
+.input-type:hover {
+    background-color: var(--input-type-color);
+    color: white;
+}
+
+.input-type[aria-selected="true"] {
+    background-color: var(--input-type-color);
+    color: white;
+}
+
+button>* {
+    pointer-events: none;
+}
+
+/* Tokens */
+.token {
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    margin: 5px;
+    padding-block: 7px;
+    gap: 10px;
+    color: var(--token-color);
+    background-color: var(--token-background-color);
+    border-radius: var(--token-border-radius);
+}
+
+.token>* {
+    pointer-events: none;
+
+    /* Token status */
+    &:first-child {
+        display: inline-flex;
+        align-items: center;
+        height: 18px;
+        /* width: 18px; */
+        background-color: gray;
+        padding: 0;
+        border-radius: 50%;
+
+        &:not(:empty) {
+            width: fit-content;
+            padding: 0px 5px;
+        }
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-style: solid;
+            border-width: 0 4px 6px 4px;
+            border-color: transparent;
+            position: relative;
+            top: -2px;
+            left: -2px;
+        }
+    }
+}
+
+.token>*:last-child {
+
+    >svg {
+        pointer-events: auto;
+        padding: 1px;
+        margin-bottom: 2px;
+        border-radius: 50%;
+        fill: #DC3545;
+    }
+
+    >svg:hover {
+        background-color: var(--bs-red);
+        fill: white;
+    }
+}

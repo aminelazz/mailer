@@ -4,7 +4,7 @@ window.onload = getHistory()
 window.onload = changeSearchType()
 
 async function getHistory() {
-    const result = await fetch('http://45.145.6.18/database/history/getOfferHistory.php')
+    const result = await fetch('https://45.145.6.18/database/history/getOfferHistory.php')
 
     data = await result.json()
     document.getElementById('loadingSpinner').style.display = 'none'
@@ -254,7 +254,7 @@ function searchOffer() {
 
 async function downloadOffer(id, offerID, offerName, date) {
     try {
-        await fetch(`http://45.145.6.18/database/history/downloadOffer.php?id=${id}`)
+        await fetch(`https://45.145.6.18/database/history/downloadOffer.php?id=${id}`)
             .then((response) => response.blob())
             .then((blob) => {
                 const newDate = date.replaceAll(':', '_').replaceAll('-', '_')
@@ -279,7 +279,7 @@ async function downloadOffer(id, offerID, offerName, date) {
 
 async function loadOffer(id, attachements, offerID, offerName, date) {
     try {
-        await fetch(`http://45.145.6.18/database/history/data_json.php?id=${id}`)
+        await fetch(`https://45.145.6.18/database/history/data_json.php?id=${id}`)
             .then((response) => response.json())
             .then((data) => {
                 // console.log(data)
@@ -289,7 +289,7 @@ async function loadOffer(id, attachements, offerID, offerName, date) {
             .catch((error) => console.error('Error:', error))
 
         if (attachements) {
-            await fetch(`http://45.145.6.18/database/history/attachements_zip.php?id=${id}`)
+            await fetch(`https://45.145.6.18/database/history/attachements_zip.php?id=${id}`)
                 .then((response) => response.blob())
                 .then((blob) => {
                     const newDate = date.replaceAll(':', '_').replaceAll('-', '_')

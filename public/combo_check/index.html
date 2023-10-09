@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="h-100" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=, initial-scale=1.0" />
+        <link href="../stylesheets/bootstrap.css" rel="stylesheet" />
+        <link href="style.css" rel="stylesheet" />
+        <title>Combo Checker</title>
+    </head>
+
+    <body class="h-100 bg-transparent p-3 pt-0">
+        <div class="navg-bar">
+            <div class="navg-tab" role="button" aria-selected="true" data-tab="match" onclick="switchTabs(event)">Match domains</div>
+            <div class="navg-tab" role="button" aria-selected="false" data-tab="unmatched" onclick="switchTabs(event)">
+                <div>Unmatched emails</div>
+                <div class="notification"></div>
+            </div>
+            <div class="navg-tab" role="button" aria-selected="false" data-tab="save-smtp" onclick="switchTabs(event)">Save SMTPs manually</div>
+        </div>
+        <!-- Match domains Tab -->
+        <div class="tab" data-tab-content="match">
+            <form action="" class="mx-3" onsubmit="matchDomains(event)">
+                <!-- Tab Label & Input Types -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <!-- Tab Label -->
+                    <h5 class="fw-semibold mb-2">Check matched domains</h5>
+                    <!-- Input Types -->
+                    <div class="d-flex">
+                        <div class="input-type" role="button" aria-selected="true" data-input-type="manual" onclick="changeInputType(event)">Manual</div>
+                        <div class="input-type" role="button" aria-selected="false" data-input-type="drag-and-drop" onclick="changeInputType(event)">Drag & Drop</div>
+                    </div>
+                </div>
+                <!-- Label -->
+                <div class="d-flex justify-content-center mb-2">
+                    <div class="w-50 fw-semibold">Combo List</div>
+                </div>
+
+                <!-- Manual Input -->
+                <div class="input-field d-flex justify-content-center" data-input-type-field="manual">
+                    <textarea class="form-control w-50" name="comboList" id="comboList" style="resize: none; height: 400px"></textarea>
+                </div>
+
+                <!-- Drag & Drop Input -->
+                <div class="input-field d-none" data-input-type-field="drag-and-drop">
+                    <!-- Drop Zone & File Display -->
+                    <div class="row mb-3 text-center text-secondary user-select-none" style="min-height: 200px">
+                        <div>
+                            <!-- Drop Zone -->
+                            <div id="dropZone" class="h-100 drop-zone w-50 rounded border-secondary-subtle mx-auto d-flex flex-column justify-content-evenly" style="border-style: dashed" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                <div class="childElements">Drag and drop .txt or .csv combo list file here</div>
+                                <div class="childElements">Or</div>
+                                <label id="uploadButton" for="data" class="childElements btn btn-outline-primary w-25 mx-auto">Browse files</label>
+                                <input id="data" name="data" type="file" accept="text/plain, text/csv" class="d-none" onchange="handleFileInput(event)" />
+                            </div>
+                            <!-- File Display -->
+                            <div id="fileDisplayZone" class="text-black fw-semibold d-none flex-column align-items-center h-100 w-50 bg-white rounded border-secondary-subtle py-2 mx-auto visible" style="border-style: dashed" ondragover="dragOverDisplay(event)">
+                                <div>Uploaded file</div>
+                                <!-- File Infos -->
+                                <div class="h-100 w-100 py-3 d-flex flex-column justify-content-center align-items-center">
+                                    <div class="w-75 d-flex border rounded rounded-bottom-0 px-2" style="height: 40px">
+                                        <!-- File Name -->
+                                        <div class="flex-fill d-flex justify-content-start align-items-center text-success ps-2">
+                                            <span id="fileName">Hi</span>
+                                        </div>
+                                        <!-- Remove File -->
+                                        <button class="btn btn-outline-secondary p-0 border-0 my-1 px-1" type="button" onclick="removeFile()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                                <path d="m376-313.847 104-104 104 104L626.153-356l-104-104 104-104L584-606.153l-104 104-104-104L333.847-564l104 104-104 104L376-313.847Zm-83.691 173.846q-30.308 0-51.308-21t-21-51.308V-720h-40v-59.999H360v-35.384h240v35.384h179.999V-720h-40v507.691q0 30.308-21 51.308t-51.308 21H292.309ZM680-720H280v507.691q0 4.616 3.846 8.463 3.847 3.846 8.463 3.846h375.382q4.616 0 8.463-3.846 3.846-3.847 3.846-8.463V-720Zm-400 0v520-520Z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <!-- File Content -->
+                                    <textarea id="fileContent" class="w-75 form-control rounded-top-0 border-top-0" style="height: 400px; resize: none; transition: height 1s"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Button & Status -->
+                <div class="row">
+                    <div class="d-flex flex-row-reverse align-items-center justify-content-between">
+                        <!-- Submit & Cancel Buttons -->
+                        <div>
+                            <!-- Submit -->
+                            <button id="submit" class="btn btn-success position-relative fw-semibold" type="submit" style="height: 43px; width: 100px; right: 0" onclick="validateCombos()">
+                                <span id="submitLabel">Submit</span>
+                                <div id="submitSpinner" class="spinner-border d-none" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </button>
+                            <!-- Cancel -->
+                            <button id="cancel" class="d-none btn btn-warning position-relative" type="button" style="height: 43px; width: 100px; right: 0" onclick="abortAjaxRequest()">
+                                <span id="cancelLabel">Cancel</span>
+                            </button>
+                        </div>
+                        <!-- Status -->
+                        <span id="" class="fw-semibold"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Download unmatched domains Tab -->
+        <div class="tab mx-3 d-none" data-tab-content="unmatched">
+            <!-- Tab Label -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-semibold mb-2">Unmatched combos</h5>
+            </div>
+            <!-- Combos & Domains -->
+            <div class="d-flex align-items-center justify-content-between gap-5">
+                <!-- Combos -->
+                <div class="d-flex flex-column justify-content-center" style="width: 50%">
+                    <!-- Label & Download Button Container -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <!-- Label -->
+                        <label class="m-0 fw-semibold">Combos</label>
+                        <!-- Download Button -->
+                        <button class="btn btn-primary p-0 px-2" style="height: 38px" title="Download unmatched combos" data-unmatched="combos" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download combos" onclick="downloadUnmatched(event)">
+                            <!-- Download Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
+                                <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Textarea -->
+                    <div id="unmatchedCombos" class="form-control" style="height: 250px; overflow: auto"></div>
+                </div>
+
+                <!-- Domains -->
+                <div class="d-flex flex-column justify-content-center" style="width: 50%">
+                    <!-- Label & Download Button Container -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <!-- Label -->
+                        <label class="m-0 fw-semibold">Domains</label>
+                        <!-- Download Button -->
+                        <button class="btn btn-primary p-0 px-2" style="height: 38px" title="Download unmatched domains" data-unmatched="domains" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download domains" onclick="downloadUnmatched(event)">
+                            <!-- Download Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
+                                <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Textarea -->
+                    <div id="unmatchedDomains" class="form-control" style="height: 250px; overflow: auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save SMTPs Tab -->
+        <div class="tab mx-3 d-none" data-tab-content="save-smtp">
+            <form action="" id="smtpForm" onsubmit="saveSMTPs(event)">
+                <!-- Tab Label -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-semibold mb-2">Save SMTPs</h5>
+                </div>
+                <div class="d-flex align-items-end gap-2 mb-2">
+                    <!-- Domain & SMTPs Fields -->
+                    <div class="row flex-fill">
+                        <!-- Domain -->
+                        <div class="col-3">
+                            <label class="form-label fw-semibold" for="domain">Domain</label>
+                            <input type="text" name="domain" id="domain" class="form-control" placeholder="Domain..." />
+                        </div>
+                        <!-- Server -->
+                        <div class="col-3">
+                            <label class="form-label fw-semibold" for="server">Server</label>
+                            <input type="text" name="server" id="server" class="form-control mb-2" placeholder="Server..." />
+                        </div>
+                        <!-- Port -->
+                        <div class="col-3">
+                            <label class="form-label fw-semibold" for="port">Port</label>
+                            <select class="form-select" name="port" id="port">
+                                <option value="" class="text-secondary" disabled hidden selected>Port...</option>
+                                <option value="587">587</option>
+                                <option value="465">465</option>
+                                <option value="25">25</option>
+                            </select>
+                        </div>
+                        <!-- Encryption -->
+                        <div class="col-3">
+                            <label class="form-label fw-semibold" for="encryption">Encryption</label>
+                            <select class="form-select" name="encryption" id="encryption">
+                                <option value="" class="text-secondary" disabled hidden selected>Encryption...</option>
+                                <option value="none">None</option>
+                                <option value="ssl">SSL</option>
+                                <option value="tls">TLS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Add Token Button -->
+                    <button type="button" class="btn btn-secondary mb-2 d-flex align-items-center" style="height: 38px" onclick="addToken()">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- SMTPs Container -->
+                <div id="smtps" class="row fw-semibold form-control mb-2 mx-0" style="height: 200px; font-size: 0.92rem; overflow: auto">
+                    <!-- Token Example -->
+                    <div id="tokenExample" class="token">
+                        <div data-value="status"></div>
+                        <div data-value="domain">domain.com</div>
+                        <div data-value="smtp">smtp:port:encryption:</div>
+                        <div role="button" onclick="this.parentNode.remove()">
+                            <!-- Cross Icon (Remove) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18">
+                                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <!-- Save Button -->
+                <div class="d-flex justify-content-end">
+                    <button id="saveSmtp" type="submit" class="btn btn-success fw-semibold" style="height: 43px; width: 100px">
+                        <span>Save</span>
+                        <!-- Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" fill="none" stroke="currentColor" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
+                            </circle>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="m-3 mt-0 mb-4">
+            <div class="mb-3 position-relative">
+                <h5 class="fw-semibold m-0">Check:</h5>
+                <!-- Status -->
+                <span id="status" class="fw-semibold d-none position-absolute top-0" style="left: 50%; transform: translateX(-50%)">
+                    <!-- Loader -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusLoading" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                        <circle cx="50" cy="50" fill="none" stroke="black" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
+                            <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
+                        </circle>
+                    </svg>
+                    <!-- Done -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusDone" height="30" viewBox="0 -960 960 960" width="30" fill="#157347" class="d-none">
+                        <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                    </svg>
+                    <!-- Stop -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusStopped" width="28" height="28" fill="#bb2d3b" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path>
+                    </svg>
+                    <!-- Status Text -->
+                    <span id="statusLabel">Checking...</span>
+                </span>
+                <!-- Buttons -->
+                <div class="d-none">
+                    <!-- Stop Button -->
+                    <button class="btn btn-warning p-0 px-2" style="height: 43px" title="Stop" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Stop" onclick="stopExecution()">
+                        <!-- Stop Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                            <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path>
+                        </svg>
+                        <!-- Stop Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                    <!-- Download Button -->
+                    <button class="btn btn-primary p-0 px-2" style="height: 43px" title="Download emails" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download emails" onclick="downloadBounced()">
+                        <!-- Download Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                            <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                        </svg>
+                        <!-- Download Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                    <!-- Delete Button -->
+                    <button id="deleteButton" class="btn btn-danger p-0 px-2" style="height: 43px" title="Delete mails from mailbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete mails from mailbox" onclick="deleteBounced(this)">
+                        <!-- Delete Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                            <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
+                        </svg>
+                        <!-- Delete Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Check Div -->
+            <div class="mb-3">
+                <!-- Ready Div -->
+                <div class="h-100 d-none align-items-center justify-content-center" id="readyDiv">
+                    <div class="fs-4">Choose combo list and submit to check...</div>
+                </div>
+                <!-- Result Div -->
+                <div class="d-flex align-items-center justify-content-between gap-5" style="height: 500px">
+                    <!-- Matched domains -->
+                    <div class="h-100 w-100 d-flex flex-column">
+                        <!-- Matched domains Label -->
+                        <div class="d-flex align-items-center mb-2 fw-semibold" style="height: 38px">
+                            Emails with matched domains &nbsp;
+                            <span id="matchedCount" class="fst-italic"></span>
+                        </div>
+                        <!-- Matched domains Field -->
+                        <div id="matchedCombos" class="form-control" style="height: inherit; overflow: auto">
+                            <div id="matchedCombo" class="d-flex align-items-center gap-2">
+                                <div class="" style="width: 24px">
+                                    <!-- Loader SVG -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 100 100" class="invisible">
+                                        <circle cx="50" cy="50" fill="none" stroke="black" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
+                                            <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
+                                        </circle>
+                                    </svg>
+                                    <!-- Done Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="#157347" class="d-none">
+                                        <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                    </svg>
+                                    <!-- Cross Icon (Failed) -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="#DC3545" class="d-none">
+                                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                    </svg>
+                                </div>
+                                <div>1st smtp</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Valid SMTPs -->
+                    <div class="h-100 w-100 d-flex flex-column">
+                        <!-- Valid SMTPs Label & Download Button -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-semibold">Valid smtps</div>
+                            <!-- Download Button -->
+                            <button class="btn btn-primary p-0 px-2" style="height: 38px" title="Download valid smtps" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download emails" onclick="downloadValidSMTPs()">
+                                <!-- Download Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
+                                    <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                                </svg>
+                                <!-- Download Loader -->
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 100 100" class="d-none">
+                                    <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                        <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                                    </circle>
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Valid SMTPs field -->
+                        <div id="validSMTPs" class="form-control" style="height: inherit; overflow: auto"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button id="check" class="btn btn-primary fw-semibold" style="height: 43px; width: 100px" onclick="checkSMTP()">
+                    <span id="checkLabel">Check</span>
+                    <div id="checkSpinner" class="spinner-border d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="../js/bootstrap.bundle.js"></script>
+        <script src="./script.js"></script>
+    </body>
+</html>

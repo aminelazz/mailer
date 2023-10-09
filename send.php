@@ -1,3 +1,6 @@
+<?php
+date_default_timezone_set('Africa/Casablanca');
+?>
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 
@@ -92,6 +95,19 @@
                </div>
                <div id="sendCount" class="text-white text-center fw-semibold my-1" style="font-size: 0.85rem;"></div>
             </div>
+            <!-- Schedule -->
+            <div class="text-white text-center fw-semibold my-3" id="status">Schedule</div>
+            <div class="d-flex flex-column gap-2">
+               <input class="form-control" type="datetime-local" value="<?php echo date('Y-m-d\TH:i') ?>" name="schedule" id="schedule" style="font-size: 0.9rem;">
+               <div class="d-flex gap-2" style="height: 43px;">
+                  <button id="cancelSchedule" class="btn btn-secondary p-0 px-2 d-none" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Cancel Schedule">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path>
+                     </svg>
+                  </button>
+                  <button class="btn btn-play fw-semibold flex-fill" type="button" onclick="setSchedule(this)">Set</button>
+               </div>
+            </div>
          </div>
       </div>
       <!-- End Side Panel -->
@@ -102,7 +118,7 @@
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 12.2</h6>
+                  <h6>Ver. 16</h6>
                </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">
@@ -130,8 +146,14 @@
                <li class="nav-item" role="presentation">
                   <button class="nav-link" id="nav-data-tab" data-bs-toggle="tab" data-bs-target="#nav-data" type="button" role="tab" aria-controls="nav-data" aria-selected="false" onclick="hideRefresh()">Data</button>
                </li>
-               <li class="nav-item me-auto" role="presentation">
+               <li class="nav-item" role="presentation">
                   <button class="nav-link" id="nav-imap-tab" data-bs-toggle="tab" data-bs-target="#nav-imap" type="button" role="tab" aria-controls="nav-imap" aria-selected="false" onclick="hideRefresh()">Imap Checker</button>
+               </li>
+               <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="nav-tracking-tab" data-bs-toggle="tab" data-bs-target="#nav-tracking" type="button" role="tab" aria-controls="nav-tracking" aria-selected="false" onclick="hideRefresh()">Tracking</button>
+               </li>
+               <li class="nav-item me-auto" role="presentation">
+                  <button class="nav-link" id="nav-smtp-check-tab" data-bs-toggle="tab" data-bs-target="#nav-smtp-check" type="button" role="tab" aria-controls="nav-smtp-check" aria-selected="false" onclick="hideRefresh()">SMTP check</button>
                </li>
                <div class="me-2 invisible" id="refreshDiv">
                   <button class="my-auto btn btn-primary border-0 d-flex gap-1 align-items-center refresh-dropbox" type="button" onclick="refreshIframe()">
@@ -582,32 +604,122 @@
                         <div class="row pb-3">
                            <!-- From Names -->
                            <div class="col">
-                              <div class="position-relative">
-                                 <div id="fromNames" class="random-divs fromNames row mx-0 form-control" style="height: 120px;" data-placeholder="From Names..."></div>
-                                 <textarea id="importfromNames" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported from names here..."></textarea>
-                                 <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
-                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
-                                    <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
+                              <div id="fromNamesContainer" class="d-flex" style="height: 180px;">
+                                 <div id="fromNames" class="random-divs h-100 fromNames row mx-0 form-control rounded-end-0 border-end-0" data-placeholder="From Names..."></div>
+
+                                 <div id="btnContainer" class="btnContainer flex-column ms-auto h-100" style="width: 50px;">
+                                    <!-- Copy Button -->
+                                    <button id="export" class="idle copy_paste btn btn-play flex-fill rounded-0 rounded-end rounded-bottom-0 border-0" type="button" onclick="copyTokens(this)">
+                                       <!-- Copy Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" fill="currentColor">
+                                          <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Paste Button -->
+                                    <button id="import" class="idle copy_paste btn btn-play flex-fill rounded-0 border-0" type="button" onclick="pasteTokens(this)">
+                                       <!-- Paste Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="21" viewBox="0 -960 960 960" width="21" fill="currentColor">
+                                          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h167q11-35 43-57.5t70-22.5q40 0 71.5 22.5T594-840h166q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560h-80v120H280v-120h-80v560Zm280-560q17 0 28.5-11.5T520-800q0-17-11.5-28.5T480-840q-17 0-28.5 11.5T440-800q0 17 11.5 28.5T480-760Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Edit Button -->
+                                    <button id="import" class="idle edit btn btn-play flex-fill rounded-0 border-0" type="button" onclick="editTokens(this)">
+                                       <!-- Edit Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                          <path d="M772-603 602-771l56-56q23-23 56.5-23t56.5 23l56 56q23 23 24 55.5T829-660l-57 57Zm-58 59L290-120H120v-170l424-424 170 170Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Clear Button -->
+                                    <button id="clear" class="idle btn btn-danger flex-fill rounded-0 rounded-bottom rounded-start-0  border-0" type="button" onclick="clearTokens(this)">
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
+                                          <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
+                                       </svg>
+                                    </button>
                                  </div>
-                                 <div class="w-100 mt-2 justify-content-center" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="okFromName" class="send btn btn-success w-100" type="button" style="margin-inline: 100%; height: 38px;" onclick="okTokens(this)">OK</button>
+                              </div>
+
+                              <div id="importfromNamesContainer" class="d-none" style="height: 180px;">
+                                 <textarea id="importfromNames" class="h-100 row mx-0 form-control rounded-end-0 border-end-0" style="resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Copy/Paste 'from names' here..."></textarea>
+
+                                 <div class="btnContainer d-flex flex-column ms-auto h-100 bg-white" style="width: 50px;">
+                                    <button id="okFromName" class="ok btn btn-success h-100 w-100 rounded-0 rounded-end border-0" type="button" onclick="okTokens(this)">
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
                                  </div>
                               </div>
                            </div>
 
                            <!-- Subjects -->
                            <div class="col">
-                              <div class="position-relative">
-                                 <div id="subjects" class="random-divs subjects row mx-0 form-control" style="height: 120px;" data-placeholder="Subjects..."></div>
-                                 <textarea id="importsubjectss" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported subjects here..."></textarea>
-                                 <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
-                                    <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
-                                    <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
+                              <div id="subjectsContainer" class="d-flex" style="height: 180px;">
+                                 <div id="subjects" class="random-divs h-100 subjects row mx-0 form-control rounded-end-0 border-end-0" data-placeholder="Subjects..."></div>
+
+                                 <div id="btnContainer" class="btnContainer flex-column ms-auto h-100" style="width: 50px;">
+                                    <!-- Copy Button -->
+                                    <button id="export" class="idle copy_paste btn btn-play flex-fill rounded-0 rounded-end rounded-bottom-0 border-0" type="button" onclick="copyTokens(this)">
+                                       <!-- Copy Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" fill="currentColor">
+                                          <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Paste Button -->
+                                    <button id="import" class="idle copy_paste btn btn-play flex-fill rounded-0 border-0" type="button" onclick="pasteTokens(this)">
+                                       <!-- Paste Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="21" viewBox="0 -960 960 960" width="21" fill="currentColor">
+                                          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h167q11-35 43-57.5t70-22.5q40 0 71.5 22.5T594-840h166q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560h-80v120H280v-120h-80v560Zm280-560q17 0 28.5-11.5T520-800q0-17-11.5-28.5T480-840q-17 0-28.5 11.5T440-800q0 17 11.5 28.5T480-760Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Edit Button -->
+                                    <button id="import" class="idle edit btn btn-play flex-fill rounded-0 border-0" type="button" onclick="editTokens(this)">
+                                       <!-- Edit Icon -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                          <path d="M772-603 602-771l56-56q23-23 56.5-23t56.5 23l56 56q23 23 24 55.5T829-660l-57 57Zm-58 59L290-120H120v-170l424-424 170 170Z" />
+                                       </svg>
+                                       <!-- Done Button -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
+                                    <!-- Clear Button -->
+                                    <button id="clear" class="idle btn btn-danger flex-fill rounded-0 rounded-bottom rounded-start-0  border-0" type="button" onclick="clearTokens(this)">
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
+                                          <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
+                                       </svg>
+                                    </button>
                                  </div>
-                                 <div class="w-100 mt-2 justify-content-center" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
-                                    <button id="okSubject" class="send btn btn-success w-100" type="button" style="margin-inline: 100%; height: 38px;" onclick="okTokens(this)">OK</button>
+                              </div>
+
+                              <div id="importsubjectsContainer" class="d-none" style="height: 180px;">
+                                 <textarea id="importsubjects" class="h-100 row mx-0 form-control rounded-end-0 border-end-0" style="resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Copy/Paste 'subjects' here..."></textarea>
+
+                                 <div class="btnContainer d-flex flex-column ms-auto h-100 bg-white" style="width: 50px;">
+                                    <button id="okSubject" class="ok btn btn-success h-100 w-100 rounded-0 rounded-end border-0" type="button" onclick="okTokens(this)">
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                       </svg>
+                                    </button>
                                  </div>
                               </div>
                            </div>
@@ -668,9 +780,15 @@
 
                   <!-- Start Body -->
                   <div id="Body" class="card">
-                     <h5 class="card-header fw-semibold">
-                        Body Section
-                     </h5>
+                     <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
+                        <h5 class="m-0 fw-semibold">
+                           Body Section
+                        </h5>
+                        <div class="form-check form-switch d-flex gap-2 align-items-center">
+                           <input class="form-check-input" type="checkbox" role="switch" id="tracking" checked>
+                           <label class="form-check-label" for="tracking">Tracking</label>
+                        </div>
+                     </div>
                      <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Link & Attachements -->
                         <div class="row pb-3">
@@ -701,7 +819,7 @@
 
                            </div>
                         </div>
-                        <!-- Creative & Preview -->
+                        <!-- Creative -->
                         <div id="creativeContainer" class="col">
                            <div class="row">
                               <!-- Labels -->
@@ -717,9 +835,81 @@
                               </div>
                            </div>
                            <!-- TextAreas -->
-                           <div class="textareas row mx-0 px-0 bg-white rounded" style="position: relative;">
-                              <!-- Creative TextArea -->
-                              <div spellcheck="false" name="creative" class="creative form-control w-100 mx-0 px-0" style="height: 391px;" oninput="previewCreative(this)" required></div>
+                           <div class="textareas row mx-0 px-0 " style="position: relative;">
+                              <div class="p-0 d-flex">
+                                 <!-- Creative TextArea -->
+                                 <div class="w-100 bg-white rounded">
+                                    <div spellcheck="false" name="creative" class="creative form-control w-100 mx-0 px-0" style="height: 391px;" oninput="previewCreative(this)" required></div>
+                                 </div>
+                                 <!-- Vertical Separator -->
+                                 <div class="bg-secondary-subtle border border-secondary rounded d-flex align-items-center" style="width: 1.3rem; cursor: pointer;" title="Collapse Subcreatives" onclick="collapseSubcreatives(this)">
+                                    <!-- Right -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" class="d-none">
+                                       <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+                                    </svg>
+                                    <!-- Left -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20">
+                                       <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" />
+                                    </svg>
+                                 </div>
+                                 <!-- Subcreatives -->
+                                 <div class="subcreativesContainer w-100 ms-2 d-none" data-collapsed="true">
+                                    <div class="subCreatives h-100 d-flex flex-column gap-2">
+                                       <div class="h-100 d-flex flex-column align-items-stretch">
+                                          <div class="d-flex justify-content-between align-items-center">
+                                             <label for="" class="form-label fw-semibold m-0">Subcreative 1</label>
+                                             <div class="fileContainer">
+                                                <input type="file" name="subcreative1Attachement" id="subcreative1Attachement" hidden oninput="showSubcreativeAttachementName(event)">
+                                                <!-- Subcreative 1 Attachement Label -->
+                                                <label class="subcreativeAttachementLabel btn btn-secondary" for="subcreative1Attachement">Choose file</label>
+                                                <!-- Subcreative 1 Attachement Clear Button -->
+                                                <button class="btn btn-danger px-2" type="button" onclick="clearSubcreativeAttachement(this)">
+                                                   <svg xmlns="http://www.w3.org/2000/svg" height="21" width="21" viewBox="0 -960 960 960" fill="currentColor">
+                                                      <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z"></path>
+                                                   </svg>
+                                                </button>
+                                             </div>
+                                          </div>
+                                          <textarea class="subcreative h-100 bg-white form-control" style="resize: none;"></textarea>
+                                       </div>
+                                       <div class="h-100 d-flex flex-column align-items-stretch">
+                                          <div class="d-flex justify-content-between align-items-center">
+                                             <label for="" class="form-label fw-semibold m-0">Subcreative 2</label>
+                                             <div class="fileContainer">
+                                                <input type="file" name="subcreative2Attachement" id="subcreative2Attachement" hidden oninput="showSubcreativeAttachementName(event)">
+                                                <!-- Subcreative 2 Attachement Label -->
+                                                <label class="subcreativeAttachementLabel btn btn-secondary" for="subcreative2Attachement">Choose file</label>
+                                                <!-- Subcreative 2 Attachement Clear Button -->
+                                                <button class="btn btn-danger px-2" type="button" onclick="clearSubcreativeAttachement(this)">
+                                                   <svg xmlns="http://www.w3.org/2000/svg" height="21" width="21" viewBox="0 -960 960 960" fill="currentColor">
+                                                      <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z"></path>
+                                                   </svg>
+                                                </button>
+                                             </div>
+                                          </div>
+                                          <textarea class="subcreative h-100 bg-white form-control" style="resize: none;"></textarea>
+                                       </div>
+                                       <div class="h-100 d-flex flex-column align-items-stretch">
+                                          <div class="d-flex justify-content-between align-items-center">
+                                             <label for="" class="form-label fw-semibold m-0">Subcreative 3</label>
+                                             <div class="fileContainer">
+                                                <input type="file" name="subcreative3Attachement" id="subcreative3Attachement" hidden oninput="showSubcreativeAttachementName(event)">
+                                                <!-- Subcreative 3 Attachement Label -->
+                                                <label class="subcreativeAttachementLabel btn btn-secondary" for="subcreative3Attachement">Choose file</label>
+                                                <!-- Subcreative 3 Attachement Clear Button -->
+                                                <button class="btn btn-danger px-2" type="button" onclick="clearSubcreativeAttachement(this)">
+                                                   <svg xmlns="http://www.w3.org/2000/svg" height="21" width="21" viewBox="0 -960 960 960" fill="currentColor">
+                                                      <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z"></path>
+                                                   </svg>
+                                                </button>
+                                             </div>
+                                          </div>
+                                          <textarea class="subcreative h-100 bg-white form-control" style="resize: none;"></textarea>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <!-- Remove Creative Button -->
                               <div class="removeCreative invisible">
                                  <button class="btn btn-danger w-100 h-100" type="button" style="padding-top: 5px;padding-bottom: 10px;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
@@ -795,31 +985,100 @@
 
                   <!-- Start Recipients -->
                   <div id="Recipients" class="card">
-                     <h5 class="card-header fw-semibold">
-                        Recipients Section
-                     </h5>
+                     <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="fw-semibold m-0">
+                           Recipients Section
+                        </h5>
+                        <div>
+                           <select name="writeType" id="writeType" class="form-select" style="width: 180px;" onchange="changeRcptsWriteType(this)" onload="this.selectedIndex = 0">
+                              <option value="manual" selected>Manual</option>
+                              <option value="drag">Drag & Drop</option>
+                              <option value="db">Choose from DB</option>
+                           </select>
+                        </div>
+                     </div>
                      <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Recipients & Blacklist & Failed -->
                         <div class="row">
                            <!-- Recipients -->
                            <div class="col-4">
-                              <label for="recipients" class="form-label fw-semibold">
-                                 Recipients
-                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                 <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
-                              </label>
-                              <textarea spellcheck=" false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;"></textarea>
+                              <div class="mb-2 d-flex justify-content-between align-items-center">
+                                 <label for="recipients" class="form-label fw-semibold m-0">
+                                    Recipients
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
+                                 </label>
+                                 <!-- Refresh from DB -->
+                                 <button id="dbRefreshBtn" type="button" class="btn border-0 p-0 me-2 invisible" onclick="refreshFromDB(event)">
+                                    <!-- Refresh Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" id="dbIcon" height="24" viewBox="0 -960 960 960" width="24">
+                                       <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+                                    </svg>
+                                    <!-- Loader Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" id="dbLoader" class="d-none" width="24" height="24" viewBox="0 0 100 100" style="cursor: not-allowed;">
+                                       <circle cx="50" cy="50" fill="none" stroke="black" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
+                                          <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
+                                       </circle>
+                                    </svg>
+                                 </button>
+                              </div>
+                              <!-- Recipients textarea -->
+                              <textarea spellcheck="false" name="recipients" id="recipients" class="form-control w-100" style="height: 400px; resize: none;" placeholder="Write recipients here..."></textarea>
+                              <!-- Drop Zone -->
+                              <div id="dropZone" class="form-control text-center text-secondary user-select-none w-100 border-secondary-subtle d-none flex-column justify-content-evenly" style="height: 400px; border-style: dashed;" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                 <div class="childElements">Drag and drop .txt or .csv file here</div>
+                                 <div class="childElements">Or</div>
+                                 <label id="uploadButton" for="data" class="childElements btn btn-outline-play mx-auto">Browse files</label>
+                                 <input id="data" name="data" type="file" accept="text/plain, text/csv" class="d-none" onchange="handleFileInput(event)" />
+                              </div>
+                              <!-- From DB -->
+                              <!-- <div id="db" class="form-control d-none" style="height: 400px;"> -->
+
+                              <!-- <select id="db" class="form-select d-none p-2" size="15" aria-label="Size 3 select example" style="height: 400px; overflow: auto;" ondblclick="">
+                                 <option class="selectPlaceholder" disabled>Choose a country first and press refresh...</option>
+                                 <option class="dataEntry">Choose a country first and press refresh...</option>
+                              </select> -->
+
+                              <div id="dbContainer" class="d-none position-relative" style="height: 400px; ">
+                                 <!-- Data from DB will be displayed here... -->
+                                 <div id="db" class="h-100 form-control d-flex flex-column p-2" style="overflow: auto;" ondblclick="console.log('hi')">
+                                    <!-- Placeholder -->
+                                    <div id="selectPlaceholder" class="text-secondary user-select-none">Choose a country first and press refresh...</div>
+                                    <!-- Data Entry Example -->
+                                    <div id="dataEntryExample" class="dataEntry d-none align-items-center" data-selected="false">
+                                       <div class="dataInfos flex-fill">
+                                          <div class="dataName fw-semibold">Data name</div>
+                                          <div class="dataNbrRecipients" style="font-size: 0.8rem;">Data rcpts number</div>
+                                       </div>
+                                       <div class="loadRecipientBtnContainer">
+                                          <button type="button" class="loadRecipientBtn btn border-0 " data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Load data to recipents field">
+                                             <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                                                <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
+                                             </svg>
+                                          </button>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <!-- Loader -->
+                                 <div id="recipientsLoader" class="d-flex align-items-center justify-content-center gap-3 h-100 w-100 bg-dark rounded invisible" style="position: absolute; top: 0; --bs-bg-opacity: 0.3">
+                                    <div class="spinner-border " role="status">
+                                       <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="fs-5 ">Please wait...</div>
+                                 </div>
+                              </div>
                            </div>
                            <!-- Blacklist -->
-                           <div class=" col-4">
+                           <div class="col-4">
                               <label for="blacklist" class="form-label fw-semibold" style="user-select: none; cursor: pointer;">
                                  Blacklist
-                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                  <span class="fst-italic text-danger" onclick="showBlacklistDialogue()">(<span id="nbrBlacklist">0</span> blacklisted)</span>
                               </label>
                               <!-- <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea> -->
                               <div style="position: relative;">
-                                 <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 391px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
+                                 <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 400px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
                                  <div id="blacklistSpinner" class="d-flex align-items-center justify-content-center gap-3 h-100 w-100 bg-dark rounded invisible" style="position: absolute; top: 0; --bs-bg-opacity: 0.3">
                                     <div class="spinner-border " role="status">
                                        <span class="visually-hidden">Loading...</span>
@@ -832,7 +1091,7 @@
                            <!-- Failed -->
                            <div class="col-4">
                               <label for="failed" class="form-label fw-semibold">Failed</label>
-                              <div spellcheck="false" name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="height: 391px; overflow: auto;"></div>
+                              <div spellcheck="false" name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="height: 400px; overflow: auto;"></div>
                            </div>
                         </div>
                      </div>
@@ -843,9 +1102,12 @@
 
                   <!-- Start Result -->
                   <div id="Result" class="card">
-                     <h5 class="card-header fw-semibold">
-                        Result Section
-                     </h5>
+                     <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-semibold">
+                           Result Section
+                        </h5>
+                        <span class="text-danger" id="remainingLabel"></span>
+                     </div>
                      <div id="responseTable" class="card-body border-3 border-top border-success" style="height: 377px; overflow: auto; background-color: white;">
                         <table class="table table-striped">
                            <tbody id="responseArea">
@@ -855,18 +1117,42 @@
                      </div>
                   </div>
                   <!-- End Result -->
+
+                  <div class="position-fixed bottom-0 end-0 py-4 px-3 d-flex flex-column gap-4 invisible">
+                     <!-- Edit Document Button -->
+                     <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Edit Document" onclick="editDocumentData()">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                           <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
+                        </svg>
+                     </button>
+                     <!-- Top Button -->
+                     <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Scroll to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                           <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                        </svg>
+                     </button>
+                  </div>
+
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="history" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="history" width="100%" height="100%" src="https://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
                </div>
                <!-- Data -->
                <div class="tab-pane h-100" id="nav-data" class="pt-2" role="tabpanel" aria-labelledby="nav-data-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="http://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
+                  <iframe id="data" width="100%" height="100%" src="https://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
                </div>
                <!-- Imap Checker -->
                <div class="tab-pane h-100" id="nav-imap" class="pt-2" role="tabpanel" aria-labelledby="nav-imap-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="./public/imap/index.html" title="Data" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+                  <iframe id="data" width="100%" height="100%" src="./public/imap/index.html" title="Imap Checker" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+               </div>
+               <!-- Tracking -->
+               <div class="tab-pane h-100" id="nav-tracking" class="pt-2" role="tabpanel" aria-labelledby="nav-tracking-tab" tabindex="0" style="height: initial;">
+                  <iframe id="data" width="100%" height="100%" src="https://45.145.6.18/database/tracking" title="Tracking" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+               </div>
+               <!-- SMTP Check -->
+               <div class="tab-pane h-100" id="nav-smtp-check" class="pt-2" role="tabpanel" aria-labelledby="nav-smtp-check-tab" tabindex="0" style="height: initial;">
+                  <iframe id="data" width="100%" height="100%" src="./public/combo_check/" title="SMTP Check" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
                </div>
             </div>
             <!-- Blacklist Dialogue -->
@@ -883,13 +1169,30 @@
                   <textarea id="blacklistList" class="form-control border border-danger rounded mt-4 text-black" style="height: 90%; width: 100%; resize: none; cursor: text;" disabled></textarea>
                </div>
             </div>
+
+            <!-- Edit Document Dialogue -->
+            <div id="documentDataDialogue" class="h-100 w-100 bg-dark d-flex invisible" style="position: fixed; top: 0; left: 0; --bs-bg-opacity: .5;">
+               <div class="bg-white m-auto border border-black rounded p-4" style="height: 80%; width: 60%; position: relative;">
+                  <div class="d-flex justify-content-end w-100" style="position: absolute; top: 0; left: 0;">
+                     <button type="button" id="closeDocumentDataDialogue" class="btn btn-outline-dark p-auto m-2" style="z-index: 1; height: 43px; width: 43px; border-color: transparent; padding-top: 2px;" onclick="closeDataDialogue();">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                           <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z"></path>
+                        </svg>
+                     </button>
+                  </div>
+                  <div class="fw-semibold"><u>Document data:</u></div>
+                  <textarea id="documentData" spellcheck="false" class="form-control rounded mt-4 text-black" style="height: 85%; width: 100%; resize: none; cursor: text; font-family: monospace; font-size: 0.8rem;"></textarea>
+                  <div class="my-4 d-flex justify-content-end fw-semibold">
+                     <button class="btn btn-success" type="button" style="width: 150px;" onclick="saveDocumentData()">Save</button>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
       <!-- End Main Menu -->
 
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   <script src="public/js/notify.js"></script>
    <script src="./public/js/bootstrap.bundle.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
    <script src="./public/js/script.js"></script>
