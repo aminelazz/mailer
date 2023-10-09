@@ -1,0 +1,38 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const evtSource = new EventSource("pr.php");
+
+  console.log(evtSource);
+
+  evtSource.onopen = function () {
+    console.log("Connection opened");
+  };
+
+  evtSource.onerror = function (error) {
+    console.error("EventSource failed:", error);
+  };
+
+  evtSource.onmessage = function (event) {
+    console.log(event.data);
+    var data = JSON.parse(event.data);
+    console.log(data);
+    if (data.type == "message") {
+      console.log(data.message);
+      $("#message").html(data.message);
+    }
+    if (data.type == "progress") {
+      console.log(data.progress);
+      $("#progress").html(data.progress);
+    }
+    if (data.type == "done") {
+      console.log(data.done);
+      $("#done").html(data.done);
+    }
+  };
+
+  evtSource.addEventListener("close", function (e) {
+    console.log("Connection closed");
+    evtSource.close();
+  });
+  // evtSource.close();
+</script>
