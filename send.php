@@ -582,55 +582,16 @@
                         <div class="row pb-3">
                            <!-- From Names -->
                            <div class="col">
-                              <div class="d-flex" style="height: 180px;">
-                                 <div id="fromNames" class="random-divs h-100 fromNames row mx-0 form-control rounded-end-0 border-end-0" data-placeholder="From Names..."></div>
-
-                                 <div id="btnContainer" class="btnContainer flex-column ms-auto h-100" style="width: 50px;">
-                                    <!-- Copy Button -->
-                                    <button id="export" class="idle btn btn-play flex-fill rounded-0 rounded-end rounded-bottom-0 border-0" type="button" onclick="copyTokens(this)">
-                                       <!-- Copy Icon -->
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" fill="currentColor">
-                                          <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Z" />
-                                       </svg>
-                                       <!-- Done Button -->
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
-                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                                       </svg>
-                                    </button>
-                                    <!-- Paste Button -->
-                                    <button id="import" class="idle btn btn-play flex-fill rounded-0 border-0" type="button" onclick="pasteTokens(this)">
-                                       <!-- Paste Icon -->
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="21" viewBox="0 -960 960 960" width="21" fill="currentColor">
-                                          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h167q11-35 43-57.5t70-22.5q40 0 71.5 22.5T594-840h166q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560h-80v120H280v-120h-80v560Zm280-560q17 0 28.5-11.5T520-800q0-17-11.5-28.5T480-840q-17 0-28.5 11.5T440-800q0 17 11.5 28.5T480-760Z" />
-                                       </svg>
-                                       <!-- Done Button -->
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" class="d-none">
-                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                                       </svg>
-                                    </button>
-                                    <!-- Clear Button -->
-                                    <button id="clear" class="idle btn btn-danger flex-fill rounded-0 rounded-bottom rounded-start-0  border-0" type="button" onclick="clearTokens(this)">
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="currentColor">
-                                          <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
-                                       </svg>
-                                    </button>
-                                 </div>
-
-                                 <!-- <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+                              <div class="position-relative">
+                                 <div id="fromNames" class="random-divs fromNames row mx-0 form-control" style="height: 120px;" data-placeholder="From Names..."></div>
+                                 <textarea id="importfromNames" class="row mx-0 form-control position-absolute top-0 invisible" style="height: 120px; resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported from names here..."></textarea>
+                                 <div class="w-100 gap-5 justify-content-around px-2 mt-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
                                     <button id="export" class="btn btn-play flex-fill" type="button" onclick="exportTokens(this)">Export</button>
                                     <button id="import" class="send btn btn-success flex-fill" type="button" onclick="importTokens(this)">Import</button>
                                     <button id="clear" class="btn btn-danger flex-fill" type="button" onclick="clearTokens(this)">Clear</button>
-                                 </div> -->
-                              </div>
-                              <div class="d-flex" style="height: 180px;">
-                                 <textarea id="importfromNames" class="h-100 row mx-0 form-control rounded-end-0 border-end-0" style="resize: none; font-family: monospace; font-size: 0.8em;" placeholder="Past imported from names here..."></textarea>
-
-                                 <div class="btnContainer d-flex flex-column ms-auto h-100 bg-white" style="width: 50px;">
-                                    <button id="okFromName" class="ok btn btn-success h-100 w-100 rounded-0 rounded-end border-0" type="button" onclick="okTokens(this)">
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
-                                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                                       </svg>
-                                    </button>
+                                 </div>
+                                 <div class="w-100 mt-2 justify-content-center" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
+                                    <button id="okFromName" class="send btn btn-success w-100" type="button" style="margin-inline: 100%; height: 38px;" onclick="okTokens(this)">OK</button>
                                  </div>
                               </div>
                            </div>
@@ -839,7 +800,7 @@
                            Recipients Section
                         </h5>
                         <div>
-                           <select name="writeType" id="writeType" class="form-select" style="width: 180px;" onchange="changeRcptsWriteType(this)" onload="this.selectedIndex = 0">
+                           <select name="writeType" id="writeType" class="form-select" style="width: 180px;" onchange="changeRcptsWriteType(event)" onload="this.selectedIndex = 0">
                               <option value="manual" selected>Manual</option>
                               <option value="drag">Drag & Drop</option>
                               <option value="db">Choose from DB</option>
@@ -878,7 +839,7 @@
                                  <div class="childElements">Drag and drop .txt or .csv file here</div>
                                  <div class="childElements">Or</div>
                                  <label id="uploadButton" for="data" class="childElements btn btn-outline-play mx-auto">Browse files</label>
-                                 <input id="data" name="data" type="file" accept="text/plain, text/csv" class="d-none" onchange="handleFileInput(event)" />
+                                 <input id="data" name="data" type="file" accept="text/plain, text/csv" class="d-none" onchange="handleFileInput(event)" required />
                               </div>
                               <!-- From DB -->
                               <!-- <div id="db" class="form-control d-none" style="height: 400px;"> -->
@@ -888,33 +849,22 @@
                                  <option class="dataEntry">Choose a country first and press refresh...</option>
                               </select> -->
 
-                              <div id="dbContainer" class="d-none position-relative" style="height: 400px; ">
-                                 <!-- Data from DB will be displayed here... -->
-                                 <div id="db" class="h-100 form-control d-flex flex-column p-2" style="overflow: auto;" ondblclick="console.log('hi')">
-                                    <!-- Placeholder -->
-                                    <div id="selectPlaceholder" class="text-secondary user-select-none">Choose a country first and press refresh...</div>
-                                    <!-- Data Entry Example -->
-                                    <div id="dataEntryExample" class="dataEntry d-none align-items-center" data-selected="false">
-                                       <div class="dataInfos flex-fill">
-                                          <div class="dataName fw-semibold">Data name</div>
-                                          <div class="dataNbrRecipients" style="font-size: 0.8rem;">Data rcpts number</div>
-                                       </div>
-                                       <div class="loadRecipientBtnContainer">
-                                          <button type="button" class="loadRecipientBtn btn border-0 " data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Load data to recipents field">
-                                             <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
-                                                <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
-                                             </svg>
-                                          </button>
-                                       </div>
+                              <div id="db" class="form-control d-none flex-column p-2" style="height: 400px; overflow: auto;" ondblclick="console.log('hi')">
+                                 <!-- Placeholder -->
+                                 <div id="selectPlaceholder" class="text-secondary user-select-none">Choose a country first and press refresh...</div>
+                                 <!-- Data Entry Example -->
+                                 <div id="dataEntryExample" class="dataEntry d-none align-items-center" data-selected="false">
+                                    <div class="dataInfos flex-fill">
+                                       <div class="dataName fw-semibold">Data name</div>
+                                       <div class="dataNbrRecipients" style="font-size: 0.8rem;">Data rcpts number</div>
                                     </div>
-                                 </div>
-
-                                 <!-- Loader -->
-                                 <div id="recipientsLoader" class="d-flex align-items-center justify-content-center gap-3 h-100 w-100 bg-dark rounded invisible" style="position: absolute; top: 0; --bs-bg-opacity: 0.3">
-                                    <div class="spinner-border " role="status">
-                                       <span class="visually-hidden">Loading...</span>
+                                    <div class="loadRecipientBtnContainer">
+                                       <button type="button" class="loadRecipientBtn btn border-0 " onclick="loadRecipients(event)">
+                                          <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                                             <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
+                                          </svg>
+                                       </button>
                                     </div>
-                                    <div class="fs-5 ">Please wait...</div>
                                  </div>
                               </div>
                            </div>
@@ -966,11 +916,11 @@
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="history" width="100%" height="100%" src="https://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="history" width="100%" height="100%" src="http://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
                </div>
                <!-- Data -->
                <div class="tab-pane h-100" id="nav-data" class="pt-2" role="tabpanel" aria-labelledby="nav-data-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="https://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
+                  <iframe id="data" width="100%" height="100%" src="http://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
                </div>
                <!-- Imap Checker -->
                <div class="tab-pane h-100" id="nav-imap" class="pt-2" role="tabpanel" aria-labelledby="nav-imap-tab" tabindex="0" style="height: initial;">

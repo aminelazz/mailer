@@ -4,7 +4,7 @@ const dropZone = document.getElementById("dropZone")
 const fileInput = document.getElementById("data")
 
 async function receiveMessage(event) {
-    if (event.origin == "https://45.145.6.18") {
+    if (event.origin == "http://45.145.6.18") {
         let offerData = event.data
         console.log(offerData)
 
@@ -158,8 +158,6 @@ try {
         fileUpload()
         clearFiles()
         configureRecipientsBlacklist()
-
-        initializeTooltip()
     })
 } catch (error) {}
 
@@ -171,18 +169,6 @@ var statusLabel = document.getElementById("status")
 
 function preventUnload() {
     return true
-}
-
-function initializeTooltip(boundary = null) {
-    boundary = boundary || document.body
-
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(
-        (tooltipTriggerEl) =>
-            new bootstrap.Tooltip(tooltipTriggerEl, {
-                boundary: boundary, // or document.querySelector('#boundary')
-            })
-    )
 }
 
 // function changeTimeValues() {
@@ -746,39 +732,29 @@ function deleteTokensEvent(tokens) {
     })
 }
 
-function copyTokens(event) {
+function exportTokens(event) {
     const target = event
     const container = target.parentNode.parentNode.querySelector("div")
 
-    if (navigator.clipboard) {
-        // Put innerHTML in the clipboard
-        navigator.clipboard.writeText(container.innerHTML)
+    // Put innerHTML in the clipboard
+    navigator.clipboard.writeText(container.innerHTML)
 
-        target.classList.replace("idle", "ok")
-        target.querySelector("svg:first-child").classList.add("d-none")
-        target.querySelector("svg:last-child").classList.remove("d-none")
+    target.textContent = "Copied!"
 
-        setTimeout(() => {
-            target.classList.replace("ok", "idle")
-
-            target.querySelector("svg:first-child").classList.remove("d-none")
-            target.querySelector("svg:last-child").classList.add("d-none")
-        }, 2000)
-    } else {
-        console.log("Clipboard API not available")
-    }
+    setTimeout(() => {
+        target.textContent = "Export"
+    }, 2000)
 }
 
-async function pasteTokens(event) {
+async function importTokens(event) {
     const target = event
     const pastContainer = target.parentNode.parentNode.getElementsByTagName("textarea")[0]
     const buttonsContainer = target.parentNode.parentNode.getElementsByTagName("div")[1]
     const okButtonContainer = target.parentNode.parentNode.getElementsByTagName("div")[2]
 
-    if (navigator.clipboard && navigator.clipboard.readText) {
+    if (navigator.clipboard.readText) {
         console.log("Clipboard API available")
         const clipboardText = await navigator.clipboard.readText()
-        console.log(clipboardText)
         const container = target.parentElement.parentElement.querySelector("div")
 
         // Check if the clipboard content is a valid tokens
@@ -790,17 +766,6 @@ async function pasteTokens(event) {
                 throw new Error("Invalid tokens")
             } else {
                 container.innerHTML += clipboardText
-
-                target.classList.replace("idle", "ok")
-                target.querySelector("svg:first-child").classList.add("d-none")
-                target.querySelector("svg:last-child").classList.remove("d-none")
-
-                setTimeout(() => {
-                    target.classList.replace("ok", "idle")
-
-                    target.querySelector("svg:first-child").classList.remove("d-none")
-                    target.querySelector("svg:last-child").classList.add("d-none")
-                }, 2000)
             }
         } catch (error) {
             console.error(`Error: ${error.message}`)
@@ -856,11 +821,11 @@ function okTokens(event) {
 }
 
 function changeRcptsWriteType(event) {
-    const target = event
+    const target = event.target
     const rcptsWriteType = target.value
     const rcptsTextarea = document.getElementById("recipients")
     const rcptsDragnDrop = document.getElementById("dropZone")
-    const rcptsDBContainer = document.getElementById("dbContainer")
+    const rcptsDB = document.getElementById("db")
 
     const dbRefreshBtn = document.getElementById("dbRefreshBtn")
 
@@ -868,21 +833,21 @@ function changeRcptsWriteType(event) {
         case "manual":
             rcptsTextarea.classList.remove("d-none")
             rcptsDragnDrop.classList.replace("d-flex", "d-none")
-            rcptsDBContainer.classList.add("d-none")
+            rcptsDB.classList.replace("d-flex", "d-none")
             dbRefreshBtn.classList.add("invisible")
             break
 
         case "drag":
             rcptsTextarea.classList.add("d-none")
             rcptsDragnDrop.classList.replace("d-none", "d-flex")
-            rcptsDBContainer.classList.add("d-none")
+            rcptsDB.classList.replace("d-flex", "d-none")
             dbRefreshBtn.classList.add("invisible")
             break
 
         case "db":
             rcptsTextarea.classList.add("d-none")
             rcptsDragnDrop.classList.replace("d-flex", "d-none")
-            rcptsDBContainer.classList.remove("d-none")
+            rcptsDB.classList.replace("d-none", "d-flex")
             dbRefreshBtn.classList.remove("invisible")
             break
 
@@ -992,7 +957,7 @@ async function refreshFromDB(event) {
     dbIcon.classList.add("d-none")
     dbLoader.classList.remove("d-none")
 
-    const result = await fetch(`https://45.145.6.18/database/data/php/data.php?countryID=${countryID}`)
+    const result = await fetch(`http://45.145.6.18/database/data/php/data.php?countryID=${countryID}`)
     const response = await result.json()
 
     console.log(response)
@@ -1019,7 +984,6 @@ function displayData(data) {
 
         // Create a new data entry and set its attributes
         const dataEntry = document.getElementById("dataEntryExample").cloneNode(true)
-        dataEntry.id = ""
         dataEntry.setAttribute("data-id", id)
         dataEntry.classList.replace("d-none", "d-flex")
 
@@ -1047,37 +1011,16 @@ function displayData(data) {
 
         dataName.textContent = name
         dataNbrRecipients.textContent = nbrRecipients
-        loadRecipientBtn.addEventListener("click", (event) => loadDataToRecipientsField(event, id, element.nbrRecipients))
+        loadRecipientBtn.addEventListener("click", async (event) => {
+            event.stopPropagation()
 
-        const tooltip = new bootstrap.Tooltip(loadRecipientBtn, {
-            boundary: loadRecipientBtn, // or document.querySelector('#boundary')
+            // Load data to the recipients field
+            const result = await fetch(`http://45.145.6.18/database/data/php/data.php?id=${id}`)
         })
 
         // Append the data entry to the db div
         db.appendChild(dataEntry)
     })
-}
-
-async function loadDataToRecipientsField(event, id, nbrRecipients) {
-    event.stopPropagation()
-
-    const recipientsLoader = document.getElementById("recipientsLoader")
-    recipientsLoader.classList.remove("invisible")
-
-    // Load data to the recipients field
-    const result = await fetch(`https://45.145.6.18/database/data/php/download_data.php?id=${id}`)
-    const response = await result.json()
-
-    recipientsField.value = response.data
-
-    configureRecipientsBlacklist()
-
-    let writeType = document.getElementById("writeType")
-    writeType.selectedIndex = 0
-    changeRcptsWriteType(writeType)
-
-    recipientsLoader.classList.add("invisible")
-    // console.log(response)
 }
 
 // Handle form submit
@@ -1500,7 +1443,7 @@ function delay(ms) {
 
 async function uploadHistory(history) {
     // while (data) {
-    fetch("https://45.145.6.18/database/uploadHistory.php", {
+    fetch("http://45.145.6.18/database/uploadHistory.php", {
         method: "POST", // or 'PUT'
         body: history,
     })

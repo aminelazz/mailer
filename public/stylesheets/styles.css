@@ -1,7 +1,3 @@
-:root {
-  --bg-play: #3598DC;
-}
-
 .main-menu {
   z-index: 10;
 }
@@ -116,6 +112,7 @@ button[aria-selected=true] {
 
 .random-divs {
   overflow: auto;
+  max-height: 134px;
 }
 
 .properties {
@@ -233,53 +230,4 @@ button[aria-selected=true] {
 
 .dataEntry[data-selected=true]>div>.btn.loadRecipientBtn:first-child:active {
   background-color: #3F72F8;
-}
-
-#btnContainer,
-.btnContainer {
-  display: flex;
-  border-radius: 0 12px 12px 0;
-  background-color: white;
-}
-
-.btnContainer>button {
-  padding-right: 5px;
-}
-
-.idle {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bg-play) 20%);
-}
-
-.idle:hover {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-btn-hover-bg) 20%);
-}
-
-.idle:active {
-  --bs-btn-active-bg: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #1E70A6 20%);
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #1E70A6 20%);
-}
-
-.ok {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #39b24b 20%);
-}
-
-.ok:hover {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #288035 20%);
-}
-
-.ok:active {
-  --bs-btn-active-bg: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #146c43 20%);
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #146c43 20%);
-}
-
-#btnContainer>button:nth-child(3) {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-danger) 20%);
-}
-
-#btnContainer>button:nth-child(3):hover {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-btn-hover-bg) 20%);
-}
-
-#btnContainer>button:nth-child(3):active {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #9C2531 20%);
 }

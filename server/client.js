@@ -1,7 +1,7 @@
 function addinserver(event) {
   event.preventDefault();
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "https://45.145.6.18:3000/add", true);
+  xhr.open("POST", "http://45.145.6.18:3000/add", true);
   xhr.setRequestHeader("Content-Type", "application/json");
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {

@@ -7,7 +7,7 @@ const trDataExample = document.getElementById('trDataExample')
 window.onload = getData()
 
 async function getData() {
-  const result = await fetch('https://45.145.6.18/database/data/php/data.php')
+  const result = await fetch('http://45.145.6.18/database/data/php/data.php')
   const data = await result.json()
   console.log(data)
 
@@ -68,7 +68,7 @@ function deleteData(deleteButton) {
   try {
     $.ajax({
       type: 'DELETE',
-      url: `https://45.145.6.18/database/data/php/data.php?id=${id}`,
+      url: `http://45.145.6.18/database/data/php/data.php?id=${id}`,
       success: function (response) {
         console.log(response)
         getData()
@@ -96,7 +96,7 @@ function downloadData(downloadButton) {
   try {
     $.ajax({
       type: 'GET',
-      url: `https://45.145.6.18/database/data/php/download_data.php?id=${id}`,
+      url: `http://45.145.6.18/database/data/php/download_data.php?id=${id}`,
       success: function (response) {
         // console.log(response)
         const blob = new Blob([response.data], { type: 'text/plain' }) // Create a Blob from the response data

@@ -122,7 +122,7 @@ async function saveData(event) {
   try {
     ajaxRequest = $.ajax({
       type: 'POST',
-      url: 'https://45.145.6.18/database/data/php/save_data.php',
+      url: 'http://45.145.6.18/database/data/php/save_data.php',
       data: formData,
       contentType: false, // Set contentType to false, as FormData already sets it to 'multipart/form-data'
       processData: false, // Set processData to false, as FormData already processes the data
