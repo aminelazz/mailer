@@ -9,11 +9,14 @@ function uploadHistory($history)
     // Initialize $response variable
     $response = array();
 
+    $dbPath = "./db.json";
+    $db = json_decode(file_get_contents($dbPath), true);
+
     // Your database connection configuration here
-    $servername = "localhost";
-    $username = "stcom";
-    $password = "Maruil589";
-    $dbname = "stcom";
+    $servername = $db["servername"];
+    $username = $db["username"];
+    $password = $db["password"];
+    $dbname = $db["dbname"];
 
     // Create connection
     $conn = new mysqli(
@@ -24,7 +27,12 @@ function uploadHistory($history)
     );
 
     if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+        $response = array(
+            "status" => 'Error',
+            "message" => "Connection failed: " . $conn->connect_error,
+        );
+        echo json_encode($response);
+        exit();
     }
 
     $offerID            = $history['offerID'];
@@ -81,7 +89,7 @@ function uploadHistory($history)
 
             // $attachmentsData == "" ? 'NULL' : $attachmentsData;
 
-            $sql = ("INSERT INTO `offer` (`offerID`, `offerName`, `servers`, `header`, `contentType`, `charset`, `encoding`, `priority`, `fromName`, `fromNameEncoding`, `subject`, `subjectEncoding`, `fromEmailCheck`, `fromEmail`, `replyToCheck`, `replyTo`, `returnPathCheck`, `returnPath`, `link`, `attachements`, `creative`, `recipients`, `blacklist`, `date`, `mailerID`, `countryID`) VALUES ('{$offerID}', '{$offerName}', '{$servers}', '{$header}', '{$contentType}', '{$charset}', '{$encoding}', '{$priority}', '{$fromName}', '{$fromNameEncoding}', '{$subject}', '{$subjectEncoding}', {$fromEmailCheck}, '{$fromEmail}', {$replyToCheck}, '{$replyTo}', {$returnPathCheck}, '{$returnPath}', '{$link}', '{$attachmentsData}', '{$creative}', '{$recipients}', '{$blacklist}', '{$currentDateTime}', '{$mailerID}', '{$countryID}')");
+            $sql = ("INSERT INTO `offer` (`offerID`, `offerName`, `servers`, `header`, `contentType`, `charset`, `encoding`, `priority`, `fromName`, `fromNameEncoding`, `subject`, `subjectEncoding`, `fromEmailCheck`, `fromEmail`, `replyToCheck`, `replyTo`, `returnPathCheck`, `returnPath`, `link`, `attachements`, `creative`, /*`recipients`, `blacklist`, */`date`, `mailerID`, `countryID`) VALUES ('{$offerID}', '{$offerName}', '{$servers}', '{$header}', '{$contentType}', '{$charset}', '{$encoding}', '{$priority}', '{$fromName}', '{$fromNameEncoding}', '{$subject}', '{$subjectEncoding}', {$fromEmailCheck}, '{$fromEmail}', {$replyToCheck}, '{$replyTo}', {$returnPathCheck}, '{$returnPath}', '{$link}', '{$attachmentsData}', '{$creative}',/* '{$recipients}', '{$blacklist}',*/ '{$currentDateTime}', '{$mailerID}', '{$countryID}')");
 
             if ($conn->query($sql) === TRUE) {
                 $response = array(
@@ -111,7 +119,7 @@ function uploadHistory($history)
     echo json_encode($response);
 }
 
-// Call the function with the form data sent from WebSocket
+// Call the function with the form data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Call the function to send emails using PHPMailer and get the email responses

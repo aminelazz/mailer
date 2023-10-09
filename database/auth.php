@@ -5,11 +5,14 @@ header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 // Function to get offer history data from the database
 function getOfferHistory()
 {
+    $dbPath = "./db.json";
+    $db = json_decode(file_get_contents($dbPath), true);
+
     // Your database connection configuration here
-    $servername = "localhost";
-    $username = "stcom";
-    $password = "Maruil589";
-    $dbname = "stcom";
+    $servername = $db["servername"];
+    $username = $db["username"];
+    $password = $db["password"];
+    $dbname = $db["dbname"];
 
     // // Get db credentials from db.json
     // $dbInfos = file_get_contents("./db.json");

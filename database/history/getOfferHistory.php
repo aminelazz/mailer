@@ -5,11 +5,14 @@ header("Content-Type: application/json");
 // Function to get offer history data from the database
 function getOfferHistory()
 {
+    $dbPath = "../db.json";
+    $db = json_decode(file_get_contents($dbPath), true);
+
     // Your database connection configuration here
-    $servername = "localhost";
-    $username = "stcom";
-    $password = "Maruil589";
-    $dbname = "stcom";
+    $servername = $db["servername"];
+    $username = $db["username"];
+    $password = $db["password"];
+    $dbname = $db["dbname"];
 
     // Create connection
     $conn = new mysqli(

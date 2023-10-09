@@ -5,11 +5,14 @@ header("Content-Type: application/json");
 // Function to get offer history data from the database
 function downloadOffer($id)
 {
+    $dbPath = "../db.json";
+    $db = json_decode(file_get_contents($dbPath), true);
+
     // Your database connection configuration here
-    $servername = "localhost";
-    $username = "stcom";
-    $password = "Maruil589";
-    $dbname = "stcom";
+    $servername = $db["servername"];
+    $username = $db["username"];
+    $password = $db["password"];
+    $dbname = $db["dbname"];
 
     // Create connection
     $conn = new mysqli(
@@ -39,7 +42,7 @@ function downloadOffer($id)
             $attachements = $row['attachements'];
 
             // Call the data_json.php using file_get_contents
-            $data_json_url = "http://45.145.6.18/database/history/data_json.php?id=$id";
+            $data_json_url = "./database/history/data_json.php?id=$id";
             $json_data = file_get_contents($data_json_url);
 
             $data = json_decode($json_data, true);

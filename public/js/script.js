@@ -1,7 +1,10 @@
 window.addEventListener("message", receiveMessage, false)
 
+const dropZone = document.getElementById("dropZone")
+const fileInput = document.getElementById("data")
+
 async function receiveMessage(event) {
-    if (event.origin == "http://45.145.6.18") {
+    if (event.origin == "https://45.145.6.18") {
         let offerData = event.data
         console.log(offerData)
 
@@ -24,8 +27,8 @@ async function receiveMessage(event) {
         document.getElementById("returnPathCheck").checked = !!+offerData.returnPathCheck // prettier-ignore
         document.getElementById("returnPath").value = offerData.returnPath // prettier-ignore
         document.getElementById("link").value = offerData.link // prettier-ignore
-        document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
-        document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
+        // document.getElementById("recipients").innerHTML = offerData.recipients.replaceAll(",", "\n") // prettier-ignore
+        // document.getElementById("blacklist").innerHTML = offerData.blacklist.replaceAll(",", "\n") // prettier-ignore
 
         let fromNamesField = document.getElementsByClassName("fromNames")[0] // prettier-ignore
         let subjectsField = document.getElementsByClassName("subjects")[0] // prettier-ignore
@@ -133,11 +136,14 @@ try {
         var attachementsName = document.getElementById("attachementsName")
         var clearButton = document.getElementById("clearAttachements")
         var failed = document.getElementById("failed")
+        var writeType = document.getElementById("writeType")
+
+        writeType.selectedIndex = 0 // Select the first option
 
         statusLabel.innerText = "Status: Pending"
 
         // Clear the failed area
-        failed.value = ""
+        failed.innerText = ""
 
         if (attachementsName.value != "") {
             clearButton.classList.toggle("invisible")
@@ -152,6 +158,8 @@ try {
         fileUpload()
         clearFiles()
         configureRecipientsBlacklist()
+
+        initializeTooltip()
     })
 } catch (error) {}
 
@@ -163,6 +171,18 @@ var statusLabel = document.getElementById("status")
 
 function preventUnload() {
     return true
+}
+
+function initializeTooltip(boundary = null) {
+    boundary = boundary || document.body
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(
+        (tooltipTriggerEl) =>
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                boundary: boundary, // or document.querySelector('#boundary')
+            })
+    )
 }
 
 // function changeTimeValues() {
@@ -577,7 +597,7 @@ function hideRefresh() {
 }
 
 function refreshIframe() {
-    let dropboxIframe = document.getElementById("dropboxFolder")
+    let dropboxIframe = document.getElementById("history")
     dropboxIframe.src = dropboxIframe.src
 }
 
@@ -726,24 +746,39 @@ function deleteTokensEvent(tokens) {
     })
 }
 
-function exportTokens(event) {
+function copyTokens(event) {
     const target = event
     const container = target.parentNode.parentNode.querySelector("div")
 
-    // Put innerHTML in the clipboard
-    navigator.clipboard.writeText(container.innerHTML)
+    if (navigator.clipboard) {
+        // Put innerHTML in the clipboard
+        navigator.clipboard.writeText(container.innerHTML)
 
-    target.textContent = "Copied!"
+        target.classList.replace("idle", "ok")
+        target.querySelector("svg:first-child").classList.add("d-none")
+        target.querySelector("svg:last-child").classList.remove("d-none")
 
-    setTimeout(() => {
-        target.textContent = "Export"
-    }, 2000)
+        setTimeout(() => {
+            target.classList.replace("ok", "idle")
+
+            target.querySelector("svg:first-child").classList.remove("d-none")
+            target.querySelector("svg:last-child").classList.add("d-none")
+        }, 2000)
+    } else {
+        console.log("Clipboard API not available")
+    }
 }
 
-async function importTokens(event) {
+async function pasteTokens(event) {
     const target = event
-    if (navigator.clipboard.readText) {
+    const pastContainer = target.parentNode.parentNode.getElementsByTagName("textarea")[0]
+    const buttonsContainer = target.parentNode.parentNode.getElementsByTagName("div")[1]
+    const okButtonContainer = target.parentNode.parentNode.getElementsByTagName("div")[2]
+
+    if (navigator.clipboard && navigator.clipboard.readText) {
+        console.log("Clipboard API available")
         const clipboardText = await navigator.clipboard.readText()
+        console.log(clipboardText)
         const container = target.parentElement.parentElement.querySelector("div")
 
         // Check if the clipboard content is a valid tokens
@@ -755,15 +790,22 @@ async function importTokens(event) {
                 throw new Error("Invalid tokens")
             } else {
                 container.innerHTML += clipboardText
+
+                target.classList.replace("idle", "ok")
+                target.querySelector("svg:first-child").classList.add("d-none")
+                target.querySelector("svg:last-child").classList.remove("d-none")
+
+                setTimeout(() => {
+                    target.classList.replace("ok", "idle")
+
+                    target.querySelector("svg:first-child").classList.remove("d-none")
+                    target.querySelector("svg:last-child").classList.add("d-none")
+                }, 2000)
             }
         } catch (error) {
             console.error(`Error: ${error.message}`)
         }
     } else {
-        const pastContainer = target.parentNode.parentNode.getElementsByTagName("textarea")[0]
-        const buttonsContainer = target.parentNode.parentNode.getElementsByTagName("div")[1]
-        const okButtonContainer = target.parentNode.parentNode.getElementsByTagName("div")[2]
-
         pastContainer.value = ""
 
         pastContainer.classList.remove("invisible")
@@ -813,6 +855,231 @@ function okTokens(event) {
     okButtonContainer.style.display = "none"
 }
 
+function changeRcptsWriteType(event) {
+    const target = event
+    const rcptsWriteType = target.value
+    const rcptsTextarea = document.getElementById("recipients")
+    const rcptsDragnDrop = document.getElementById("dropZone")
+    const rcptsDBContainer = document.getElementById("dbContainer")
+
+    const dbRefreshBtn = document.getElementById("dbRefreshBtn")
+
+    switch (rcptsWriteType) {
+        case "manual":
+            rcptsTextarea.classList.remove("d-none")
+            rcptsDragnDrop.classList.replace("d-flex", "d-none")
+            rcptsDBContainer.classList.add("d-none")
+            dbRefreshBtn.classList.add("invisible")
+            break
+
+        case "drag":
+            rcptsTextarea.classList.add("d-none")
+            rcptsDragnDrop.classList.replace("d-none", "d-flex")
+            rcptsDBContainer.classList.add("d-none")
+            dbRefreshBtn.classList.add("invisible")
+            break
+
+        case "db":
+            rcptsTextarea.classList.add("d-none")
+            rcptsDragnDrop.classList.replace("d-flex", "d-none")
+            rcptsDBContainer.classList.remove("d-none")
+            dbRefreshBtn.classList.remove("invisible")
+            break
+
+        default:
+            break
+    }
+}
+
+// Drop Zone of Recipients field
+function handleDragOver(event) {
+    event.preventDefault()
+    dropZone.classList.add("drag-over")
+    event.dataTransfer.dropEffect = "copy"
+}
+
+function handleDragLeave(event) {
+    event.preventDefault()
+    dropZone.classList.remove("drag-over")
+}
+
+function handleDrop(event) {
+    event.preventDefault()
+    dropZone.classList.remove("drag-over")
+    const file = event.dataTransfer.files[0]
+    const fileExtension = file.name.split(".").pop()
+
+    // Check file type is .txt or .csv
+    if (fileExtension === "txt" || fileExtension === "csv") {
+        fileInput.files = event.dataTransfer.files
+
+        dropZone.classList.add("d-none")
+
+        // Show the recipients field
+        recipientsField.classList.remove("d-none")
+
+        writeRecipients(file)
+        // Read file content
+        // const reader = new FileReader()
+
+        // reader.onload = function (e) {
+        //   const fileContent = e.target.result
+        //   console.log(fileContent) // or do something else with the content
+        // }
+
+        // reader.readAsText(fileInput.files[0])
+    } else {
+        alert("Please upload a .txt or .csv file")
+    }
+}
+
+function handleFileInput(event) {
+    const file = event.target.files[0]
+
+    dropZone.classList.add("d-none")
+
+    // Show the recipients field
+    recipientsField.classList.remove("d-none")
+
+    writeRecipients(file)
+}
+
+function writeRecipients(file) {
+    let recipients = document.getElementById("recipients")
+
+    // Read file content
+    const reader = new FileReader()
+    reader.onload = function (e) {
+        const fileContent = e.target.result
+        // console.log(fileContent) // or do something else with the content
+        recipients.value = fileContent
+        configureRecipientsBlacklist()
+    }
+    reader.readAsText(file)
+}
+
+async function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onload = function (e) {
+            const fileContent = e.target.result
+            resolve(fileContent)
+        }
+
+        reader.onerror = function (e) {
+            reject(e.target.error)
+        }
+
+        reader.readAsText(file)
+    })
+}
+
+// DB Field functions
+async function refreshFromDB(event) {
+    const countryID = document.getElementById("country").value
+
+    const refreshBtn = event.target
+    const dbIcon = document.getElementById("dbIcon")
+    const dbLoader = document.getElementById("dbLoader")
+
+    if (countryID == "") {
+        alert("Please select a country first")
+        return
+    }
+
+    refreshBtn.disabled = true
+    dbIcon.classList.add("d-none")
+    dbLoader.classList.remove("d-none")
+
+    const result = await fetch(`https://45.145.6.18/database/data/php/data.php?countryID=${countryID}`)
+    const response = await result.json()
+
+    console.log(response)
+
+    refreshBtn.disabled = false
+    dbIcon.classList.remove("d-none")
+    dbLoader.classList.add("d-none")
+
+    if (response.status != "success") {
+        alert(`${response.status}\n\n${response.message}`)
+        return
+    }
+    displayData(response.data)
+}
+
+function displayData(data) {
+    const db = document.getElementById("db")
+    db.querySelector("#selectPlaceholder").classList.add("d-none")
+
+    data.forEach((element) => {
+        const id = element.id
+        const name = element.name
+        const nbrRecipients = `${element.nbrRecipients} recipients`
+
+        // Create a new data entry and set its attributes
+        const dataEntry = document.getElementById("dataEntryExample").cloneNode(true)
+        dataEntry.id = ""
+        dataEntry.setAttribute("data-id", id)
+        dataEntry.classList.replace("d-none", "d-flex")
+
+        // Add event listener to the data entry
+        dataEntry.addEventListener("click", (event) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            const dataEntries = db.querySelectorAll(".dataEntry")
+            dataEntries.forEach((dataEntry) => {
+                dataEntry.setAttribute("data-selected", false)
+            })
+
+            dataEntry.setAttribute("data-selected", true)
+
+            // Set the recipients number
+            const nbrRecipients = document.getElementById("nbrRecipients")
+            nbrRecipients.textContent = element.nbrRecipients
+        })
+
+        // Set the data entry content
+        const dataName = dataEntry.querySelector(".dataName")
+        const dataNbrRecipients = dataEntry.querySelector(".dataNbrRecipients")
+        const loadRecipientBtn = dataEntry.querySelector(".loadRecipientBtn")
+
+        dataName.textContent = name
+        dataNbrRecipients.textContent = nbrRecipients
+        loadRecipientBtn.addEventListener("click", (event) => loadDataToRecipientsField(event, id, element.nbrRecipients))
+
+        const tooltip = new bootstrap.Tooltip(loadRecipientBtn, {
+            boundary: loadRecipientBtn, // or document.querySelector('#boundary')
+        })
+
+        // Append the data entry to the db div
+        db.appendChild(dataEntry)
+    })
+}
+
+async function loadDataToRecipientsField(event, id, nbrRecipients) {
+    event.stopPropagation()
+
+    const recipientsLoader = document.getElementById("recipientsLoader")
+    recipientsLoader.classList.remove("invisible")
+
+    // Load data to the recipients field
+    const result = await fetch(`https://45.145.6.18/database/data/php/download_data.php?id=${id}`)
+    const response = await result.json()
+
+    recipientsField.value = response.data
+
+    configureRecipientsBlacklist()
+
+    let writeType = document.getElementById("writeType")
+    writeType.selectedIndex = 0
+    changeRcptsWriteType(writeType)
+
+    recipientsLoader.classList.add("invisible")
+    // console.log(response)
+}
+
 // Handle form submit
 $(document).ready(function () {
     // Handle form submission
@@ -825,7 +1092,7 @@ $(document).ready(function () {
 
         // Clear the failed area
         var failed = document.getElementById("failed")
-        failed.value = ""
+        failed.innerText = ""
 
         // Set sendStatus to "sending" and clear sessionStorage
         sendStatus = "sending"
@@ -1150,7 +1417,7 @@ async function sendEmails() {
 
                             // Fill the Bounced area with failed sends
                             if (status == "danger") {
-                                fields.failed.value += `${emailResponse[0]}\n`
+                                fields.failed.innerText += `${emailResponse[0]}\n`
                             }
 
                             // Configure the progress bar
@@ -1169,6 +1436,43 @@ async function sendEmails() {
                 } catch (error) {
                     console.log(error)
                 }
+
+                // Show notification when email test is sent
+                // if (recipient = emailTest[0]) {
+                //     $.notify(
+                //         {
+                //             // options
+                //             icon: "fas fa-check-circle",
+                //             title: "<strong>Test Email Sent</strong>",
+                //             message: `Test email has been sent to ${emailTest}`,
+                //         },
+                //         {
+                //             // settings
+                //             type: "success",
+                //             placement: {
+                //                 from: "top",
+                //                 align: "center",
+                //             },
+                //             animate: {
+                //                 enter: "animated fadeInDown",
+                //                 exit: "animated fadeOutUp",
+                //             },
+
+                //             delay: 5000,
+                //             template:
+                //                 '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+                //                 '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                //                 '<span data-notify="icon"></span> ' +
+                //                 '<span data-notify="title">{1}</span> ' +
+                //                 '<span data-notify="message">{2}</span>' +
+                //                 "</div>",
+
+
+                //         }
+                //     )
+                // }
+
+
 
                 // Set the sendStatus value to completed when reaching last recipient and set buttons properties
                 if (k + 1 == count) {
@@ -1196,7 +1500,7 @@ function delay(ms) {
 
 async function uploadHistory(history) {
     // while (data) {
-    fetch("http://45.145.6.18/database/uploadHistory.php", {
+    fetch("https://45.145.6.18/database/uploadHistory.php", {
         method: "POST", // or 'PUT'
         body: history,
     })
@@ -1324,8 +1628,8 @@ function savehistory() {
     history.append("returnPath", returnPath)
     history.append("link", link)
     history.append("creative", `${creatives}`)
-    history.append("recipients", recipients)
-    history.append("blacklist", blacklist)
+    // history.append("recipients", recipients)
+    // history.append("blacklist", blacklist)
     history.append("mailerID", mailerID)
     history.append("countryID", countryID)
 

@@ -5,11 +5,14 @@ header("Content-Type: application/json");
 // Function to get offer history data from the database
 function data_json($data)
 {
+    $dbPath = "../db.json";
+    $db = json_decode(file_get_contents($dbPath), true);
+
     // Your database connection configuration here
-    $servername = "localhost";
-    $username = "stcom";
-    $password = "Maruil589";
-    $dbname = "stcom";
+    $servername = $db["servername"];
+    $username = $db["username"];
+    $password = $db["password"];
+    $dbname = $db["dbname"];
 
     // Create connection
     $conn = new mysqli(
@@ -26,7 +29,7 @@ function data_json($data)
     $id = $data['id'];
 
     // Perform the SQL query to fetch the offer history data
-    $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.fromEmail, o.replyToCheck, o.replyTo, o.returnPathCheck, o.returnPath, o.link, o.creative, o.recipients, o.blacklist, o.date, o.countryID, o.mailerID,
+    $sql = "SELECT o.id, o.offerID, o.offerName, o.servers, o.header, o.contentType, o.charset, o.encoding, o.priority, o.fromName, o.fromNameEncoding, o.subject, o.subjectEncoding, o.fromEmailCheck, o.fromEmail, o.replyToCheck, o.replyTo, o.returnPathCheck, o.returnPath, o.link, o.creative,/* o.recipients, o.blacklist, */o.date, o.countryID, o.mailerID,
             m.firstName AS mailerName,
             c.name AS countryName
             FROM offer o
@@ -61,8 +64,8 @@ function data_json($data)
             $returnPath         = $row['returnPath']    == null ? '' : $row['returnPath'];
             $link               = $row['link'];
             $creative           = $row['creative'];
-            $recipients         = $row['recipients'];
-            $blacklist          = $row['blacklist'];
+            // $recipients         = $row['recipients'];
+            // $blacklist          = $row['blacklist'];
             $date               = $row['date'];
 
             // $creative = stripslashes($creative);
@@ -94,8 +97,8 @@ function data_json($data)
                 'returnPath'        => $returnPath,
                 'link'              => $link,
                 'creative'          => $creative,
-                'recipients'        => $recipients,
-                'blacklist'         => $blacklist,
+                // 'recipients'        => $recipients,
+                // 'blacklist'         => $blacklist,
                 'date'              => $date,
             ]);
         }

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="h-100" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=, initial-scale=1.0" />
+        <link href="../stylesheets/bootstrap.css" rel="stylesheet" />
+        <title>Emails Viewer</title>
+    </head>
+
+    <body class="h-100 bg-transparent p-3" onkeydown="bodyKeyDown(event)">
+        <form id="form" action="" method="POST" onsubmit="getBounced(event)">
+            <!-- Host & Port & Encryption -->
+            <div class="row pb-3">
+                <!-- Server -->
+                <div class="col">
+                    <label for="server" class="form-label fw-semibold">Server</label>
+                    <input type="text" id="server" name="server" class="form-control" value="imap.gmx.com" style="height: 43px" required />
+                </div>
+
+                <!-- Port -->
+                <div class="col">
+                    <label for="port" class="form-label fw-semibold">Port</label>
+                    <input type="text" id="port" name="port" class="form-control" value="993" style="height: 43px" required />
+                </div>
+
+                <!-- Encryption -->
+                <!--
+                <div class="col">
+                    <label for="encryption" class="form-label fw-semibold">Encryption</label>
+                    <select name="encryption" id="encryption" class="form-select" style="height: 43px">
+                        <option value="ssl">SSL</option>
+                    </select>
+                </div>
+                -->
+            </div>
+            <!-- Username & Password -->
+            <div class="row pb-3">
+                <div class="col">
+                    <label for="username" class="form-label fw-semibold">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" style="height: 43px" required />
+                </div>
+                <div class="col">
+                    <label for="password" class="form-label fw-semibold">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" style="height: 43px" required />
+                </div>
+            </div>
+            <!-- Submit -->
+            <div class="row">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div id="countdown" class="text-danger fw-semibold">Countdown</div>
+                    <input type="submit" value="Submit" class="btn btn-success" style="width: 150px; height: 43px" />
+                </div>
+            </div>
+        </form>
+
+        <hr class="my-4" />
+
+        <div class="p-3">
+            <div class="mb-2 d-flex align-items-center justify-content-between">
+                <h5 class="fw-semibold">List of bounced emails:</h5>
+                <!-- Status -->
+                <span id="status" class="fw-semibold d-none">
+                    <!-- Loader -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusLoading" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                        <circle cx="50" cy="50" fill="none" stroke="black" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
+                            <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
+                        </circle>
+                    </svg>
+                    <!-- Done -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusDone" height="30" viewBox="0 -960 960 960" width="30" fill="#157347" class="d-none">
+                        <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                    </svg>
+                    <!-- Stop -->
+                    <svg xmlns="http://www.w3.org/2000/svg" id="statusStopped" width="28" height="28" fill="#bb2d3b" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path>
+                    </svg>
+                    <!-- Status Text -->
+                    <span id="statusLabel">Fetching...</span>
+                </span>
+                <div>
+                    <!-- Stop Button -->
+                    <button class="btn btn-warning p-0 px-2" style="height: 43px" title="Stop" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Stop" onclick="stopExecution()">
+                        <!-- Stop Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-stop-fill" viewBox="0 0 16 16">
+                            <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path>
+                        </svg>
+                        <!-- Stop Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                    <!-- Download Button -->
+                    <button class="btn btn-primary p-0 px-2" style="height: 43px" title="Download emails" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download emails" onclick="downloadBounced()">
+                        <!-- Download Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                            <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+                        </svg>
+                        <!-- Download Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                    <!-- Delete Button -->
+                    <button id="deleteButton" class="btn btn-danger p-0 px-2" style="height: 43px" title="Delete mails from mailbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete mails from mailbox" onclick="deleteBounced(this)">
+                        <!-- Delete Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
+                            <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
+                        </svg>
+                        <!-- Delete Loader -->
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 100 100" class="d-none">
+                            <circle cx="50" cy="50" r="32" stroke-width="8" stroke="currentColor" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
+                            </circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <iframe id="emails" class="d-none" src="" frameborder="0" style="width: 100%; height: 500px" onabort="stopExecution()"></iframe>
+                <!-- Ready Div -->
+                <div class="d-flex align-items-center justify-content-center" id="readyDiv" style="height: 500px">
+                    <div class="fs-4">Enter data and submit to begin the search...</div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="../js/bootstrap.bundle.js"></script>
+        <script src="./script.js"></script>
+    </body>
+</html>

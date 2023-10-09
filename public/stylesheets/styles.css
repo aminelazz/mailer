@@ -1,55 +1,111 @@
+:root {
+  --bg-play: #3598DC;
+}
+
+.main-menu {
+  z-index: 10;
+}
+
 .navigation:hover {
   background-color: #566769;
 }
+
 .send {
   background-color: #39b24b;
   border: 0;
 }
+
 .send:hover {
   background-color: #288035;
 }
+
 ul {
   list-style-type: "-  ";
 }
 
-ol li span.header{
+ol li span.header {
   text-decoration: underline;
   font-weight: 600;
 }
 
-.response
-{
+.response {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-table{
+table {
   width: 100%;
   table-layout: fixed;
 }
 
 .response-cell {
-  width: 50%; /* You can adjust the value as needed */
+  width: 50%;
+  /* You can adjust the value as needed */
 }
 
-button, [aria-selected=false]
-{
-  color: #4587EE;
+/* Send Tab button */
+#nav-send-tab[aria-selected=false] {
+  background-color: transparent;
+  color: #31AEF2;
 }
 
-button, [aria-selected=true]
-{
-  color: black;
+#nav-send-tab[aria-selected=true] {
+  background-color: #31AEF2;
+  color: white;
   font-weight: 600;
 }
 
-.nav-link{
+/* History Tab button */
+#nav-history-tab[aria-selected=false] {
+  background-color: transparent;
+  color: #FFC20D;
+}
+
+#nav-history-tab[aria-selected=true] {
+  background-color: #FFC20D;
+  color: white;
+  font-weight: 600;
+}
+
+/* Data Tab button */
+#nav-data-tab[aria-selected=false] {
+  background-color: transparent;
+  color: #6A9955;
+}
+
+#nav-data-tab[aria-selected=true] {
+  background-color: #6A9955;
+  color: white;
+  font-weight: 600;
+}
+
+/* IMAP Tab button */
+#nav-imap-tab[aria-selected=false] {
+  background-color: transparent;
+  color: #DC3545;
+}
+
+#nav-imap-tab[aria-selected=true] {
+  background-color: #DC3545;
+  color: white;
+  font-weight: 600;
+}
+
+button[aria-selected=false]:hover {
+  color: gray;
+}
+
+button[aria-selected=true] {
+  color: white;
+  font-weight: 600;
+}
+
+.nav-link {
   padding-inline: 2rem;
 }
 
-.refresh-dropbox
-{
+.refresh-dropbox {
   background-color: #0062FF;
 }
 
@@ -58,19 +114,17 @@ button, [aria-selected=true]
   color: #595C5F;
 }
 
-.random-divs{
+.random-divs {
   overflow: auto;
-  max-height: 134px;
 }
 
-.properties{
+.properties {
   resize: none;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.token
-{
+.token {
   background-color: #D7D7D7;
   width: fit-content;
   padding-block: 4px;
@@ -82,18 +136,150 @@ button, [aria-selected=true]
   font-size: 0.85rem;
 }
 
-.tokenButton
-{
+.tokenButton {
   border: 0;
   background-color: transparent;
   margin-top: -2px;
 }
 
-.removeCreative{
+.removeCreative {
   width: 44px;
   height: 41px;
   position: absolute;
   width: fit-content;
   right: 0px;
   padding-right: 0;
+}
+
+.drop-zone {
+  background-color: white;
+}
+
+.drag-over {
+  background-color: #cef0db;
+}
+
+.childElements {
+  pointer-events: none;
+}
+
+#uploadButton {
+  pointer-events: unset;
+}
+
+.dataEntry {
+  cursor: pointer;
+  padding: 0.75rem;
+  margin: 0.25rem;
+  border-radius: 10px;
+}
+
+.dataEntry[data-selected=true] {
+  background-color: #BFD0FC;
+  color: #1F3487;
+  border: #1F3487 1.5px solid;
+}
+
+.dataEntry[data-selected=false] {
+  background-color: white;
+  color: #262431;
+  border: #5C5E6B 1.5px solid;
+}
+
+.dataEntry[data-selected=false]:hover {
+  background-color: #E2EAFE;
+}
+
+.loadRecipientBtnContainer {
+  visibility: hidden;
+}
+
+.dataEntry:hover>.loadRecipientBtnContainer {
+  visibility: visible;
+}
+
+.dataInfos {
+  user-select: none;
+  /* display: flex;
+  flex-direction: column;
+  gap: 0.5rem; */
+}
+
+.loadRecipientBtn {
+  color: #1F3487;
+}
+
+.loadRecipientBtn:hover {
+  background-color: #BFD0FC;
+}
+
+.loadRecipientBtn:active {
+  color: white;
+  background-color: #769AFA;
+}
+
+.btn.loadRecipientBtn:first-child:active {
+  color: white;
+  background-color: #769AFA;
+}
+
+.dataEntry[data-selected=true]>div>.loadRecipientBtn:hover {
+  background-color: #769AFA;
+}
+
+.dataEntry[data-selected=true]>div>.loadRecipientBtn:active {
+  background-color: #3F72F8;
+}
+
+.dataEntry[data-selected=true]>div>.btn.loadRecipientBtn:first-child:active {
+  background-color: #3F72F8;
+}
+
+#btnContainer,
+.btnContainer {
+  display: flex;
+  border-radius: 0 12px 12px 0;
+  background-color: white;
+}
+
+.btnContainer>button {
+  padding-right: 5px;
+}
+
+.idle {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bg-play) 20%);
+}
+
+.idle:hover {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-btn-hover-bg) 20%);
+}
+
+.idle:active {
+  --bs-btn-active-bg: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #1E70A6 20%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #1E70A6 20%);
+}
+
+.ok {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #39b24b 20%);
+}
+
+.ok:hover {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #288035 20%);
+}
+
+.ok:active {
+  --bs-btn-active-bg: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #146c43 20%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #146c43 20%);
+}
+
+#btnContainer>button:nth-child(3) {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-danger) 20%);
+}
+
+#btnContainer>button:nth-child(3):hover {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--bs-btn-hover-bg) 20%);
+}
+
+#btnContainer>button:nth-child(3):active {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #9C2531 20%);
 }

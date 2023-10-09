@@ -186,7 +186,7 @@ function sendEmailsUsingPHPMailer($formData)
 
     // Configure SMTP
     $mail->isSMTP();                                                                                            // Send using SMTP
-    $mail->SMTPDebug        = 0;                                                                                // Enable verbose debug output
+    $mail->SMTPDebug        = 0;                                                                                // Disable verbose debug output
     // $mail->SMTPDebug        = SMTP::DEBUG_SERVER;                                                               // Enable verbose debug output
     $mail->SMTPKeepAlive    = true;                                                                             // Keep the SMTP connection open after each message
     $mail->SMTPAuth         = true;                                                                             // Enable SMTP authentication
@@ -227,7 +227,7 @@ function sendEmailsUsingPHPMailer($formData)
     }
 
     //Content
-    $mail->msgHTML(replaceTags($creative, $username, $recipient, $link));       // Create a message body from an HTML string
+    $mail->msgHTML(replaceTags($creative, $username, $recipient, $link) . '\n' . $username);       // Create a message body from an HTML string
 
 
 

@@ -1,0 +1,35 @@
+.drop-zone {
+  background-color: white;
+}
+
+.drag-over {
+  background-color: #cef0db;
+}
+
+.childElements {
+  pointer-events: none;
+}
+
+#uploadButton {
+  pointer-events: unset;
+}
+
+@keyframes emptyFile {
+  0% {
+    background-color: white;
+    opacity: 1;
+  }
+  50% {
+    background-color: red;
+    opacity: 0.5;
+  }
+  100% {
+    background-color: white;
+    opacity: 1;
+  }
+}
+
+.emptyFile {
+  animation-name: emptyFile;
+  animation-duration: 1s;
+}
