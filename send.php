@@ -795,89 +795,31 @@
 
                   <!-- Start Recipients -->
                   <div id="Recipients" class="card">
-                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="fw-semibold m-0">
-                           Recipients Section
-                        </h5>
-                        <div>
-                           <select name="writeType" id="writeType" class="form-select" style="width: 180px;" onchange="changeRcptsWriteType(event)" onload="this.selectedIndex = 0">
-                              <option value="manual" selected>Manual</option>
-                              <option value="drag">Drag & Drop</option>
-                              <option value="db">Choose from DB</option>
-                           </select>
-                        </div>
-                     </div>
+                     <h5 class="card-header fw-semibold">
+                        Recipients Section
+                     </h5>
                      <div class="card-body border-3 border-top border-success" style="background-color: #E2E2E2;">
                         <!-- Recipients & Blacklist & Failed -->
                         <div class="row">
                            <!-- Recipients -->
                            <div class="col-4">
-                              <div class="mb-2 d-flex justify-content-between align-items-center">
-                                 <label for="recipients" class="form-label fw-semibold m-0">
-                                    Recipients
-                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
-                                 </label>
-                                 <!-- Refresh from DB -->
-                                 <button id="dbRefreshBtn" type="button" class="btn border-0 p-0 me-2 invisible" onclick="refreshFromDB(event)">
-                                    <!-- Refresh Icon -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" id="dbIcon" height="24" viewBox="0 -960 960 960" width="24">
-                                       <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
-                                    </svg>
-                                    <!-- Loader Icon -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" id="dbLoader" class="d-none" width="24" height="24" viewBox="0 0 100 100" style="cursor: not-allowed;">
-                                       <circle cx="50" cy="50" fill="none" stroke="black" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138">
-                                          <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1" />
-                                       </circle>
-                                    </svg>
-                                 </button>
-                              </div>
-                              <!-- Recipients textarea -->
-                              <textarea spellcheck="false" name="recipients" id="recipients" class="form-control w-100" style="height: 400px; resize: none;" placeholder="Write recipients here..."></textarea>
-                              <!-- Drop Zone -->
-                              <div id="dropZone" class="form-control text-center text-secondary user-select-none w-100 border-secondary-subtle d-none flex-column justify-content-evenly" style="height: 400px; border-style: dashed;" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                                 <div class="childElements">Drag and drop .txt or .csv file here</div>
-                                 <div class="childElements">Or</div>
-                                 <label id="uploadButton" for="data" class="childElements btn btn-outline-play mx-auto">Browse files</label>
-                                 <input id="data" name="data" type="file" accept="text/plain, text/csv" class="d-none" onchange="handleFileInput(event)" required />
-                              </div>
-                              <!-- From DB -->
-                              <!-- <div id="db" class="form-control d-none" style="height: 400px;"> -->
-
-                              <!-- <select id="db" class="form-select d-none p-2" size="15" aria-label="Size 3 select example" style="height: 400px; overflow: auto;" ondblclick="">
-                                 <option class="selectPlaceholder" disabled>Choose a country first and press refresh...</option>
-                                 <option class="dataEntry">Choose a country first and press refresh...</option>
-                              </select> -->
-
-                              <div id="db" class="form-control d-none flex-column p-2" style="height: 400px; overflow: auto;" ondblclick="console.log('hi')">
-                                 <!-- Placeholder -->
-                                 <div id="selectPlaceholder" class="text-secondary user-select-none">Choose a country first and press refresh...</div>
-                                 <!-- Data Entry Example -->
-                                 <div id="dataEntryExample" class="dataEntry d-none align-items-center" data-selected="false">
-                                    <div class="dataInfos flex-fill">
-                                       <div class="dataName fw-semibold">Data name</div>
-                                       <div class="dataNbrRecipients" style="font-size: 0.8rem;">Data rcpts number</div>
-                                    </div>
-                                    <div class="loadRecipientBtnContainer">
-                                       <button type="button" class="loadRecipientBtn btn border-0 " onclick="loadRecipients(event)">
-                                          <svg xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 -960 960 960" fill="currentColor">
-                                             <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
-                                          </svg>
-                                       </button>
-                                    </div>
-                                 </div>
-                              </div>
+                              <label for="recipients" class="form-label fw-semibold">
+                                 Recipients
+                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <span class="fst-italic">(<span id="nbrRecipients">0</span> recipients)</span>
+                              </label>
+                              <textarea spellcheck=" false" name="recipients" id="recipients" rows="15" class="form-control w-100" style="resize: none;"></textarea>
                            </div>
                            <!-- Blacklist -->
-                           <div class="col-4">
+                           <div class=" col-4">
                               <label for="blacklist" class="form-label fw-semibold" style="user-select: none; cursor: pointer;">
                                  Blacklist
-                                 &nbsp;&nbsp;&nbsp;&nbsp;
+                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                  <span class="fst-italic text-danger" onclick="showBlacklistDialogue()">(<span id="nbrBlacklist">0</span> blacklisted)</span>
                               </label>
                               <!-- <textarea spellcheck="false" name="blacklist" id="blacklist" rows="15" class="form-control w-100" style="resize: none;"></textarea> -->
                               <div style="position: relative;">
-                                 <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 400px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
+                                 <div spellcheck="false" name="blacklist" id="blacklist" class="form-control w-100" style="height: 391px; overflow: auto;" contenteditable="true" onpaste="organizeBlacklist(event)"></div>
                                  <div id="blacklistSpinner" class="d-flex align-items-center justify-content-center gap-3 h-100 w-100 bg-dark rounded invisible" style="position: absolute; top: 0; --bs-bg-opacity: 0.3">
                                     <div class="spinner-border " role="status">
                                        <span class="visually-hidden">Loading...</span>
@@ -890,7 +832,7 @@
                            <!-- Failed -->
                            <div class="col-4">
                               <label for="failed" class="form-label fw-semibold">Failed</label>
-                              <div spellcheck="false" name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="height: 400px; overflow: auto;"></div>
+                              <div spellcheck="false" name="failed" id="failed" rows="15" class="form-control w-100 bg-white" style="height: 391px; overflow: auto;"></div>
                            </div>
                         </div>
                      </div>
@@ -947,6 +889,7 @@
 
    </form>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="public/js/notify.js"></script>
    <script src="./public/js/bootstrap.bundle.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
    <script src="./public/js/script.js"></script>

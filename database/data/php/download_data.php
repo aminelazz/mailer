@@ -2,7 +2,6 @@
 header("Access-Control-Allow-Origin: *"); // Allow requests from any domain
 header("Content-Type: application/json");
 
-// Download data from database
 function downloadData($id)
 {
     // Initialize $response variable
@@ -26,7 +25,7 @@ function downloadData($id)
             $dbname
         );
     } catch (Exception $e) {
-        // close with 500 status code and error message
+        // close with 400 status code and error message
         $response['status'] = 'error';
         $response['message'] = 'Error connecting to database: ' . $e->getMessage() . '';
 
