@@ -59,6 +59,7 @@ const dropZone = document.getElementById("dropZone")
 const fileInput = document.getElementById("data")
 
 var nbrRotations
+var scheduled = false
 
 async function receiveMessage(event) {
     // console.log(event.data)
@@ -379,6 +380,8 @@ function clearFiles() {
 }
 
 function checkFields() {
+    let serverInput = document.getElementById("servers")
+    let servers = document.querySelectorAll("#serverContainer > .server-token")
     let recipients = document.getElementById("recipients")
     let rotationAfterField = document.getElementById("rotationAfter")
     let testAfter = document.getElementById("testAfter")
@@ -399,6 +402,13 @@ function checkFields() {
     let emailTestCount = emailTestArray.length
 
     let allRecipientsCount = recipientsCount + emailTestCount
+
+    // Servers validity
+    serverInput.setCustomValidity("")
+
+    if (servers.length == 0) {
+        serverInput.setCustomValidity("Please enter at least one valid server")
+    }
 
     // BCC number Validity
     BCCnumber.setCustomValidity("")
@@ -1261,17 +1271,18 @@ function setSchedule(setButton) {
     setButton.disabled = true
     cancelSchedule.classList.remove("d-none")
 
-    let scheduled = true
+    scheduled = true
 
     cancelSchedule.addEventListener("click", () => {
         scheduled = false
+        updateCountdown()
     })
 
     function updateCountdown() {
         const currentTime = new Date()
         const timeDifference = scheduleDate - currentTime
 
-        if (timeDifference <= 0 || !scheduled) {
+        if (timeDifference <= 0 || scheduled == false) {
             // Timer has reached zero or went negative
             clearInterval(timer)
             setButton.textContent = "Set"
@@ -1367,6 +1378,10 @@ $(document).ready(function () {
 
         // Calculate remaining time
         displayRemainingTime()
+
+        // Cancel schedule if exists
+        const cancelSchedule = document.getElementById("cancelSchedule")
+        cancelSchedule.click()
     })
 })
 

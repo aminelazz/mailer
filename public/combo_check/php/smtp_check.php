@@ -24,7 +24,7 @@ function smtpCheck($smtpServer, $debug)
     // Set SMTP server settings
     $mail->IsSMTP();
     $mail->SMTPDebug = $debug; // Enable verbose debugging (you can adjust the level as needed)
-    $mail->Timeout = 120; // Set the timeout value for SMTP connections to 2 minutes
+    $mail->Timeout = 30; // Set the timeout value for SMTP connections to 1 minute
     $mail->SMTPAuth = true;
     $mail->SMTPSecure = $encryption;
     $mail->Host = $host;

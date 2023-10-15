@@ -118,19 +118,24 @@ date_default_timezone_set('Africa/Casablanca');
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 16.3</h6>
+                  <h6>Ver. 17</h6>
                </div>
+               <!-- Postfix Link -->
                <!-- Welcome & Logout -->
-               <div class="btn-group">
-                  <button type="button" class="btn">Welcome, <span id="mailerName" class="fw-semibold"></span></button>
-                  <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                     <span class="visually-hidden">Toggle Dropdown</span>
-                  </button>
-                  <ul class="dropdown-menu  dropdown-menu-end">
-                     <li>
-                        <button type="button" class="btn btn-outline-danger dropdown-item" onclick="logout()">Log out</button>
-                     </li>
-                  </ul>
+               <div class="d-flex justify-content-between align-items-center" style="gap: 8rem;">
+                  <a href="./postfix" target="_blank" rel="noopener noreferrer">Postfix</a>
+
+                  <div class="btn-group">
+                     <button type="button" class="btn">Welcome, <span id="mailerName" class="fw-semibold"></span></button>
+                     <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                     </button>
+                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                           <button type="button" class="btn btn-outline-danger dropdown-item" onclick="logout()">Log out</button>
+                        </li>
+                     </ul>
+                  </div>
                </div>
 
             </div>
@@ -190,7 +195,7 @@ date_default_timezone_set('Africa/Casablanca');
                                     </svg>
                                  </button>
                               </div>
-                              <div spellcheck="false" id="serverContainer" class="servers form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 200px; max-width: 100%; font-size: 0.95rem; overflow: auto;" data-placeholder="Host:Port:Encryption:User:Pass" onpaste="pasteServers(event)">
+                              <div spellcheck="false" id="serverContainer" class="servers form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 200px; max-width: 100%; font-size: 0.95rem; overflow: auto;" data-placeholder="Click and paste servers..." onpaste="pasteServers(event)">
                                  <div id="serverTokenExample" class="server-token d-none">
                                     <div class="server-nbr">N</div>
                                     <div class="label">smtp:port:encryption:</div>

@@ -143,7 +143,7 @@ button[aria-selected=true] {
   overflow: auto;
 }
 
-.servers:empty::before {
+#serverContainer:empty::before {
   content: attr(data-placeholder);
   color: #595C5F;
 }

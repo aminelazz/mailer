@@ -36,6 +36,9 @@ tokenExample.remove()
 const saveSmtp = document.getElementById('saveSmtp')
 
 var ajaxRequest
+var requestAborted = false
+
+var emailProperties = {}
 var data
 
 fileInput.value = ''
@@ -294,11 +297,30 @@ async function matchDomains(event) {
 
 async function checkSMTP() {
     const matchedComboDivs = matchedCombos.querySelectorAll('.matchedCombo')
+    const matchedComboArray = Array.from(matchedComboDivs)
+
+    requestAborted = false
 
     if (matchedComboDivs.length === 0) {
         alert('Please match domains first.')
         return false
     }
+
+    // Reset matched combos style
+    matchedComboArray.forEach((matchedCombo) => {
+        matchedCombo.classList.remove('fw-semibold', 'text-success', 'text-danger') // Remove all classes
+
+        const svgContainer = matchedCombo.children[0]
+        const loader = svgContainer.children[0]
+        const check = svgContainer.children[1]
+        const cross = svgContainer.children[2]
+        const stop = svgContainer.children[3]
+
+        loader.classList.add('d-none') // Hide loader
+        check.classList.add('d-none') // Hide check
+        cross.classList.add('d-none') // Hide cross
+        stop.classList.add('d-none') // Hide stop
+    })
 
     // Check Button
     checkButton.disabled = true
@@ -323,10 +345,22 @@ async function checkSMTP() {
         const loader = svgContainer.children[0]
         const check = svgContainer.children[1]
         const cross = svgContainer.children[2]
+        const stop = svgContainer.children[3]
 
-        loader.classList.remove('invisible') // Show loader
+        loader.classList.remove('d-none') // Show loader
         check.classList.add('d-none') // Hide check
         cross.classList.add('d-none') // Hide cross
+        stop.classList.add('d-none') // Hide stop
+
+        emailProperties = {
+            comboContainer: comboContainer,
+            emailIcons: {
+                loader: loader,
+                check: check,
+                cross: cross,
+                stop: stop,
+            },
+        }
 
         let success = false
 
@@ -341,14 +375,14 @@ async function checkSMTP() {
             const smtp = comboSMTPs[j]
             const smtpServer = `${smtp}${comboLabel.textContent.trim()}`
 
-            statusLabel.innerHTML = `Checking: <span class="text-warning">${comboLabel.textContent.trim()}</span>` // Set label text
+            statusLabel.innerHTML = `Checking: <span class="text-primary">${comboLabel.textContent.trim()}</span>     (${j + 1} / ${comboSMTPs.length})` // Set label text
 
             const formData = new FormData()
             formData.append('smtpServer', smtpServer)
             formData.append('debug', '0')
 
             try {
-                await $.ajax({
+                ajaxRequest = await $.ajax({
                     type: 'POST',
                     url: './php/smtp_check.php',
                     data: formData,
@@ -366,12 +400,25 @@ async function checkSMTP() {
                         success = true
                     },
                     error: function (response) {
-                        response = JSON.parse(response.responseText)
+                        try {
+                            response = JSON.parse(response.responseText)
+                        } catch (error) {
+                            response = {
+                                status: 'Error',
+                                message: 'Error checking SMTP',
+                                server: smtpServer,
+                            }
+                        }
+
                         console.log(response)
                     },
                 })
             } catch (error) {
-                // console.log(error)
+                // console.log(`Error checking '${smtpServer}':\n${JSON.parse(JSON.stringify(error.responseText, null, 4))}`)
+            }
+
+            if (requestAborted) {
+                return
             }
         }
 
@@ -381,12 +428,14 @@ async function checkSMTP() {
             loader.classList.add('d-none') // Hide loader
             check.classList.remove('d-none') // Show check
             cross.classList.add('d-none') // Hide cross
+            stop.classList.add('d-none') // Hide stop
         } else {
             comboContainer.classList.add('fw-semibold', 'text-danger') // Add danger class
 
             loader.classList.add('d-none') // Hide loader
             check.classList.add('d-none') // Hide check
             cross.classList.remove('d-none') // Show cross
+            stop.classList.add('d-none') // Hide stop
         }
         // break matchedCombosLoop // Only check the first SMTP
     }
@@ -404,6 +453,37 @@ async function checkSMTP() {
     statusLabel.textContent = 'Done' // Set label text
 
     // console.log(matchedCombosArray)
+}
+
+function stopCheck() {
+    // console.log(ajaxRequest)
+
+    requestAborted = true
+    // ajaxRequest.abort()
+    console.log('Aborting...')
+
+    const svgContainer = emailProperties.comboContainer
+    const icons = emailProperties.emailIcons
+
+    svgContainer.classList.add('fw-semibold', 'text-danger') // Add danger class
+
+    // Email Icons
+    icons.loader.classList.add('d-none') // Hide loader
+    icons.check.classList.add('d-none') // Hide check
+    icons.cross.classList.add('d-none') // Hide cross
+    icons.stop.classList.remove('d-none') // Show stop
+
+    // Check Button
+    checkButton.disabled = false
+    checkButton.children[0].classList.remove('d-none') // Show label
+    checkButton.children[1].classList.add('d-none') // Hide spinner
+
+    // Status Span
+    statusLoading.classList.add('d-none') // Hide loading spinner
+    statusDone.classList.add('d-none') // Hide done icon
+    statusStopped.classList.remove('d-none') // Show stopped icon
+    statusLabel.classList.add('text-danger') // Add danger class
+    statusLabel.textContent = 'Stopped' // Set label text
 }
 
 function delay(ms) {
@@ -672,7 +752,7 @@ async function saveSMTPs(event) {
                 },
             })
         } catch (error) {
-            // console.log(error)
+            console.log(error)
         }
     }
 

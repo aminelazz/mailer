@@ -96,7 +96,7 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
     $ip                 = base64_encode($_SERVER['REMOTE_ADDR']);
     $UID                = $formData['UID'];
     $offerName          = $formData['offerName'];
-    $serverIndex             = $formData['serverIndex'];
+    $serverIndex        = $formData['serverIndex'];
     $server             = $formData['server'];
     $headers            = explode("\n", $formData['headers']);
     $contentType        = $formData['contentType'];
@@ -139,15 +139,15 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
     // append the tracking image to the creative
     $creative = $creative . $trackImg;
 
-    $headerProperties = [];
+    $headersArray = [];
 
     // Split the header properties by ": "
     for ($i = 0; $i < sizeof($headers); $i++) {
-        $h = explode(": ", $headers[$i]);
-        array_push($headerProperties, $h[1]);
+        $h = explode(": ", $headers[$i], 2);
+        array_push($headersArray, array(
+            $h[0] => $h[1],
+        ));
     }
-
-    list($messageID, $XMailer, $autoSubmit, $XAutoResponse, $XAbuse) = $headerProperties;
 
     list($host, $port, $smtpSecure, $username, $password) = explode(":", $server);
 
@@ -208,7 +208,6 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
     $mail->setFrom(replaceTags($fromEmail, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     $mail->AddReplyTo(replaceTags($replyTo, $username, $recipient, $link), replaceTags($fromName, $username, $recipient, $link));
     // $mail->Sender           = replaceTags($returnPath, $username, $recipient, $link);
-    $mail->addCustomHeader("Return-Path", replaceTags($returnPath, $username, $recipient, $link));
     $mail->Subject          = $subject;
     $mail->MessageDate      = PHPMailer::rfcDate();
     $mail->Encoding         = $encoding;
@@ -229,11 +228,30 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
     $mail->Username         = $username;                                                                                // SMTP username
     $mail->Password         = $password;                                                                                // SMTP password
     $mail->Priority         = $priority;                                                                                // Email priority
-    $mail->MessageID        = replaceTags($messageID, $username, $recipient, $link);                                    // An ID to be used in the Message-ID header
-    $mail->XMailer          = replaceTags($XMailer, $username, $recipient, $link);                                      // X-Mailer header
-    $mail->addCustomHeader("Auto-Submitted", replaceTags($autoSubmit, $username, $recipient, $link));
-    $mail->addCustomHeader("X-Auto-Response-Suppress", replaceTags($XAutoResponse, $username, $recipient, $link));
-    $mail->addCustomHeader("X-Abuse", replaceTags($XAbuse, $username, $recipient, $link));
+
+    // Configure headers
+    foreach ($headersArray as $header) {
+        foreach ($header as $key => $value) {
+
+            // echo "Header key: $key, value: $value <br />";
+            if ($key == "X-Mailer") {
+                $mail->XMailer = replaceTags($value, $username, $recipient, $link);
+                continue;
+            }
+
+            if ($key == "Message-ID") {
+                $mail->MessageID = replaceTags($value, $username, $recipient, $link);
+                continue;
+            }
+            $mail->addCustomHeader($key, replaceTags($value, $username, $recipient, $link));
+        }
+    }
+    // $mail->MessageID        = replaceTags($messageID, $username, $recipient, $link);                                    // An ID to be used in the Message-ID header
+    // $mail->XMailer          = replaceTags($XMailer, $username, $recipient, $link);                                      // X-Mailer header
+    // $mail->addCustomHeader("Return-Path", replaceTags($returnPath, $username, $recipient, $link));
+    // $mail->addCustomHeader("Auto-Submitted", replaceTags($autoSubmit, $username, $recipient, $link));
+    // $mail->addCustomHeader("X-Auto-Response-Suppress", replaceTags($XAutoResponse, $username, $recipient, $link));
+    // $mail->addCustomHeader("X-Abuse", replaceTags($XAbuse, $username, $recipient, $link));
 
     //Recipients
     $mail->addBCC($recipient);                                      //Name is optional
