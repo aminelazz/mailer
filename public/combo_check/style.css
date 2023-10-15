@@ -129,49 +129,73 @@ button>* {
 
 .token>* {
     pointer-events: none;
-
-    /* Token status */
-    &:first-child {
-        display: inline-flex;
-        align-items: center;
-        height: 18px;
-        /* width: 18px; */
-        background-color: gray;
-        padding: 0;
-        border-radius: 50%;
-
-        &:not(:empty) {
-            width: fit-content;
-            padding: 0px 5px;
-        }
-
-        &::before {
-            content: "";
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border-style: solid;
-            border-width: 0 4px 6px 4px;
-            border-color: transparent;
-            position: relative;
-            top: -2px;
-            left: -2px;
-        }
-    }
 }
 
-.token>*:last-child {
+/* Status div */
+.token>*:first-child {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6rem;
+    border-radius: 50rem;
+    height: 18px;
+}
 
-    >svg {
-        pointer-events: auto;
-        padding: 1px;
-        margin-bottom: 2px;
-        border-radius: 50%;
-        fill: #DC3545;
-    }
+/* Label of status div */
+.token>*:first-child>div {
+    height: 18px;
+    border-radius: 50rem;
+    background-color: gray;
+}
 
-    >svg:hover {
-        background-color: var(--bs-red);
-        fill: white;
-    }
+/* Hide loader by default */
+.token>*:first-child>svg {
+    display: none;
+}
+
+/* Loader when status div has class "saving" */
+.token>*:first-child.saving>svg {
+    display: unset;
+}
+
+/* Label when status div has class "saving" */
+.token>*:first-child.saving>div {
+    width: 0;
+}
+
+/* Label when status div has any class other than "saving" */
+.token>*:first-child:not(.saving)>div {
+    width: 18px;
+}
+
+/* Label when status div has class "success" */
+.token>*:first-child.success>div {
+    background-color: #28A745;
+    color: white;
+}
+
+/* Label when status div has class "warning" */
+.token>*:first-child.warning>div {
+    background-color: #FFC107;
+    color: black;
+}
+
+/* Label when status div has class "error" */
+.token>*:first-child.error>div {
+    background-color: #DC3545;
+    color: white;
+}
+
+/* Remove button style */
+.token>*:last-child>svg {
+    pointer-events: auto;
+    padding: 1px;
+    margin-bottom: 2px;
+    border-radius: 50%;
+    fill: #DC3545;
+}
+
+/* Remove button style on hover */
+.token>*:last-child>svg:hover {
+    background-color: var(--bs-red);
+    fill: white;
 }

@@ -17,10 +17,10 @@ date_default_timezone_set('Africa/Casablanca');
    <title>St-Com</title>
 </head>
 
-<body class="row w-100 h-100" style="background-color: #E2E2E2;" onbeforeunload="return preventUnload()">
+<body class="row w-100 h-100" style="background-color: #E2E2E2;">
    <form action="public/functions/send_email.php" method="post" class="p-0" id="sendForm" enctype="multipart/form-data">
       <!-- Start Side panel -->
-      <div class="col p-0 position-fixed start-0 h-100" style="max-width: 220px; background-color: #8fa1a3;">
+      <div class="col p-0 position-fixed start-0 h-100" style="max-width: 220px; background-color: #8fa1a3; overflow: auto;">
          <div class="m-2 ">
             <center>
                <a href="">
@@ -73,7 +73,7 @@ date_default_timezone_set('Africa/Casablanca');
                </div>
             </a>
             <!-- Start Button -->
-            <button id="startSend" type="submit" class="send btn btn-success bord-0 mt-4 mb-3 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
+            <button id="startSend" type="submit" class="send btn btn-success bord-0 my-2 mx-auto text-white fw-semibold" style="height: 43px; width: 85%;" onclick="checkFields()">Start</button>
             <!-- Play & Pause & Stop Buttons -->
             <div id="controlArea" class="d-flex justify-content-evenly mx-auto h-auto p-0 invisible" style="width: 85%;">
                <button id="play" type="button" class="col-3 btn btn-play border-2" onclick="send()">
@@ -87,7 +87,7 @@ date_default_timezone_set('Africa/Casablanca');
                </button>
             </div>
             <!-- Status Label -->
-            <div class="text-white text-center fw-semibold my-3" id="status">Status: Pending</div>
+            <div class="text-white text-center fw-semibold my-2" id="status">Status: Pending</div>
             <!-- Progress bar & Send count -->
             <div>
                <div class="progress p-0 mx-auto invisible" id="progressBarContainer" role="progressbar" style="width: 85%;" aria-label="Sent emails" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -97,7 +97,7 @@ date_default_timezone_set('Africa/Casablanca');
             </div>
             <!-- Schedule -->
             <div class="text-white text-center fw-semibold my-3" id="status">Schedule</div>
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-2 py-2">
                <input class="form-control" type="datetime-local" value="<?php echo date('Y-m-d\TH:i') ?>" name="schedule" id="schedule" style="font-size: 0.9rem;">
                <div class="d-flex gap-2" style="height: 43px;">
                   <button id="cancelSchedule" class="btn btn-secondary p-0 px-2 d-none" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Cancel Schedule">
@@ -118,7 +118,7 @@ date_default_timezone_set('Africa/Casablanca');
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 16</h6>
+                  <h6>Ver. 16.3</h6>
                </div>
                <!-- Welcome & Logout -->
                <div class="btn-group">
@@ -181,7 +181,27 @@ date_default_timezone_set('Africa/Casablanca');
                               <label for="servers" class="form-label fw-semibold">
                                  Servers
                               </label>
-                              <textarea spellcheck="false" name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 134px; resize: none; font-size: 0.85rem; overflow: auto;" placeholder="Format 1: Host:Port:TLS:User:Pass&#10;&#10;Format 2: Host:Port:SSL:User:Pass" required></textarea>
+                              <div class="mb-2 d-flex gap-2" style="height: 43px;">
+                                 <input spellcheck="false" name="servers" id="servers" class="form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl|):[\w.-]+@[\w.-]+:\S+)$/gm" style="font-size: 0.85rem;" placeholder="Host:Port:Encryption:User:Pass" onkeydown="addServerToken(event)"></input>
+                                 <!-- Add server token button -->
+                                 <button type="button" class="btn btn-secondary h-100 d-flex align-items-center" onclick="addServerToken({ key: 'Enter', target: this.previousElementSibling, preventDefault: () => {}})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="26" viewBox="0 -960 960 960" width="26" fill="currentColor">
+                                       <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                                    </svg>
+                                 </button>
+                              </div>
+                              <div spellcheck="false" id="serverContainer" class="servers form-control" pattern="/^(?:[\w.-]+:\d+:(?:tls|ssl):[\w.-]+@[\w.-]+:\S+)$/gm" style="height: 200px; max-width: 100%; font-size: 0.95rem; overflow: auto;" data-placeholder="Host:Port:Encryption:User:Pass" onpaste="pasteServers(event)">
+                                 <div id="serverTokenExample" class="server-token d-none">
+                                    <div class="server-nbr">N</div>
+                                    <div class="label">smtp:port:encryption:</div>
+                                    <div role="button" onclick="this.parentNode.remove()">
+                                       <!-- Cross Icon (Remove) -->
+                                       <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18">
+                                          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                       </svg>
+                                    </div>
+                                 </div>
+                              </div>
                            </div>
                            <!-- End Server Field -->
                            <div class="col">
@@ -1118,41 +1138,28 @@ date_default_timezone_set('Africa/Casablanca');
                   </div>
                   <!-- End Result -->
 
-                  <div class="position-fixed bottom-0 end-0 py-4 px-3 d-flex flex-column gap-4 invisible">
-                     <!-- Edit Document Button -->
-                     <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Edit Document" onclick="editDocumentData()">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
-                           <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
-                        </svg>
-                     </button>
-                     <!-- Top Button -->
-                     <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Scroll to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
-                           <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
-                        </svg>
-                     </button>
-                  </div>
+
 
                </div>
                <!-- History -->
                <div class="tab-pane h-100" id="nav-history" class="pt-2" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="0" style="height: initial;">
-                  <iframe id="history" width="100%" height="100%" src="https://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
+                  <iframe id="historyIframe" width="100%" height="100%" src="https://45.145.6.18/database/history/history.html" title="History" frameborder="0" allowfullscreen></iframe>
                </div>
                <!-- Data -->
                <div class="tab-pane h-100" id="nav-data" class="pt-2" role="tabpanel" aria-labelledby="nav-data-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="https://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
+                  <iframe id="dataIframe" width="100%" height="100%" src="https://45.145.6.18/database/data/data.html" title="Data" frameborder="0" allowfullscreen style="height: 110%;"></iframe>
                </div>
                <!-- Imap Checker -->
                <div class="tab-pane h-100" id="nav-imap" class="pt-2" role="tabpanel" aria-labelledby="nav-imap-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="./public/imap/index.html" title="Imap Checker" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+                  <iframe id="imapIframe" width="100%" height="100%" src="./public/imap/index.html" title="Imap Checker" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
                </div>
                <!-- Tracking -->
                <div class="tab-pane h-100" id="nav-tracking" class="pt-2" role="tabpanel" aria-labelledby="nav-tracking-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="https://45.145.6.18/database/tracking" title="Tracking" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+                  <iframe id="trackingIframe" width="100%" height="100%" src="https://45.145.6.18/database/tracking" title="Tracking" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
                </div>
                <!-- SMTP Check -->
                <div class="tab-pane h-100" id="nav-smtp-check" class="pt-2" role="tabpanel" aria-labelledby="nav-smtp-check-tab" tabindex="0" style="height: initial;">
-                  <iframe id="data" width="100%" height="100%" src="./public/combo_check/" title="SMTP Check" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+                  <iframe id="smtpCheckIframe" width="100%" height="100%" src="./public/combo_check/" title="SMTP Check" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
                </div>
             </div>
             <!-- Blacklist Dialogue -->
@@ -1186,6 +1193,35 @@ date_default_timezone_set('Africa/Casablanca');
                      <button class="btn btn-success" type="button" style="width: 150px;" onclick="saveDocumentData()">Save</button>
                   </div>
                </div>
+            </div>
+
+            <div class="position-fixed bottom-0 end-0 py-4 px-3 d-flex flex-column align-items-center gap-4 invisible">
+               <div class="d-flex flex-column align-items-center gap-2 rounded invisible visible" style="padding: 15px; width: max-content; background-color: rgba(0, 0, 0, 0.5);">
+                  <button type="button" class="btn btn-dark fw-semibold" title="SMTP Check" style="border-radius: 50rem; width: 50px;" onclick="navSmtpCheckTab.click()">S</button>
+                  <button type="button" class="btn btn-purple fw-semibold" title="Tracking" style="border-radius: 50rem; width: 50px;" onclick="navTrackingTab.click()">T</button>
+                  <button type="button" class="btn btn-danger fw-semibold" title="IMAP Checker" style="border-radius: 50rem; width: 50px;" onclick="navImapTab.click()">I</button>
+                  <button type="button" class="btn btn-success fw-semibold" title="Data" style="border-radius: 50rem; width: 50px;" onclick="navDataTab.click()">D</button>
+                  <button type="button" class="btn btn-warning fw-semibold" title="History" style="border-radius: 50rem; width: 50px;" onclick="navHistoryTab.click()">H</button>
+                  <button type="button" class="btn btn-play fw-semibold" title="Send" style="border-radius: 50rem; width: 50px;" onclick="navSendTab.click()">S</button>
+               </div>
+               <!-- 3 points Button -->
+               <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="More" onclick="this.previousElementSibling.classList.toggle('invisible')">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                     <path d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
+                  </svg>
+               </button>
+               <!-- Edit Document Button -->
+               <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Edit Document" onclick="editDocumentData()">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                     <path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z" />
+                  </svg>
+               </button>
+               <!-- Top Button -->
+               <button class="btn btn-play rounded-circle visible" type="button" style="width: 50px; height: 50px; box-shadow: 0px 0px 30px 4px #8B8B8B;" title="Scroll to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                     <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                  </svg>
+               </button>
             </div>
          </div>
       </div>

@@ -96,6 +96,7 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
     $ip                 = base64_encode($_SERVER['REMOTE_ADDR']);
     $UID                = $formData['UID'];
     $offerName          = $formData['offerName'];
+    $serverIndex             = $formData['serverIndex'];
     $server             = $formData['server'];
     $headers            = explode("\n", $formData['headers']);
     $contentType        = $formData['contentType'];
@@ -281,19 +282,28 @@ function sendEmailsUsingPHPMailer($formData, $subSend = false)
 
     // Send the email using PHPMailer
     if ($mail->Send()) {
-        $response   = 'Mail Sent successfully';
-        $status     = 'success';
+        $response   = array(
+            'status'        => 'success',
+            'message'       => 'Mail Sent successfully',
+            'email'         => $recipient,
+            'serverIndex'   => $serverIndex,
+            'server'        => $server,
+        );
     } else {
-        $response   = 'Error: ' . $mail->ErrorInfo;
-        $status     = 'danger';
+        $response   = array(
+            'status'        => 'danger',
+            'message'       => $mail->ErrorInfo,
+            'email'         => $recipient,
+            'serverIndex'   => $serverIndex,
+            'server'        => $server,
+        );
     }
 
     $mail->clearAllRecipients();
+
+    header("content-type: application/json");
     // Send the response back to the client-side code using AJAX
-    echo json_encode([
-        $recipient => $response,
-        'status'   => $status,
-    ]);
+    echo json_encode($response);
 
     // Flush the output buffer to send the response immediately
     ob_flush();

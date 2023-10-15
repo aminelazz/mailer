@@ -5,6 +5,7 @@ const fileName = document.getElementById('fileName')
 const fileContentField = document.getElementById('fileContent')
 
 const comboList = document.getElementById('comboList')
+const office365 = document.getElementById('office365')
 
 const statusSpan = document.getElementById('status')
 const statusLoading = document.getElementById('statusLoading')
@@ -204,23 +205,63 @@ async function matchDomains(event) {
     }
 
     combos = combos.filter((combo) => combo !== '')
-
-    matchedCombos.innerText = ''
     let matched = 0
-    let unmatchedCombosArray = []
-    let unmatchedDomainsArray = []
 
-    await combos.forEach((combo) => {
-        let comboEmail = combo.split(':')[0]
-        let comboDomain = comboEmail.split('@')[1]
-        let comboDomainExists = data.some((smtp) => smtp.domain.toLowerCase() === comboDomain.toLowerCase())
-        if (comboDomainExists) {
+    if (!office365.checked) {
+        matchedCombos.innerText = ''
+        let unmatchedCombosArray = []
+        let unmatchedDomainsArray = []
+
+        await combos.forEach((combo) => {
+            let comboEmail = combo.split(':')[0]
+            let comboDomain = comboEmail.split('@')[1]
+            let comboDomainExists = data.some((smtp) => smtp.domain.toLowerCase() === comboDomain.toLowerCase()) // For all domains
+
+            if (comboDomainExists) {
+                // console.log(`${combo} exists`)
+                const div = matchedCombo.cloneNode(true)
+                div.classList.add('matchedCombo')
+                div.classList.remove('d-none')
+                div.setAttribute('data-combo', combo)
+                div.setAttribute('data-domain', comboDomain)
+
+                const svgContainer = div.children[0]
+                const label = div.children[1]
+                label.innerText = `${combo}`
+
+                matchedCombos.appendChild(div)
+                matched++
+            } else {
+                // console.log(`${combo} does not exist`)
+                unmatchedDomainsArray.push(comboDomain)
+                unmatchedCombosArray.push(combo)
+            }
+        })
+
+        if (unmatchedDomainsArray.length > 0) {
+            const uniqueUnmatchedDomainsArray = [...new Set(unmatchedDomainsArray)]
+            unmatchedDomains.innerText = uniqueUnmatchedDomainsArray.join('\n')
+
+            const uniqueUnmatchedCombosArray = [...new Set(unmatchedCombosArray)]
+            unmatchedCombos.innerText = uniqueUnmatchedCombosArray.join('\n')
+
+            const unmatchedDomainsTab = document.querySelectorAll('.navg-tab')[1]
+            const notificationBadge = unmatchedDomainsTab.children[1]
+
+            notificationBadge.style.display = 'unset'
+        }
+    } else {
+        // Put all combos directly in matchedCombos
+        combos.forEach((combo) => {
+            let comboEmail = combo.split(':')[0]
+            let comboDomain = comboEmail.split('@')[1]
+
             // console.log(`${combo} exists`)
             const div = matchedCombo.cloneNode(true)
             div.classList.add('matchedCombo')
             div.classList.remove('d-none')
             div.setAttribute('data-combo', combo)
-            div.setAttribute('data-domain', comboDomain)
+            div.setAttribute('data-domain', 'office365.com')
 
             const svgContainer = div.children[0]
             const label = div.children[1]
@@ -228,26 +269,8 @@ async function matchDomains(event) {
 
             matchedCombos.appendChild(div)
             matched++
-        } else {
-            // console.log(`${combo} does not exist`)
-            unmatchedDomainsArray.push(comboDomain)
-            unmatchedCombosArray.push(combo)
-        }
-    })
-
-    if (unmatchedDomainsArray.length > 0) {
-        const uniqueUnmatchedDomainsArray = [...new Set(unmatchedDomainsArray)]
-        unmatchedDomains.innerText = uniqueUnmatchedDomainsArray.join('\n')
-
-        const uniqueUnmatchedCombosArray = [...new Set(unmatchedCombosArray)]
-        unmatchedCombos.innerText = uniqueUnmatchedCombosArray.join('\n')
-
-        const unmatchedDomainsTab = document.querySelectorAll('.navg-tab')[1]
-        const notificationBadge = unmatchedDomainsTab.children[1]
-
-        notificationBadge.style.display = 'unset'
+        })
     }
-
     matchedCount.innerText = `(${matched} emails)`
 
     submitButton.disabled = false
@@ -310,6 +333,7 @@ async function checkSMTP() {
         const comboLabel = comboContainer.children[1]
         let comboDomain = comboContainer.getAttribute('data-domain')
         const comboSMTPs = data.find((smtp) => smtp.domain.toLowerCase() === comboDomain.toLowerCase()).smtps
+
         // console.log(comboSMTP)
 
         // Iterate over combo SMTPs
@@ -424,6 +448,31 @@ function saveAs(blob, filename) {
         }, 0)
 
         a.remove()
+    }
+}
+
+function LoadSMTPsToParent() {
+    const validSMTPs = document.querySelectorAll('.validSMTP')
+    const validSMTPsArray = []
+
+    if (validSMTPs.length === 0) {
+        alert('Please check SMTPs first.')
+        return
+    } else {
+        validSMTPs.forEach((validSMTP) => {
+            validSMTPsArray.push(validSMTP.textContent)
+        })
+
+        if (validSMTPsArray.length === 0) {
+            alert('Please check SMTPs first.')
+            return
+        }
+
+        let validSMTPsObject = {
+            validSMTPs: validSMTPsArray,
+        }
+
+        parent.postMessage(validSMTPsObject, '*')
     }
 }
 
@@ -589,8 +638,13 @@ async function saveSMTPs(event) {
     for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i]
         const tokenStatus = token.querySelector('[data-value="status"]')
+        const tokenStatusLabel = tokenStatus.children[0]
         const tokenDomain = token.querySelector('[data-value="domain"]').innerText.toLowerCase()
         const tokenServer = token.querySelector('[data-value="smtp"]').innerText.toLowerCase()
+
+        // Set status to saving
+        tokenStatus.className = 'saving'
+        tokenStatusLabel.innerText = ''
 
         const formData = new FormData()
         formData.append('domain', tokenDomain)
@@ -605,18 +659,15 @@ async function saveSMTPs(event) {
                 processData: false,
                 success: function (response) {
                     console.log(response)
-                    // tokenStatus.innerText = 'Saved'
-                    tokenStatus.style.backgroundColor = 'var(--bs-success)'
+                    tokenStatus.className = 'success'
                 },
                 error: function (response) {
                     response = JSON.parse(response.responseText)
                     console.log(response)
                     if (response.status === 'Error') {
-                        // tokenStatus.innerText = 'Error'
-                        tokenStatus.style.backgroundColor = 'var(--bs-danger)'
+                        tokenStatus.className = 'error'
                     } else if (response.status === 'Duplicate') {
-                        // tokenStatus.innerText = 'Duplicated'
-                        tokenStatus.style.backgroundColor = 'var(--bs-warning)'
+                        tokenStatus.className = 'warning'
                     }
                 },
             })

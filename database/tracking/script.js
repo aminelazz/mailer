@@ -203,3 +203,63 @@ function saveAs(blob, filename) {
         a.remove()
     }
 }
+
+function sortTracking(event) {
+    const target = event
+    const sortingCol = target.getAttribute('data-sort-col') // Get the sorting column
+
+    const currrentSVG = target.querySelector('svg:not(.d-none)') // Get the current sorting icon
+
+    const nextSvg = currrentSVG.nextElementSibling || target.firstElementChild // Get the next sorting icon or the default sorting icon
+    const sortMethod = nextSvg.getAttribute('data-sort') // Get the requested sorting method
+    // console.log(`Current sorting: ${sortMethod}`)
+
+    const sortingContainers = document.querySelectorAll(`.sorting-container`) // Get all sorting containers
+
+    // Reset all sorting
+    sortingContainers.forEach((container) => {
+        // console.log(container)
+        const svgs = container.querySelectorAll('svg')
+        svgs.forEach((svg) => {
+            svg.classList.add('d-none')
+        })
+
+        // Show the default sorting icon if the container is not the target
+        if (container != target) {
+            container.children[0].classList.remove('d-none')
+        }
+    })
+
+    // Hide the current icon and show the next icon or the default icon
+    currrentSVG.classList.add('d-none')
+    nextSvg.classList.remove('d-none')
+
+    // Sort the data
+    // Slice the "data" array to prevent it from being modified
+    const sortedData = data.slice().sort((a, b) => {
+        const aData = a[sortingCol]
+        const bData = b[sortingCol]
+
+        if (sortMethod == 'asc') {
+            if (sortingCol == 'date') {
+                return new Date(aData) - new Date(bData) // Sort date ascending
+            } else {
+                return parseInt(aData) - parseInt(bData) // Sort openers acsending
+            }
+        } else if (sortMethod == 'desc') {
+            if (sortingCol == 'date') {
+                return new Date(bData) - new Date(aData) // Sort date descending
+            } else {
+                return parseInt(bData) - parseInt(aData) // Sort openers descending
+            }
+        } else {
+            return 0
+        }
+    })
+
+    if (sortMethod == 'default') {
+        displayTracking(data) // Display the original data
+    } else {
+        displayTracking(sortedData) // Display the sorted data
+    }
+}

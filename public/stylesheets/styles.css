@@ -143,6 +143,11 @@ button[aria-selected=true] {
   overflow: auto;
 }
 
+.servers:empty::before {
+  content: attr(data-placeholder);
+  color: #595C5F;
+}
+
 .properties {
   resize: none;
   white-space: nowrap;
@@ -307,4 +312,42 @@ button[aria-selected=true] {
 
 #btnContainer>button:nth-child(4):active {
   background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, #9C2531 20%);
+}
+
+.server-token {
+  background-color: #0062ff3d;
+  color: #0062FF;
+  font-weight: 600;
+  display: inline-flex;
+  margin: 5px;
+  padding: 5px 10px;
+  gap: 10px;
+  /* border: 1.5px solid #0062FF; */
+  border-radius: 8px;
+}
+
+.server-token>* {
+  user-select: all;
+}
+
+.server-token>*:first-child {
+  user-select: none;
+  background-color: white;
+  padding-inline: 5px;
+  border-radius: 50rem;
+}
+
+/* Remove button style */
+.server-token>*:last-child>svg {
+  pointer-events: auto;
+  padding: 1px;
+  margin-bottom: 2px;
+  border-radius: 50%;
+  fill: #DC3545;
+}
+
+/* Remove button style on hover */
+.server-token>*:last-child>svg:hover {
+  background-color: var(--bs-red);
+  fill: white;
 }

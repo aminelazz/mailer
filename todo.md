@@ -16,4 +16,6 @@ show the number of successes and fails
 
 access to server from result section
 
-asc/desc ordering in tracking table
+~~asc/desc ordering in tracking table~~
+
+Postfix: edit /etc/postfix/main.cf from php file

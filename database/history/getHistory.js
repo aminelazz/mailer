@@ -3,6 +3,19 @@ var data
 window.onload = getHistory()
 window.onload = changeSearchType()
 
+// Send scroll height to parent when the page is loaded
+// window.addEventListener('load', sendScrollHeight())
+
+// Send scroll height to parent when the page is resized
+// window.addEventListener('resize', sendScrollHeight())
+
+function sendScrollHeight() {
+    let scrollHeight = {
+        historyHeight: document.body.scrollHeight,
+    }
+    parent.postMessage(scrollHeight, '*')
+}
+
 async function getHistory() {
     const result = await fetch('https://45.145.6.18/database/history/getOfferHistory.php')
 
@@ -222,6 +235,8 @@ function displayHistory(data) {
         offerHistory.style.display = 'block'
         document.getElementById('notFound').style.display = 'none'
     }
+
+    // sendScrollHeight()
 }
 
 function changeSearchType() {
@@ -284,7 +299,11 @@ async function loadOffer(id, attachements, offerID, offerName, date) {
             .then((data) => {
                 // console.log(data)
                 data.creative = new TextDecoder('utf-8').decode(Uint8Array.from(atob(data.creative), (c) => c.charCodeAt(0)))
-                parent.postMessage(data, '*')
+
+                let offerData = {
+                    offerData: data,
+                }
+                parent.postMessage(offerData, '*')
             })
             .catch((error) => console.error('Error:', error))
 

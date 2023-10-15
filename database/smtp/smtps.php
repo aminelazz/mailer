@@ -55,7 +55,7 @@ function get_smtps()
         exit();
     }
 
-    $sql = "SELECT s.domain, s.smtp
+    $sql = "SELECT lower(s.domain) AS domain, lower(s.smtp) AS smtp
             FROM smtps s";
 
     $result = $conn->query($sql);
@@ -139,7 +139,7 @@ function save_smtp($domain, $smtp)
     }
 
     $sql = "INSERT INTO smtps (domain, smtp)
-            SELECT '$domain', '$smtp'
+            SELECT LOWER('$domain'), LOWER('$smtp')
             WHERE NOT EXISTS (
                 SELECT 1 FROM smtps WHERE domain = '$domain' AND smtp = '$smtp'
             )";

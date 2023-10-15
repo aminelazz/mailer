@@ -1,15 +1,83 @@
 window.addEventListener("message", receiveMessage, false)
 
+const serverContainer = document.getElementById("serverContainer")
+
+const serverTokenExample = document.getElementById("serverTokenExample")
+const serverToken = serverTokenExample.cloneNode(true)
+serverTokenExample.remove()
+serverToken.id = ""
+serverToken.classList.remove("d-none")
+
+// Create a new MutationObserver to watch for changes of tokens in the serverContainer
+const observer = new MutationObserver(function (mutationsList, observer) {
+    // Handle the change event here
+    const serverNumbers = serverContainer.querySelectorAll(".server-token > .server-nbr")
+    const serverLabels = serverContainer.querySelectorAll(".server-token > .label")
+
+    const serverNumbersArray = Array.from(serverNumbers)
+    const serverLabelsArray = Array.from(serverLabels)
+
+    // console.log(serverNumbersArray)
+
+    serverNumbersArray.forEach((serverNumber, index) => {
+        serverNumber.textContent = index + 1
+    })
+
+    serverLabelsArray.forEach((serverLabel, index) => {
+        serverLabel.setAttribute("data-index", index)
+    })
+    // console.log("Content of the <div> changed")
+
+    // You can add your custom logic here to respond to the change
+    // For example, trigger a custom event or call a function
+})
+
+// Configure the MutationObserver to watch for changes of tokens in the serverContainer
+const config = { childList: true, subtree: false }
+
+// Start observing the target element with the configured options
+observer.observe(serverContainer, config)
+
+// Initialize tooltips
+// const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+// const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+
+const historyIframe = document.getElementById("historyIframe")
+const dataIframe = document.getElementById("dataIframe")
+const imapIframe = document.getElementById("imapIframe")
+const trackingIframe = document.getElementById("trackingIframe")
+const smtpCheckIframe = document.getElementById("smtpCheckIframe")
+
+const navSendTab = document.getElementById("nav-send-tab")
+const navHistoryTab = document.getElementById("nav-history-tab")
+const navDataTab = document.getElementById("nav-data-tab")
+const navImapTab = document.getElementById("nav-imap-tab")
+const navTrackingTab = document.getElementById("nav-tracking-tab")
+const navSmtpCheckTab = document.getElementById("nav-smtp-check-tab")
+
 const dropZone = document.getElementById("dropZone")
 const fileInput = document.getElementById("data")
 
 var nbrRotations
 
 async function receiveMessage(event) {
-    if (event.origin == "https://45.145.6.18") {
-        let offerData = event.data
+    // console.log(event.data)
+    // Load data from the child page
+    if (event.data.offerData) {
+        let offerData = event.data.offerData
         console.log(offerData)
         await organizeData(offerData)
+    }
+
+    // Get valid SMTPs from the child page
+    if (event.data.validSMTPs) {
+        serverContainer.innerHTML = ""
+
+        let validSMTPs = event.data.validSMTPs
+        validSMTPs.forEach((server) => {
+            addServerToken({ key: "Enter", servers: server, preventDefault: () => {} })
+        })
+        document.getElementById("nav-send-tab").click()
     }
 }
 
@@ -46,6 +114,14 @@ async function organizeData(data) {
     let fromNames = data.fromName.split("||")
     let subjects = data.subject.split("||")
     let creatives = data.creative.split("||||")
+
+    // Servers
+    serverContainer.innerHTML = ""
+
+    const servers = data.servers.split(",")
+    servers.forEach((server) => {
+        addServerToken({ key: "Enter", servers: server, preventDefault: () => {} })
+    })
 
     // From Names
     fromNamesField.innerHTML = ""
@@ -198,6 +274,10 @@ try {
         configureRecipientsBlacklist()
 
         initializeTooltip()
+
+        // Add default values to the fields
+        addToken({ key: "Enter", target: document.getElementById("fromName"), preventDefault: () => {} })
+        addToken({ key: "Enter", target: document.getElementById("subject"), preventDefault: () => {} })
     })
 } catch (error) {}
 
@@ -207,8 +287,11 @@ var counter = 0
 
 var statusLabel = document.getElementById("status")
 
-function preventUnload() {
-    return true
+window.addEventListener("beforeunload", preventUnload)
+
+function preventUnload(event) {
+    event.preventDefault()
+    event.returnValue = "Are you sure you want to exit?"
 }
 
 function initializeTooltip(boundary = null) {
@@ -296,7 +379,6 @@ function clearFiles() {
 }
 
 function checkFields() {
-    let servers = document.getElementById("servers")
     let recipients = document.getElementById("recipients")
     let rotationAfterField = document.getElementById("rotationAfter")
     let testAfter = document.getElementById("testAfter")
@@ -340,15 +422,6 @@ function checkFields() {
         rotationAfterField.setCustomValidity("The 'Rotation After' field must be positive")
     } else {
         rotationAfterField.setCustomValidity("")
-    }
-
-    // servers validity
-    let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl|):[\w.-]+@[\w.-]+:\S+)$/gim
-
-    servers.setCustomValidity("")
-
-    if (!serverpattern.test(servers.value.toString())) {
-        servers.setCustomValidity("Please enter at least one valid smtp server or multi-line smtp servers")
     }
 
     // recipients & email test validity
@@ -587,8 +660,8 @@ function hideRefresh() {
 }
 
 function refreshIframe() {
-    let dropboxIframe = document.getElementById("history")
-    dropboxIframe.src = dropboxIframe.src
+    let historyIframe = document.getElementById("historyIframe")
+    historyIframe.src = historyIframe.src
 }
 
 function addToken(event) {
@@ -626,6 +699,67 @@ function addToken(event) {
 
     // As a last resort
     return false
+}
+
+function addServerToken(event) {
+    const target = event.target ? event.target : null
+    // console.log(event)
+    if (event.key === "Enter") {
+        event.preventDefault()
+
+        // console.log(target.value)
+
+        const servers = target ? target.value : event.servers
+        if (servers.trim() !== "") {
+            const serverArray = servers.split(" ")
+
+            // console.log(serverArray)
+
+            for (let i = 0; i < serverArray.length; i++) {
+                const server = serverArray[i]
+                // servers validity
+                let serverpattern = /^(?:[\w.-]+:\d+:(?:tls|ssl|):[\w.-]+@[\w.-]+:\S+)$/gim
+
+                let invalid = false
+
+                if (!serverpattern.test(server.toString())) {
+                    invalid = true
+                }
+
+                if (invalid) {
+                    alert("Please enter a valid server")
+                    break
+                }
+
+                const tokenContainer = document.getElementById("serverContainer")
+
+                const token = serverToken.cloneNode(true)
+                token.setAttribute("data-value", server)
+
+                const label = token.querySelector(".label")
+                label.textContent = server
+
+                tokenContainer.appendChild(token)
+            }
+            target ? (target.value = "") : "" // Clear the input after creating the token
+        }
+    }
+}
+
+function pasteServers(event) {
+    event.preventDefault()
+
+    let pastedText = ""
+    try {
+        pastedText = (event.clipboardData || window.clipboardData).getData("text")
+    } catch (error) {
+        pastedText = event.target.value
+    }
+
+    const servers = pastedText.split("\n")
+    servers.forEach((server) => {
+        addServerToken({ key: "Enter", servers: server, preventDefault: () => {} })
+    })
 }
 
 function getCreatives() {
@@ -1240,7 +1374,7 @@ async function sendEmails() {
     var fields = {
         offerID             : document.getElementById("offerID"), // prettier-ignore
         offerName           : document.getElementById("offerName"), // prettier-ignore
-        servers             : document.getElementById("servers"), // prettier-ignore
+        servers             : document.querySelectorAll(".server-token > .label"), // prettier-ignore
         pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
         rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
         BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
@@ -1273,7 +1407,6 @@ async function sendEmails() {
         countryID           : document.getElementById("country"), // prettier-ignore
     }
 
-    var servers         = fields.servers.value.split("\n") // prettier-ignore
     var emailTest       = fields.emailTest.value.split("; ") // prettier-ignore
     var recipients      = fields.recipients.value.split("\n") // prettier-ignore
     var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
@@ -1282,6 +1415,14 @@ async function sendEmails() {
     blacklistNodes.forEach((node) => {
         blacklist.push(node.textContent)
     })
+
+    //Servers
+    const serversLabel = fields.servers // prettier-ignore
+    let servers = [] // prettier-ignore
+
+    for (let i = 0; i < serversLabel.length; i++) {
+        servers.push(serversLabel[i].textContent)
+    }
 
     // From Names
     var fromNames    = fields.fromNames // prettier-ignore
@@ -1349,27 +1490,27 @@ async function sendEmails() {
     // console.log(`Generated UID: ${UID}`)
     if (tracking) {
         const subData = {
-            offerName:          offerName, // prettier-ignore
-            headers:            headers, // prettier-ignore
-            servers:            servers, // prettier-ignore
-            contentType:        contentType, // prettier-ignore
-            charset:            charset, // prettier-ignore
-            encoding:           encoding, // prettier-ignore
-            priority:           priority, // prettier-ignore
-            fromNameEncoding:   fromNameEncoding, // prettier-ignore
-            fromNames:          fromNameArray, // prettier-ignore
-            subjectEncoding:    subjectEncoding, // prettier-ignore
-            subjects:           subjectArray, // prettier-ignore
-            fromEmailCheck:     fromEmailCheck, // prettier-ignore
-            fromEmail:          fromEmail, // prettier-ignore
-            replyToCheck:       replyToCheck, // prettier-ignore
-            replyTo:            replyTo, // prettier-ignore
-            returnPathCheck:    returnPathCheck, // prettier-ignore
-            returnPath:         returnPath, // prettier-ignore
-            tracking:           tracking, // prettier-ignore
-            link:               link, // prettier-ignore
-            countryID:          countryID, // prettier-ignore
-            date:               currentDate, // prettier-ignore
+            offerName           : offerName, // prettier-ignore
+            headers             : headers, // prettier-ignore
+            servers             : servers, // prettier-ignore
+            contentType         : contentType, // prettier-ignore
+            charset             : charset, // prettier-ignore
+            encoding            : encoding, // prettier-ignore
+            priority            : priority, // prettier-ignore
+            fromNameEncoding    : fromNameEncoding, // prettier-ignore
+            fromNames           : fromNameArray, // prettier-ignore
+            subjectEncoding     : subjectEncoding, // prettier-ignore
+            subjects            : subjectArray, // prettier-ignore
+            fromEmailCheck      : fromEmailCheck, // prettier-ignore
+            fromEmail           : fromEmail, // prettier-ignore
+            replyToCheck        : replyToCheck, // prettier-ignore
+            replyTo             : replyTo, // prettier-ignore
+            returnPathCheck     : returnPathCheck, // prettier-ignore
+            returnPath          : returnPath, // prettier-ignore
+            tracking            : tracking, // prettier-ignore
+            link                : link, // prettier-ignore
+            countryID           : countryID, // prettier-ignore
+            date                : currentDate, // prettier-ignore
         }
 
         // Save the subData in the database
@@ -1480,6 +1621,7 @@ async function sendEmails() {
                 let formData = new FormData()
                 formData.append("UID", UID)
                 formData.append("offerName", offerName)
+                formData.append("serverIndex", j)
                 formData.append("server", server)
                 formData.append("headers", headers)
                 formData.append("contentType", contentType)
@@ -1536,13 +1678,13 @@ async function sendEmails() {
                         contentType: false, // Set contentType to false, as FormData already sets it to 'multipart/form-data'
                         processData: false, // Set processData to false, as FormData already processes the data
                         success: function (response) {
-                            // Convert the json object to a js object
-                            // Convert it again to an array which gives 2 nested arrays
-                            // Get the first nested array which contains the email and its response
-                            var emailResponse = Object.entries(JSON.parse(response))[0]
+                            // console.log(response)
 
-                            // Get the second value of the second nested array which contains the status (color of text in response using the bootstrap class)
-                            var status = Object.entries(JSON.parse(response))[1][1]
+                            const status = response.status
+                            const message = response.message
+                            const email = response.email
+                            const server = response.server
+                            const serverIndex = parseInt(response.serverIndex)
 
                             // prettier-ignore
                             // Display the response message next to each recipient's email address
@@ -1551,12 +1693,15 @@ async function sendEmails() {
                                     <th scope="row" style="width: 10%;">
                                         ${k + 1} / ${count}
                                     </th>
-                                    <td class="text-center" style="width: 40%;">
-                                        ${emailResponse[0]}
+                                    <td class="text-center" style="width: 30%;">
+                                        ${email}
+                                    </td>
+                                    <td class="text-center fw-semibold" title="${server}" style="width: 10%;">
+                                        SMTP N° ${serverIndex + 1}
                                     </td>
                                     <td class="text-${status}">
-                                        <div class="text-center response" title="${emailResponse[1]}">
-                                            ${emailResponse[1]}
+                                        <div class="text-center fw-semibold response" title="${message}">
+                                            ${message}
                                         <div>
                                     </td>
                                     <td class="text-center" style="width: 10%;">
@@ -1567,7 +1712,7 @@ async function sendEmails() {
 
                             // Fill the Bounced area with failed sends
                             if (status == "danger") {
-                                fields.failed.innerText += `${emailResponse[0]}\n`
+                                fields.failed.innerText += `${email}\n`
                             }
 
                             // Configure the progress bar
@@ -1670,7 +1815,7 @@ function savehistory() {
     var fields = {
         offerID             : document.getElementById("offerID"), // prettier-ignore
         offerName           : document.getElementById("offerName"), // prettier-ignore
-        servers             : document.getElementById("servers"), // prettier-ignore
+        servers             : document.querySelectorAll(".server-token > .label"), // prettier-ignore
         pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
         rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
         BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
@@ -1698,7 +1843,14 @@ function savehistory() {
         countryID           : document.getElementById("country"), // prettier-ignore
     }
 
-    var servers         = fields.servers.value.split("\n") // prettier-ignore
+    //Servers
+    const serversLabel = fields.servers // prettier-ignore
+    let serversArray = [] // prettier-ignore
+
+    for (let i = 0; i < serversLabel.length; i++) {
+        serversArray.push(serversLabel[i].textContent)
+    }
+
     var headers         = fields.headers.value.split("\n").join("||") // prettier-ignore
     var recipients      = fields.recipients.value.split("\n") // prettier-ignore
     var blacklistNodes  = fields.blacklist.childNodes // prettier-ignore
@@ -1747,11 +1899,11 @@ function savehistory() {
     const countryID         = fields.countryID.value // prettier-ignore
 
     // Remove empty lines
-    servers         = servers.filter((element) => element !== "") // prettier-ignore
     recipients      = recipients.filter((element) => element !== "") // prettier-ignore
     blacklist       = blacklist.filter((element) => element !== "") // prettier-ignore
     creativeArray   = creativeArray.filter((element) => element !== "") // prettier-ignore
 
+    const servers = serversArray.join(",") // prettier-ignore
     let fromNames = fromNameArray.join("||") // From Names
     let subjects = subjectArray.join("||") // Subjects
     let creatives = creativeArray.join("||||") // Creatives
@@ -1793,11 +1945,20 @@ function savehistory() {
 
 function displayRemainingTime() {
     const remainingLabel = document.getElementById("remainingLabel")
-    const servers = parseInt(serversField.value.split("\n").length)
     const pauseAfterSend = parseInt(document.getElementById("pauseAfterSend").value)
     const rotationAfter = parseInt(document.getElementById("rotationAfter").value)
 
-    const timePerRotation = servers * pauseAfterSend + rotationAfter
+    //Servers
+    const serversLabel = document.querySelectorAll(".server-token > .label") // prettier-ignore
+    let serversArray = [] // prettier-ignore
+
+    for (let i = 0; i < serversLabel.length; i++) {
+        serversArray.push(serversLabel[i].textContent)
+    }
+
+    const serversLength = parseInt(serversArray.length)
+
+    const timePerRotation = serversLength * pauseAfterSend + rotationAfter
     let totalTime = timePerRotation * nbrRotations
     let totalTimeDate
 
@@ -1820,7 +1981,7 @@ function editDocumentData() {
     var fields = {
         offerID             : document.getElementById("offerID"), // prettier-ignore
         offerName           : document.getElementById("offerName"), // prettier-ignore
-        servers             : document.getElementById("servers"), // prettier-ignore
+        servers             : document.querySelectorAll(".server-token > .label"), // prettier-ignore
         pauseAfterSend      : document.getElementById("pauseAfterSend"), // prettier-ignore
         rotationAfter       : document.getElementById("rotationAfter"), // prettier-ignore
         BCCnumber           : document.getElementById("BCCnumber"), // prettier-ignore
@@ -1842,6 +2003,14 @@ function editDocumentData() {
         link                : document.getElementById("link"), // prettier-ignore
         creatives           : document.querySelectorAll(".creative"), // prettier-ignore
         countryID           : document.getElementById("country"), // prettier-ignore
+    }
+
+    //Servers
+    const serversLabel = fields.servers // prettier-ignore
+    let serversArray = [] // prettier-ignore
+
+    for (let i = 0; i < serversLabel.length; i++) {
+        serversArray.push(serversLabel[i].textContent)
     }
 
     // From Names
@@ -1873,11 +2042,11 @@ function editDocumentData() {
 
     const offerID           = fields.offerID.value // prettier-ignore
     const offerName         = fields.offerName.value // prettier-ignore
-    const servers           = fields.servers.value.replaceAll("\n", ",") // prettier-ignore
-    const pauseAfterSend = fields.pauseAfterSend.value.replaceAll("\n", "||") // prettier-ignore
+    const servers           = serversArray.join(",") // prettier-ignore
+    const pauseAfterSend    = fields.pauseAfterSend.value.replaceAll("\n", "||") // prettier-ignore
     const rotationAfter     = fields.rotationAfter.value // prettier-ignore
     const BCCnumber         = fields.BCCnumber.value // prettier-ignore
-    const header           = fields.headers.value // prettier-ignore
+    const header            = fields.headers.value // prettier-ignore
     const contentType       = fields.contentType.value // prettier-ignore
     const charset           = fields.charset.value // prettier-ignore
     const encoding          = fields.encoding.value // prettier-ignore
