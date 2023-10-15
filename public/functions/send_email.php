@@ -31,7 +31,8 @@ function generateRandomString($length, $characters)
 function replaceTags($var, $username, $recipient, $link)
 {
 
-    $var = str_replace('[mail_date]', date('d/m/Y'), $var);
+    $var = str_replace('[mail_date]', date('D, j M Y G:i:s'), $var);
+    // $var = str_replace('[mail_date]', date('d/m/Y'), $var);
     $var = str_replace('[time]', date('H:i:s'), $var);
 
     if (isset($recipient) && $recipient != "") {

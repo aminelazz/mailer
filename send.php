@@ -118,7 +118,7 @@ date_default_timezone_set('Africa/Casablanca');
             <div class="d-flex align-items-center justify-content-between">
                <div class="d-flex gap-4 align-items-center">
                   <h4>St-Com Mailing</h4>
-                  <h6>Ver. 17</h6>
+                  <h6>Ver. 17.1</h6>
                </div>
                <!-- Postfix Link -->
                <!-- Welcome & Logout -->
@@ -161,7 +161,7 @@ date_default_timezone_set('Africa/Casablanca');
                   <button class="nav-link" id="nav-smtp-check-tab" data-bs-toggle="tab" data-bs-target="#nav-smtp-check" type="button" role="tab" aria-controls="nav-smtp-check" aria-selected="false" onclick="hideRefresh()">SMTP check</button>
                </li>
                <div class="me-2 invisible" id="refreshDiv">
-                  <button class="my-auto btn btn-primary border-0 d-flex gap-1 align-items-center refresh-dropbox" type="button" onclick="refreshIframe()">
+                  <button class="my-auto btn btn-primary-mod border-0 d-flex gap-1 align-items-center refresh-dropbox" type="button" onclick="refreshIframe()">
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
                         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"></path>
                         <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"></path>
@@ -429,12 +429,12 @@ date_default_timezone_set('Africa/Casablanca');
                                           </li>
                                           <li>
                                              <span>[mail_date]</span>:&nbsp;
-                                             Date <span class="fst-italic fw-semibold">(<?php echo date('d/m/Y') ?>)</span>
+                                             Date <span class="fst-italic fw-semibold">(<?php echo date('D, j M Y G:i:s') ?>)</span>
                                           </li>
-                                          <li>
+                                          <!-- <li>
                                              <span>[time]</span>:&nbsp;
                                              Time <span class="fst-italic fw-semibold">(<?php echo date('H:i:s') ?>)</span>
-                                          </li>
+                                          </li> -->
                                           <li>
                                              <span>[email]</span>:&nbsp;
                                              Reciever Email <span class="fst-italic fw-semibold">(email_user@domain.com)</span>
@@ -1157,6 +1157,8 @@ date_default_timezone_set('Africa/Casablanca');
                <!-- Imap Checker -->
                <div class="tab-pane h-100" id="nav-imap" class="pt-2" role="tabpanel" aria-labelledby="nav-imap-tab" tabindex="0" style="height: initial;">
                   <iframe id="imapIframe" width="100%" height="100%" src="./public/imap/index.html" title="Imap Checker" frameborder="0" allowfullscreen style="height: 107%;"></iframe>
+                  <?php //include("./public/imap/index.html") 
+                  ?>
                </div>
                <!-- Tracking -->
                <div class="tab-pane h-100" id="nav-tracking" class="pt-2" role="tabpanel" aria-labelledby="nav-tracking-tab" tabindex="0" style="height: initial;">
